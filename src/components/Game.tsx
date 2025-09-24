@@ -56,7 +56,7 @@ interface GameState {
 
 // iOS-specific performance settings
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-const TARGET_FPS_MOBILE = isIOS ? 30 : 60; // Lower FPS for iOS
+const TARGET_FPS_MOBILE = isIOS ? 75 : 60; // Higher FPS for iOS
 const TARGET_FPS_DESKTOP = 60;
 const getTargetFPS = () => window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
 const FRAME_TIME = () => 1000 / getTargetFPS();
