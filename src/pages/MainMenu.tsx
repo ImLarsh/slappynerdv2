@@ -72,18 +72,15 @@ const MainMenu: React.FC = () => {
   }, [user]);
   // Start background music on component mount and keep it playing
   useEffect(() => {
-    // Try to start music, but it may be blocked by browser autoplay policy
-    const startMusic = () => {
+    // Only start music if not already playing
+    if (!isPlaying) {
       playBackgroundMusic();
-    };
-
-    // Start music immediately if possible
-    startMusic();
+    }
 
     // Add click listener to start music on first user interaction if not already playing
     const handleFirstClick = () => {
       if (!isPlaying) {
-        startMusic();
+        playBackgroundMusic();
       }
       document.removeEventListener('click', handleFirstClick);
     };
@@ -91,10 +88,8 @@ const MainMenu: React.FC = () => {
     
     return () => {
       document.removeEventListener('click', handleFirstClick);
-      // Don't stop background music when leaving main menu - let it continue playing
-      // stopBackgroundMusic();
     };
-  }, [playBackgroundMusic, isPlaying]);
+  }, []); // Remove dependencies to prevent re-running
 
   // Lock body scroll on Main Menu
   useEffect(() => {
