@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useCallback } from 'react';
+import React, { useEffect, useRef, useState, useCallback, startTransition } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -418,221 +418,50 @@ export const Game: React.FC = () => {
       return;
     }
 
-    setGameState(prev => {
-      const newState = { ...prev };
-      const deltaTime = currentTime - newState.lastFrameTime;
-      const targetFrameTime = 16.67; // Fixed 60fps (1000/60)
+    const doUpdate = () => {
+      setGameState(prev => {
+        const newState = { ...prev };
+        const deltaTime = currentTime - newState.lastFrameTime;
+        const targetFrameTime = 16.67; // Fixed 60fps (1000/60)
 
-      // iOS-specific frame limiting to reduce stuttering
-      if (isIOS) {
-        // Use more lenient frame timing on iOS to prevent micro-stutters
-        if (deltaTime < 14) { // Allow slightly faster frames
-          return newState;
-        }
-      } else {
-        // Standard frame limiting for other devices
-        if (deltaTime < targetFrameTime) {
-          return newState;
-        }
-      }
-
-      // Clamp delta more conservatively for iOS
-      const maxDelta = isIOS ? 25 : 33.33; // Smaller jumps on iOS
-      const clampedDelta = Math.min(deltaTime, maxDelta);
-
-      // Get current power modifiers
-      const modifiers = getGameModifiers();
-      
-      // Calculate frame multiplier - use more stable calculation for iOS
-      const frameMultiplier = isIOS ? clampedDelta / 16.67 : clampedDelta / targetFrameTime;
-      newState.lastFrameTime = currentTime;
-
-      // Clear expired temporary invincibility
-      if (newState.temporaryInvincibility && currentTime >= newState.temporaryInvincibility) {
-        newState.temporaryInvincibility = undefined;
-      }
-
-      
-
-      // Update bird physics with frame rate compensation
-      newState.bird.velocity += GRAVITY * frameMultiplier;
-      newState.bird.y += newState.bird.velocity * frameMultiplier;
-
-      // Update background scrolling
-      newState.backgroundOffset += (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
-
-      // Check ground/ceiling collision - game over when emoji completely falls off screen
-      if (newState.bird.y > canvasSize.height || newState.bird.y + newState.bird.height < 0) {
-        newState.gameOver = true;
-        newState.gameEnded = true;
-        
-        // Play game over sound
-        playSound('gameOver');
-        
-        // Update stats in database and get new totals
-        if (user) {
-          updateGameStats(newState.score).then((updatedStats) => {
-            if (updatedStats) {
-              // Check achievements with updated stats
-              checkAchievements({
-                score: newState.score,
-                gamesPlayed: updatedStats.total_games,
-                highScore: updatedStats.best_score
-              });
-            }
-          });
-
-          // Submit score to leaderboard
-          submitScore(newState.score, selectedCharacter?.id);
-        }
-
-        return newState;
-      }
-
-      // Generate pipes (slower spawn rate for iOS performance)
-      const basePipeFrequency = isIOS ? 2800 : 2000; // Slower spawning on iOS
-      const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
-      const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency; // Double spawn rate if locker spam is active
-      
-      // Prevent pipe spawning during power selection or right after power activation to avoid stacking
-      const timeSinceLastPipe = currentTime - newState.lastPipeTime;
-      const canSpawnPipe = timeSinceLastPipe > pipeFrequency && 
-                          (!newState.temporaryInvincibility || currentTime > newState.temporaryInvincibility + 500);
-      
-      if (canSpawnPipe) {
-        // Calculate gap size - only affected by gap-specific powers, not speed powers
-        const gapPowers = modifiers.activePowers.filter(p => p.effect.gapMultiplier);
-        const gapMultiplier = gapPowers.reduce((mult, power) => mult * power.effect.gapMultiplier!, 1);
-        
-        const gapStart = Math.random() * (canvasSize.height - (PIPE_GAP * gapMultiplier) - 100) + 50;
-        const lockerType = 0; // Always use yellow locker
-        // Position lockers from the right edge - ensure consistent spacing
-        const lockerX = canvasSize.width + LOCKER_WIDTH + 10; // Add small buffer to prevent immediate collision
-        
-        // Ensure minimum gap size to prevent impossible passages
-        const finalGapSize = Math.max(MIN_PIPE_GAP, PIPE_GAP * gapMultiplier);
-        const finalGapStart = Math.max(60, Math.min(gapStart, canvasSize.height - finalGapSize - 60));
-        
-        // Only add pipes if they don't overlap with existing ones
-        const wouldOverlap = newState.pipes.some(existingPipe => 
-          Math.abs(existingPipe.x - lockerX) < LOCKER_WIDTH + 50
-        );
-        
-        if (!wouldOverlap) {
-          newState.pipes.push(
-            {
-              x: lockerX,
-              y: 0, // Top locker starts from screen top
-              width: LOCKER_WIDTH,
-              height: finalGapStart, // Extends down to gap start
-              passed: false,
-              lockerType,
-            },
-            {
-              x: lockerX,
-              y: finalGapStart + finalGapSize, // Bottom locker starts after gap
-              width: LOCKER_WIDTH,
-              height: canvasSize.height - (finalGapStart + finalGapSize), // Extends to screen bottom
-              passed: false,
-              lockerType,
-            }
-          );
-          newState.lastPipeTime = currentTime;
-          
-          // Reduce book spawn rate on iOS for better performance
-          if (Math.random() < (isIOS ? 0.05 : 0.1) && !hasLockerSpam) {
-            // Use the existing gapStart calculation for safe spawn area
-            const gapMiddle = finalGapStart + finalGapSize / 2;
-            const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6); // Keep books in middle of gap
-            
-            const newBook: Book = {
-              id: `book_${nextBookIdRef.current++}`,
-              x: canvasSize.width + Math.random() * 150,
-              y: Math.max(80, Math.min(safeY, canvasSize.height - 80)), // Ensure books stay in reachable area
-              collected: false
-            };
-            newState.books.push(newBook);
+        // iOS-specific frame limiting to reduce stuttering
+        if (isIOS) {
+          // Use more lenient frame timing on iOS to prevent micro-stutters
+          if (deltaTime < 14) { // Allow slightly faster frames
+            return newState;
           }
-        }
-      }
-
-      // Update books first (before collision check)
-      newState.books = newState.books.filter(book => {
-        if (!book.collected) {
-          if (book.beingPulled) {
-            // Calculate pull force toward character
-            const birdCenterX = newState.bird.x + newState.bird.width / 2;
-            const birdCenterY = newState.bird.y + newState.bird.height / 2;
-            
-            const dx = birdCenterX - book.x;
-            const dy = birdCenterY - book.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance > 5) { // Only pull if not too close
-              // Normalize direction and apply pull speed (faster when farther)
-              const pullSpeed = Math.min(12, 6 + distance * 0.1) * frameMultiplier;
-              const normalizedDx = dx / distance;
-              const normalizedDy = dy / distance;
-              
-              book.x += normalizedDx * pullSpeed;
-              book.y += normalizedDy * pullSpeed;
-            }
-          } else {
-            // Normal book movement (scroll with world)
-            book.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
-          }
-        }
-        
-        return book.x > -50 && !book.collected;
-      });
-
-      // Check book collisions after position updates
-      const bookCollisionResult = checkBookCollisions(newState.bird, newState.books);
-      newState.books = bookCollisionResult.updatedBooks;
-      
-      // Handle book collection side effects
-      if (bookCollisionResult.booksCollected > 0) {
-        // Use setTimeout to avoid setState during render
-        setTimeout(() => {
-          // Apply double points power if owned
-          const booksToAdd = hasDoublePoints() ? bookCollisionResult.booksCollected * 2 : bookCollisionResult.booksCollected;
-          addBooks(booksToAdd);
-          playSound('collectBook');
-        }, 0);
-      }
-
-      // Update pipes with frame rate compensation
-      newState.pipes = newState.pipes.filter(pipe => {
-        // Remove pipes marked for demolition by Ghost Mode
-        if ((pipe as any).shouldBeRemoved) {
-          return false; // Remove this pipe completely
-        }
-        
-        pipe.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
-        
-        // Check scoring
-        if (!pipe.passed && pipe.x + pipe.width < newState.bird.x) {
-          pipe.passed = true;
-          if (pipe.y === 0) { // Only count top pipes
-            newState.score += 1;
-            
-            // Play pass locker sound effect
-            playSound('passLocker');
-            
-            // Check for power selection trigger
-            checkPowerSelection(newState.score);
-            
-            // Check if we need to show crown (only when beating personal best)
-            const currentBest = stats.best_score;
-            if (newState.score > currentBest && !newState.crownCollected) {
-              newState.crownCollected = true;
-            }
+        } else {
+          // Standard frame limiting for other devices
+          if (deltaTime < targetFrameTime) {
+            return newState;
           }
         }
 
-        // Check collision (skip if invincible from powers or temporary invincibility)
-        const hasTemporaryInvincibility = newState.temporaryInvincibility && currentTime < newState.temporaryInvincibility;
-        if (!modifiers.isInvincible && !hasTemporaryInvincibility && checkCollision(newState.bird, pipe, newState)) {
+        // Clamp delta more conservatively for iOS
+        const maxDelta = isIOS ? 25 : 33.33; // Smaller jumps on iOS
+        const clampedDelta = Math.min(deltaTime, maxDelta);
+
+        // Get current power modifiers
+        const modifiers = getGameModifiers();
+        
+        // Calculate frame multiplier - use more stable calculation for iOS
+        const frameMultiplier = isIOS ? clampedDelta / 16.67 : clampedDelta / targetFrameTime;
+        newState.lastFrameTime = currentTime;
+
+        // Clear expired temporary invincibility
+        if (newState.temporaryInvincibility && currentTime >= newState.temporaryInvincibility) {
+          newState.temporaryInvincibility = undefined;
+        }
+
+        // Update bird physics with frame rate compensation
+        newState.bird.velocity += GRAVITY * frameMultiplier;
+        newState.bird.y += newState.bird.velocity * frameMultiplier;
+
+        // Update background scrolling
+        newState.backgroundOffset += (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
+
+        // Check ground/ceiling collision - game over when emoji completely falls off screen
+        if (newState.bird.y > canvasSize.height || newState.bird.y + newState.bird.height < 0) {
           newState.gameOver = true;
           newState.gameEnded = true;
           
@@ -655,14 +484,191 @@ export const Game: React.FC = () => {
             // Submit score to leaderboard
             submitScore(newState.score, selectedCharacter?.id);
           }
+
+          return newState;
         }
 
-        // Remove pipes that should be demolished or have moved off screen
-        return pipe.x > -pipe.width && !(pipe as any).shouldBeRemoved;
-      });
+        // Generate pipes (slower spawn rate for iOS performance)
+        const basePipeFrequency = isIOS ? 2800 : 2000; // Slower spawning on iOS
+        const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
+        const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency; // Double spawn rate if locker spam is active
+        
+        // Prevent pipe spawning during power selection or right after power activation to avoid stacking
+        const timeSinceLastPipe = currentTime - newState.lastPipeTime;
+        const canSpawnPipe = timeSinceLastPipe > pipeFrequency && 
+                            (!newState.temporaryInvincibility || currentTime > newState.temporaryInvincibility + 500);
+        
+        if (canSpawnPipe) {
+          // Calculate gap size - only affected by gap-specific powers, not speed powers
+          const gapPowers = modifiers.activePowers.filter(p => p.effect.gapMultiplier);
+          const gapMultiplier = gapPowers.reduce((mult, power) => mult * power.effect.gapMultiplier!, 1);
+          
+          const gapStart = Math.random() * (canvasSize.height - (PIPE_GAP * gapMultiplier) - 100) + 50;
+          const lockerType = 0; // Always use yellow locker
+          // Position lockers from the right edge - ensure consistent spacing
+          const lockerX = canvasSize.width + LOCKER_WIDTH + 10; // Add small buffer to prevent immediate collision
+          
+          // Ensure minimum gap size to prevent impossible passages
+          const finalGapSize = Math.max(MIN_PIPE_GAP, PIPE_GAP * gapMultiplier);
+          const finalGapStart = Math.max(60, Math.min(gapStart, canvasSize.height - finalGapSize - 60));
+          
+          // Only add pipes if they don't overlap with existing ones
+          const wouldOverlap = newState.pipes.some(existingPipe => 
+            Math.abs(existingPipe.x - lockerX) < LOCKER_WIDTH + 50
+          );
+          
+          if (!wouldOverlap) {
+            newState.pipes.push(
+              {
+                x: lockerX,
+                y: 0, // Top locker starts from screen top
+                width: LOCKER_WIDTH,
+                height: finalGapStart, // Extends down to gap start
+                passed: false,
+                lockerType,
+              },
+              {
+                x: lockerX,
+                y: finalGapStart + finalGapSize, // Bottom locker starts after gap
+                width: LOCKER_WIDTH,
+                height: canvasSize.height - (finalGapStart + finalGapSize), // Extends to screen bottom
+                passed: false,
+                lockerType,
+              }
+            );
+            newState.lastPipeTime = currentTime;
+            
+            // Reduce book spawn rate on iOS for better performance
+            if (Math.random() < (isIOS ? 0.05 : 0.1) && !hasLockerSpam) {
+              // Use the existing gapStart calculation for safe spawn area
+              const gapMiddle = finalGapStart + finalGapSize / 2;
+              const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6); // Keep books in middle of gap
+              
+              const newBook: Book = {
+                id: `book_${nextBookIdRef.current++}`,
+                x: canvasSize.width + Math.random() * 150,
+                y: Math.max(80, Math.min(safeY, canvasSize.height - 80)), // Ensure books stay in reachable area
+                collected: false
+              };
+              newState.books.push(newBook);
+            }
+          }
+        }
 
-      return newState;
-    });
+        // Update books first (before collision check)
+        newState.books = newState.books.filter(book => {
+          if (!book.collected) {
+            if (book.beingPulled) {
+              // Calculate pull force toward character
+              const birdCenterX = newState.bird.x + newState.bird.width / 2;
+              const birdCenterY = newState.bird.y + newState.bird.height / 2;
+              
+              const dx = birdCenterX - book.x;
+              const dy = birdCenterY - book.y;
+              const distance = Math.sqrt(dx * dx + dy * dy);
+              
+              if (distance > 5) { // Only pull if not too close
+                // Normalize direction and apply pull speed (faster when farther)
+                const pullSpeed = Math.min(12, 6 + distance * 0.1) * frameMultiplier;
+                const normalizedDx = dx / distance;
+                const normalizedDy = dy / distance;
+                
+                book.x += normalizedDx * pullSpeed;
+                book.y += normalizedDy * pullSpeed;
+              }
+            } else {
+              // Normal book movement (scroll with world)
+              book.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
+            }
+          }
+          
+          return book.x > -50 && !book.collected;
+        });
+
+        // Check book collisions after position updates
+        const bookCollisionResult = checkBookCollisions(newState.bird, newState.books);
+        newState.books = bookCollisionResult.updatedBooks;
+        
+        // Handle book collection side effects
+        if (bookCollisionResult.booksCollected > 0) {
+          // Use setTimeout to avoid setState during render
+          setTimeout(() => {
+            // Apply double points power if owned
+            const booksToAdd = hasDoublePoints() ? bookCollisionResult.booksCollected * 2 : bookCollisionResult.booksCollected;
+            addBooks(booksToAdd);
+            playSound('collectBook');
+          }, 0);
+        }
+
+        // Update pipes with frame rate compensation
+        newState.pipes = newState.pipes.filter(pipe => {
+          // Remove pipes marked for demolition by Ghost Mode
+          if ((pipe as any).shouldBeRemoved) {
+            return false; // Remove this pipe completely
+          }
+          
+          pipe.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
+          
+          // Check scoring
+          if (!pipe.passed && pipe.x + pipe.width < newState.bird.x) {
+            pipe.passed = true;
+            if (pipe.y === 0) { // Only count top pipes
+              newState.score += 1;
+              
+              // Play pass locker sound effect
+              playSound('passLocker');
+              
+              // Check for power selection trigger
+              checkPowerSelection(newState.score);
+              
+              // Check if we need to show crown (only when beating personal best)
+              const currentBest = stats.best_score;
+              if (newState.score > currentBest && !newState.crownCollected) {
+                newState.crownCollected = true;
+              }
+            }
+          }
+
+          // Check collision (skip if invincible from powers or temporary invincibility)
+          const hasTemporaryInvincibility = newState.temporaryInvincibility && currentTime < newState.temporaryInvincibility;
+          if (!modifiers.isInvincible && !hasTemporaryInvincibility && checkCollision(newState.bird, pipe, newState)) {
+            newState.gameOver = true;
+            newState.gameEnded = true;
+            
+            // Play game over sound
+            playSound('gameOver');
+            
+            // Update stats in database and get new totals
+            if (user) {
+              updateGameStats(newState.score).then((updatedStats) => {
+                if (updatedStats) {
+                  // Check achievements with updated stats
+                  checkAchievements({
+                    score: newState.score,
+                    gamesPlayed: updatedStats.total_games,
+                    highScore: updatedStats.best_score
+                  });
+                }
+              });
+
+              // Submit score to leaderboard
+              submitScore(newState.score, selectedCharacter?.id);
+            }
+          }
+
+          // Remove pipes that should be demolished or have moved off screen
+          return pipe.x > -pipe.width && !(pipe as any).shouldBeRemoved;
+        });
+
+        return newState;
+      });
+    };
+
+    if (isIOS) {
+      startTransition(() => doUpdate());
+    } else {
+      doUpdate();
+    }
 
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [getGameModifiers, checkPowerSelection, checkBookCollisions, addBooks, playSound, toast]);
@@ -801,11 +807,13 @@ export const Game: React.FC = () => {
           );
         }
         
-        // Add a subtle shadow for depth
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        ctx.shadowBlur = 5;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 3;
+        // Add a subtle shadow for depth (skip on iOS to reduce overdraw)
+        if (!isIOS) {
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 5;
+          ctx.shadowOffsetX = 3;
+          ctx.shadowOffsetY = 3;
+        }
       } else {
         // Fallback: draw yellow rectangle if image not loaded
         ctx.fillStyle = '#FFD700'; // Yellow
@@ -835,21 +843,27 @@ export const Game: React.FC = () => {
         // Draw bright yellow ring around book
         ctx.save();
         
-        // Add extra glow effect for books being pulled
-        if (book.beingPulled) {
-          ctx.strokeStyle = '#00FF00'; // Green for being pulled
-          ctx.lineWidth = 6;
-          ctx.shadowColor = '#00FF00';
-          ctx.shadowBlur = 12;
-          
-          // Draw pulsing effect
-          const pulseIntensity = 0.8 + 0.2 * Math.sin(Date.now() * 0.01);
-          ctx.globalAlpha = pulseIntensity;
+        // Glow and pulsing effects (reduced on iOS to minimize jank)
+        if (!isIOS) {
+          if (book.beingPulled) {
+            ctx.strokeStyle = '#00FF00'; // Green for being pulled
+            ctx.lineWidth = 6;
+            ctx.shadowColor = '#00FF00';
+            ctx.shadowBlur = 12;
+            // Draw pulsing effect
+            const pulseIntensity = 0.8 + 0.2 * Math.sin(Date.now() * 0.01);
+            ctx.globalAlpha = pulseIntensity;
+          } else {
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 4;
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 8;
+          }
         } else {
           ctx.strokeStyle = '#FFD700';
-          ctx.lineWidth = 4;
-          ctx.shadowColor = '#FFD700';
-          ctx.shadowBlur = 8;
+          ctx.lineWidth = 3;
+          ctx.shadowColor = 'transparent';
+          ctx.shadowBlur = 0;
         }
         
         // Draw the glowing ring
@@ -940,11 +954,18 @@ export const Game: React.FC = () => {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // Add subtle shadow for character
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-    ctx.shadowBlur = 3;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
+    // Add subtle shadow for character (skip on iOS to reduce overdraw)
+    if (!isIOS) {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 3;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+    } else {
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
+    }
     
     const character = selectedCharacter ? selectedCharacter.emoji : '🤓';
     ctx.fillText(
