@@ -1,0 +1,10 @@
+{
+  "appId": "app.lovable.06c760a0107b47e2bbe3dbf285ac4946",
+  "appName": "slappynerd",
+  "webDir": "dist",
+  "bundledWebRuntime": false,
+  "server": {
+    "url": "https://06c760a0-107b-47e2-bbe3-dbf285ac4946.lovableproject.com?forceHideBadge=true",
+    "cleartext": true
+  }
+}

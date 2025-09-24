@@ -1,0 +1,397 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Slappy Nerds Design System - Academic & Playful Theme
+All colors MUST be HSL.
+*/
+
+@layer base {
+  :root {
+    /* Core Academic Colors */
+    --background: 210 100% 97%;
+    --foreground: 215 25% 15%;
+
+    /* Game Background & Sky */
+    --sky-start: 200 100% 85%;
+    --sky-end: 220 100% 92%;
+    --cloud-white: 0 0% 98%;
+
+    /* Nerdy Character Colors */
+    --nerd-skin: 35 25% 85%;
+    --nerd-glasses: 215 100% 20%;
+    --nerd-shirt: 25 90% 55%;
+    --nerd-hair: 30 15% 25%;
+
+    /* Game Elements */
+    --obstacle-primary: 120 25% 35%;
+    --obstacle-secondary: 120 30% 45%;
+    --collectible-gold: 45 95% 55%;
+    --collectible-glow: 45 100% 70%;
+
+    /* UI & Cards */
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 15%;
+    --card-shadow: 215 25% 15% / 0.1;
+
+    /* Interactive Elements */
+    --primary: 210 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --primary-glow: 210 100% 65%;
+
+    --secondary: 25 90% 55%;
+    --secondary-foreground: 0 0% 100%;
+    --secondary-glow: 25 95% 70%;
+
+    /* Status Colors */
+    --success: 120 60% 45%;
+    --success-foreground: 0 0% 100%;
+    --warning: 45 95% 55%;
+    --warning-foreground: 30 15% 25%;
+    --danger: 0 75% 55%;
+    --danger-foreground: 0 0% 100%;
+
+    /* Surfaces */
+    --muted: 210 40% 94%;
+    --muted-foreground: 215 15% 45%;
+    --accent: 200 80% 90%;
+    --accent-foreground: 215 25% 15%;
+
+    /* Borders & Inputs */
+    --border: 215 20% 85%;
+    --input: 0 0% 100%;
+    --ring: 210 100% 50%;
+
+    /* Game Gradients */
+    --gradient-sky: linear-gradient(180deg, hsl(var(--sky-start)), hsl(var(--sky-end)));
+    --gradient-ground: linear-gradient(180deg, hsl(120 30% 45%), hsl(120 25% 35%));
+    --gradient-button: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-score: linear-gradient(135deg, hsl(var(--collectible-gold)), hsl(var(--collectible-glow)));
+
+    /* Shadows & Effects */
+    --shadow-soft: 0 4px 12px hsl(var(--card-shadow));
+    --shadow-game: 0 8px 24px hsl(215 25% 15% / 0.15);
+    --shadow-glow: 0 0 20px hsl(var(--primary-glow) / 0.3);
+
+    /* Game Physics */
+    --gravity: 0.6;
+    --jump-force: -12;
+    --pipe-gap: 150;
+
+    --radius: 1rem;
+
+    --sidebar-background: 0 0% 98%;
+
+    --sidebar-foreground: 240 5.3% 26.1%;
+
+    --sidebar-primary: 240 5.9% 10%;
+
+    --sidebar-primary-foreground: 0 0% 98%;
+
+    --sidebar-accent: 240 4.8% 95.9%;
+
+    --sidebar-accent-foreground: 240 5.9% 10%;
+
+    --sidebar-border: 220 13% 91%;
+
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+
+  .dark {
+    --background: 222.2 84% 4.9%;
+    --foreground: 210 40% 98%;
+
+    --card: 222.2 84% 4.9%;
+    --card-foreground: 210 40% 98%;
+
+    --popover: 222.2 84% 4.9%;
+    --popover-foreground: 210 40% 98%;
+
+    --primary: 210 40% 98%;
+    --primary-foreground: 222.2 47.4% 11.2%;
+
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 210 40% 98%;
+
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
+    --sidebar-background: 240 5.9% 10%;
+    --sidebar-foreground: 240 4.8% 95.9%;
+    --sidebar-primary: 224.3 76.3% 48%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-accent: 240 3.7% 15.9%;
+    --sidebar-accent-foreground: 240 4.8% 95.9%;
+    --sidebar-border: 240 3.7% 15.9%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
+}
+
+/* Retro 2D Game Animations */
+@keyframes retro-float {
+  0%, 100% { transform: translateY(0px); }
+  50% { transform: translateY(-8px); }
+}
+
+@keyframes retro-pulse {
+  0%, 100% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.05); opacity: 0.8; }
+}
+
+@keyframes retro-glow {
+  0%, 100% { box-shadow: 0 0 15px hsl(var(--primary) / 0.3); }
+  50% { box-shadow: 0 0 25px hsl(var(--primary) / 0.6); }
+}
+
+@keyframes retro-bounce-in {
+  0% { transform: scale(0.8) translateY(20px); opacity: 0; }
+  60% { transform: scale(1.05) translateY(-5px); opacity: 1; }
+  100% { transform: scale(1) translateY(0px); opacity: 1; }
+}
+
+@keyframes retro-slide-in {
+  0% { transform: translateX(-100px); opacity: 0; }
+  100% { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes retro-zoom-in {
+  0% { transform: scale(0.5); opacity: 0; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@keyframes retro-shake {
+  0%, 100% { transform: translateX(0); }
+  25% { transform: translateX(-2px); }
+  75% { transform: translateX(2px); }
+}
+
+@keyframes pixel-flicker {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.8; }
+}
+
+@keyframes retro-gradient-shift {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+@keyframes retro-rotate {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+/* Retro 2D Game Classes */
+.retro-float {
+  animation: retro-float 3s ease-in-out infinite;
+}
+
+.retro-pulse {
+  animation: retro-pulse 2s ease-in-out infinite;
+}
+
+.retro-glow {
+  animation: retro-glow 2s ease-in-out infinite;
+}
+
+.retro-bounce-in {
+  animation: retro-bounce-in 0.6s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+.retro-slide-in {
+  animation: retro-slide-in 0.5s ease-out;
+}
+
+.retro-zoom-in {
+  animation: retro-zoom-in 0.4s ease-out;
+}
+
+.retro-shake {
+  animation: retro-shake 0.5s ease-in-out;
+}
+
+.pixel-flicker {
+  animation: pixel-flicker 1.5s ease-in-out infinite;
+}
+
+.retro-gradient-shift {
+  background-size: 200% 200%;
+  animation: retro-gradient-shift 3s ease infinite;
+}
+
+.retro-rotate {
+  animation: retro-rotate 2s linear infinite;
+}
+
+/* 2D Retro Game Button Styles */
+.retro-button {
+  @apply relative overflow-hidden font-bold text-lg px-6 py-3 rounded-lg transition-all duration-200;
+  background: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+  border: 3px solid hsl(var(--primary));
+  text-shadow: 1px 1px 0px rgba(0,0,0,0.3);
+  box-shadow: 
+    0 4px 0 hsl(var(--primary-glow)),
+    0 8px 15px rgba(0,0,0,0.2);
+}
+
+.retro-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 6px 0 hsl(var(--primary-glow)),
+    0 12px 20px rgba(0,0,0,0.3);
+}
+
+.retro-button:active {
+  transform: translateY(2px);
+  box-shadow: 
+    0 2px 0 hsl(var(--primary-glow)),
+    0 4px 8px rgba(0,0,0,0.2);
+}
+
+/* Retro Card Styles */
+.retro-card {
+  @apply bg-card border-2 rounded-xl shadow-lg relative overflow-hidden;
+  border-color: hsl(var(--border));
+  background: linear-gradient(145deg, hsl(var(--card)), hsl(var(--muted)));
+}
+
+.retro-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+  transition: left 0.5s;
+}
+
+.retro-card:hover::before {
+  left: 100%;
+}
+
+/* Pixelated Text Effect */
+.pixel-text {
+  font-family: 'Courier New', monospace;
+  letter-spacing: 1px;
+  text-shadow: 2px 2px 0px rgba(0,0,0,0.1);
+}
+
+/* Retro Background Patterns */
+.retro-bg-pattern {
+  background-image: 
+    radial-gradient(circle at 25% 25%, hsl(var(--primary) / 0.1) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, hsl(var(--secondary) / 0.1) 0%, transparent 50%);
+  background-size: 100px 100px;
+  background-position: 0 0, 50px 50px;
+}
+
+/* Game Screen Effect */
+.retro-screen {
+  position: relative;
+  background: linear-gradient(180deg, hsl(var(--sky-start)), hsl(var(--sky-end)));
+  border: 4px solid hsl(var(--border));
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.retro-screen::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: repeating-linear-gradient(
+    0deg,
+    transparent,
+    transparent 2px,
+    rgba(0,0,0,0.03) 2px,
+    rgba(0,0,0,0.03) 4px
+  );
+  pointer-events: none;
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+/* Mobile game optimizations */
+@media (max-width: 640px) {
+  .retro-card {
+    @apply rounded-lg;
+  }
+  
+  .pixel-text {
+    letter-spacing: 0.5px;
+  }
+  
+  /* Prevent scrolling on mobile during game */
+  body.game-active {
+    overflow: hidden;
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    touch-action: none;
+    overscroll-behavior: none;
+    -webkit-overflow-scrolling: auto;
+  }
+}
+
+/* Touch device optimizations */
+@media (hover: none) and (pointer: coarse) {
+  .retro-button:hover {
+    transform: none;
+  }
+  
+  .retro-button:active {
+    transform: translateY(2px);
+  }
+  
+  /* Improve touch targets on mobile */
+  canvas {
+    cursor: none;
+  }
+}
+
+/* Touch performance tweaks */
+html, body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+/* Mobile performance optimizations */
+@media (max-width: 768px) {
+  /* Reduce animations on touch devices */
+  .hover-scale {
+    transition: none;
+  }
+  
+  /* Optimize backdrop blur for mobile */
+  .backdrop-blur-sm {
+    backdrop-filter: none;
+  }
+}
+
+canvas {
+  -webkit-tap-highlight-color: transparent;
+  touch-action: none;
+}
