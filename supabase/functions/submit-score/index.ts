@@ -35,9 +35,12 @@ serve(async (req) => {
 
     const { score, gameData, characterId } = await req.json();
 
+    // Parse and validate score
+    const parsedScore = typeof score === 'string' ? parseInt(score, 10) : score;
+    
     // Basic anti-cheat validation
-    if (!score || score < 0 || score > 10000) {
-      throw new Error('Invalid score');
+    if (parsedScore === null || parsedScore === undefined || isNaN(parsedScore) || parsedScore < 0 || parsedScore > 10000) {
+      throw new Error(`Invalid score: received ${score} (type: ${typeof score}), parsed: ${parsedScore}`);
     }
 
     // Rate limiting check - prevent rapid score submissions
@@ -73,13 +76,13 @@ serve(async (req) => {
       .single();
 
     // Check if this is a new high score for the user
-    if (!existingScore || score > existingScore.score) {
+    if (!existingScore || parsedScore > existingScore.score) {
       // If user already has a score, update it; otherwise insert new one
       if (existingScore) {
         const { error: updateError } = await supabase
           .from('leaderboards')
           .update({
-            score: score,
+            score: parsedScore,
             character_id: characterId || null,
             updated_at: new Date().toISOString()
           })
@@ -95,7 +98,7 @@ serve(async (req) => {
           .insert({
             user_id: user.id,
             player_name: profile.player_name,
-            score: score,
+            score: parsedScore,
             character_id: characterId || null
           });
 
@@ -104,31 +107,32 @@ serve(async (req) => {
         }
       }
 
-      console.log(`New high score submitted: ${score} by ${profile.player_name}`);
+      console.log(`New high score submitted: ${parsedScore} by ${profile.player_name}`);
     } else {
-      console.log(`Score ${score} not high enough for ${profile.player_name} (current best: ${existingScore.score})`);
+      console.log(`Score ${parsedScore} not high enough for ${profile.player_name} (current best: ${existingScore.score})`);
     }
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         message: 'Score submitted successfully',
-        isNewHighScore: !existingScore || score > existingScore.score
+        isNewHighScore: !existingScore || parsedScore > existingScore.score
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in submit-score function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Internal server error';
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'Internal server error',
+        error: errorMessage,
         success: false 
       }),
       {
-        status: error.message === 'Unauthorized' ? 401 : 400,
+        status: errorMessage === 'Unauthorized' ? 401 : 400,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       }
     );

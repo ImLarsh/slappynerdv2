@@ -76,12 +76,13 @@ serve(async (req) => {
       }
     );
 
-  } catch (error) {
+  } catch (error: unknown) {
     console.error('Error in validate-name function:', error);
+    const errorMessage = error instanceof Error ? error.message : 'Invalid player name';
     return new Response(
       JSON.stringify({ 
-        valid: false,
-        error: error.message || 'Invalid player name'
+        valid: false, 
+        error: errorMessage
       }),
       {
         status: 400,
