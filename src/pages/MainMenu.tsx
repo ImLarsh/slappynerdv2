@@ -18,7 +18,6 @@ import schoolHallwayBg from '@/assets/school-hallway-bg.png';
 import slappyNerdsTitle from '@/assets/slappy-nerds-title.png';
 import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
-let hasAutoStartedMusic = false;
 const MainMenu: React.FC = () => {
   const [charactersOpen, setCharactersOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
@@ -71,17 +70,7 @@ const MainMenu: React.FC = () => {
     };
     fetchPlayerProfile();
   }, [user]);
-  // Start background music only from the music player, with a 1s delay on first load
-  useEffect(() => {
-    if (!hasAutoStartedMusic) {
-      hasAutoStartedMusic = true;
-      const t = setTimeout(() => {
-        // Play once after page load settles
-        playBackgroundMusic();
-      }, 1000);
-      return () => clearTimeout(t);
-    }
-  }, []);
+  // No automatic music - only controlled via player controls
 
   // Lock body scroll on Main Menu
   useEffect(() => {

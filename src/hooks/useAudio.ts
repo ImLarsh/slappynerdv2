@@ -9,6 +9,11 @@ interface AudioState {
 // Global singleton audio elements to prevent duplicate playback across components
 let globalBackgroundMusic: HTMLAudioElement | null = null;
 let globalSoundEffects: { [key: string]: HTMLAudioElement } = {};
+const SOUND_SOURCES: Record<string, string> = {
+  gameOver: '/audio/game-over-sound.mp3',
+  passLocker: '/audio/passlocker.mp3',
+  collectBook: '/audio/collectbook.mp3',
+};
 
 export const useAudio = () => {
   const [audioState, setAudioState] = useState<AudioState>({
@@ -27,9 +32,10 @@ export const useAudio = () => {
       const audio = new Audio();
       audio.src = `/audio/main-menu-music.mp3?v=${Date.now()}`;
       audio.loop = true;
-      audio.preload = 'auto';
+      audio.preload = 'metadata'; // Changed from 'auto' to prevent autoload
       audio.crossOrigin = 'anonymous';
       audio.volume = 0.5 * 0.3; // initial volume, will sync below
+      audio.autoplay = false; // Explicitly disable autoplay
       globalBackgroundMusic = audio;
       audio.addEventListener('canplaythrough', () => {
         console.log('Background music loaded successfully');
@@ -38,7 +44,7 @@ export const useAudio = () => {
         console.warn('Background music failed to load:', e);
         setAudioState(prev => ({ ...prev, isPlaying: false }));
       });
-      audio.load();
+      // Don't auto-load - only load when explicitly requested
     }
     // Point local ref to global instance
     backgroundMusicRef.current = globalBackgroundMusic;
@@ -60,12 +66,13 @@ export const useAudio = () => {
       };
       Object.values(globalSoundEffects).forEach(a => {
         a.volume = audioState.volume;
-        a.preload = 'auto';
+        a.preload = 'metadata'; // Changed from 'auto' to prevent autoload
         a.crossOrigin = 'anonymous';
+        a.autoplay = false; // Explicitly disable autoplay
         a.addEventListener('error', (e) => {
           console.warn('Sound effect failed to load:', e);
         });
-        a.load();
+        // Don't auto-load sound effects
       });
     }
     // Point local ref to global effects
@@ -107,6 +114,18 @@ export const useAudio = () => {
     if (!audio || !audio.paused) return;
 
     try {
+      // Load audio if not loaded yet
+      if (audio.readyState < 2) {
+        audio.load();
+        await new Promise(resolve => {
+          const onLoad = () => {
+            audio.removeEventListener('canplaythrough', onLoad);
+            resolve(void 0);
+          };
+          audio.addEventListener('canplaythrough', onLoad);
+        });
+      }
+      
       // Ensure properties are synced
       audio.muted = audioState.isMuted;
       audio.volume = audioState.isMuted ? 0 : audioState.volume * 0.3;
