@@ -54,10 +54,12 @@ interface GameState {
   temporaryInvincibility?: number; // End time for temporary invincibility
 }
 
-const TARGET_FPS_MOBILE = 60;
-const TARGET_FPS_DESKTOP = 60; // Reduce desktop FPS for consistency
-const getTargetFPS = () => TARGET_FPS_MOBILE; // Use consistent 60fps across all devices
-const FRAME_TIME = () => 1000 / 60; // Fixed 60fps frame time
+// iOS-specific performance settings
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+const TARGET_FPS_MOBILE = isIOS ? 30 : 60; // Lower FPS for iOS
+const TARGET_FPS_DESKTOP = 60;
+const getTargetFPS = () => window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
+const FRAME_TIME = () => 1000 / getTargetFPS();
 const GRAVITY = 0.6;
 const JUMP_FORCE = -9.4;
 const PIPE_WIDTH = 80;
@@ -414,15 +416,16 @@ export const Game: React.FC = () => {
     setGameState(prev => {
       const newState = { ...prev };
       const deltaTime = currentTime - newState.lastFrameTime;
-      const targetFrameTime = 16.67; // Fixed 60fps (1000/60)
+      const targetFrameTime = FRAME_TIME();
 
-      // Throttle to consistent 60fps across all devices
+      // More aggressive throttling for iOS
       if (deltaTime < targetFrameTime) {
         return newState;
       }
 
-      // Clamp delta to avoid big jumps on tab switching/backgrounding
-      const clampedDelta = Math.min(deltaTime, 33.33); // Max 30fps fallback
+      // Clamp delta more aggressively for iOS stability
+      const maxDelta = isIOS ? 50 : 33.33;
+      const clampedDelta = Math.min(deltaTime, maxDelta);
 
       // Get current power modifiers
       const modifiers = getGameModifiers();
@@ -473,8 +476,8 @@ export const Game: React.FC = () => {
         return newState;
       }
 
-      // Generate pipes (consistent frequency across devices)
-      const basePipeFrequency = 2000; // Fixed frequency for consistent performance
+      // Generate pipes (slower spawn rate for iOS performance)
+      const basePipeFrequency = isIOS ? 2800 : 2000; // Slower spawning on iOS
       const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
       const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency; // Double spawn rate if locker spam is active
       
@@ -523,8 +526,8 @@ export const Game: React.FC = () => {
           );
           newState.lastPipeTime = currentTime;
           
-          // 10% chance to spawn a book with the new pipe (not affected by locker spam)
-          if (Math.random() < 0.1 && !hasLockerSpam) {
+          // Reduce book spawn rate on iOS for better performance
+          if (Math.random() < (isIOS ? 0.05 : 0.1) && !hasLockerSpam) {
             // Use the existing gapStart calculation for safe spawn area
             const gapMiddle = finalGapStart + finalGapSize / 2;
             const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6); // Keep books in middle of gap
@@ -682,7 +685,7 @@ export const Game: React.FC = () => {
     ctx.fillStyle = 'hsl(200, 100%, 85%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw scrolling background
+    // Draw scrolling background - simplified for iOS performance
     if (backgroundImageRef.current && backgroundImageRef.current.complete) {
       const img = backgroundImageRef.current;
       const bgWidth = img.width;
@@ -702,8 +705,9 @@ export const Game: React.FC = () => {
       // Calculate offset for seamless looping
       const scrollOffset = gameState.backgroundOffset % scaledWidth;
       
-      // Draw multiple copies of the background for seamless scrolling
-      for (let i = -1; i <= Math.ceil(canvas.width / scaledWidth) + 1; i++) {
+      // Reduce background drawing complexity for iOS
+      const bgCopies = isIOS ? 2 : Math.ceil(canvas.width / scaledWidth) + 2;
+      for (let i = -1; i <= bgCopies; i++) {
         ctx.drawImage(
           img,
           i * scaledWidth - scrollOffset,
@@ -721,8 +725,8 @@ export const Game: React.FC = () => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Draw lockers instead of pipes
-    const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03)); // extend offscreen to avoid top/bottom gaps
+    // Draw lockers - optimized for iOS performance
+    const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03));
     gameState.pipes.forEach(pipe => {
       const lockerImage = lockerImagesRef.current[0]; // Always use yellow locker (index 0)
       
@@ -737,25 +741,36 @@ export const Game: React.FC = () => {
         const isTopLocker = pipe.y === 0;
         
         if (isTopLocker) {
-          // Flip the top locker vertically
-          ctx.save();
-          ctx.scale(1, -1);
-          ctx.drawImage(
-            lockerImage,
-            drawX,
-            -drawY - targetHeight, // keep bottom aligned to gap start
-            targetWidth,
-            targetHeight + EDGE_OVERDRAW // extend upward offscreen to remove top gap
-          );
-          ctx.restore();
+          // Simplified drawing for iOS performance
+          if (isIOS) {
+            ctx.drawImage(
+              lockerImage,
+              drawX,
+              drawY,
+              targetWidth,
+              targetHeight
+            );
+          } else {
+            // Full flip animation for other devices
+            ctx.save();
+            ctx.scale(1, -1);
+            ctx.drawImage(
+              lockerImage,
+              drawX,
+              -drawY - targetHeight,
+              targetWidth,
+              targetHeight + EDGE_OVERDRAW
+            );
+            ctx.restore();
+          }
         } else {
-          // Draw bottom locker normally, extend below screen to remove bottom gap
+          // Draw bottom locker normally
           ctx.drawImage(
             lockerImage,
             drawX,
             drawY,
             targetWidth,
-            targetHeight + EDGE_OVERDRAW
+            isIOS ? targetHeight : targetHeight + EDGE_OVERDRAW
           );
         }
         
@@ -1020,12 +1035,13 @@ export const Game: React.FC = () => {
           style={{ 
             touchAction: 'none', 
             WebkitTapHighlightColor: 'transparent', 
-            imageRendering: 'auto',
+            imageRendering: isIOS ? 'auto' : 'pixelated',
             width: canvasSize.width + 'px',
             height: canvasSize.height + 'px',
             willChange: 'contents',
             transform: 'translateZ(0)',
-            backfaceVisibility: 'hidden'
+            backfaceVisibility: 'hidden',
+            WebkitBackfaceVisibility: 'hidden'
           }}
         />
 
