@@ -6,6 +6,10 @@ interface AudioState {
   isPlaying: boolean;
 }
 
+// Global singleton audio elements to prevent duplicate playback across components
+let globalBackgroundMusic: HTMLAudioElement | null = null;
+let globalSoundEffects: { [key: string]: HTMLAudioElement } = {};
+
 export const useAudio = () => {
   const [audioState, setAudioState] = useState<AudioState>({
     volume: 0.5,
@@ -16,69 +20,64 @@ export const useAudio = () => {
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   const soundEffectsRef = useRef<{ [key: string]: HTMLAudioElement }>({});
 
-  // Initialize audio elements
+  // Initialize audio elements (singleton across app)
   useEffect(() => {
-    // Background music - ensure proper loading
-    const audio = new Audio();
-    audio.src = `/audio/main-menu-music.mp3?v=${Date.now()}`;
-    audio.loop = true;
-    audio.volume = audioState.volume * 0.3;
-    audio.preload = 'auto';
-    audio.crossOrigin = 'anonymous';
-    backgroundMusicRef.current = audio;
-
-    // Sound effects
-    soundEffectsRef.current = {
-      gameOver: new Audio('/audio/game-over-sound.mp3'),
-      passLocker: new Audio('/audio/passlocker.mp3'),
-      collectBook: new Audio('/audio/collectbook.mp3')
-    };
-
-    // Set volume and properties for all sound effects
-    Object.values(soundEffectsRef.current).forEach(audio => {
-      audio.volume = audioState.volume;
+    // Create global background music if needed
+    if (!globalBackgroundMusic) {
+      const audio = new Audio();
+      audio.src = `/audio/main-menu-music.mp3?v=${Date.now()}`;
+      audio.loop = true;
       audio.preload = 'auto';
       audio.crossOrigin = 'anonymous';
-    });
-
-    // Load audio files with better error handling and status sync
-    if (backgroundMusicRef.current) {
-      const onPlay = () => setAudioState(prev => ({ ...prev, isPlaying: true }));
-      const onPause = () => setAudioState(prev => ({ ...prev, isPlaying: false }));
-      const onEnded = () => setAudioState(prev => ({ ...prev, isPlaying: false }));
-      
-      backgroundMusicRef.current.addEventListener('play', onPlay);
-      backgroundMusicRef.current.addEventListener('pause', onPause);
-      backgroundMusicRef.current.addEventListener('ended', onEnded);
-      backgroundMusicRef.current.addEventListener('canplaythrough', () => {
+      audio.volume = 0.5 * 0.3; // initial volume, will sync below
+      globalBackgroundMusic = audio;
+      audio.addEventListener('canplaythrough', () => {
         console.log('Background music loaded successfully');
       });
-      backgroundMusicRef.current.addEventListener('error', (e) => {
+      audio.addEventListener('error', (e) => {
         console.warn('Background music failed to load:', e);
         setAudioState(prev => ({ ...prev, isPlaying: false }));
       });
-      // Force reload after source change
-      backgroundMusicRef.current.load();
-    }
-    
-    Object.values(soundEffectsRef.current).forEach(audio => {
-      audio.addEventListener('error', (e) => {
-        console.warn('Sound effect failed to load:', e);
-      });
       audio.load();
-    });
+    }
+    // Point local ref to global instance
+    backgroundMusicRef.current = globalBackgroundMusic;
+
+    // Attach per-hook listeners so local state reflects global audio
+    const onPlay = () => setAudioState(prev => ({ ...prev, isPlaying: true }));
+    const onPause = () => setAudioState(prev => ({ ...prev, isPlaying: false }));
+    const onEnded = () => setAudioState(prev => ({ ...prev, isPlaying: false }));
+    backgroundMusicRef.current?.addEventListener('play', onPlay);
+    backgroundMusicRef.current?.addEventListener('pause', onPause);
+    backgroundMusicRef.current?.addEventListener('ended', onEnded);
+
+    // Create global sound effects if needed
+    if (Object.keys(globalSoundEffects).length === 0) {
+      globalSoundEffects = {
+        gameOver: new Audio('/audio/game-over-sound.mp3'),
+        passLocker: new Audio('/audio/passlocker.mp3'),
+        collectBook: new Audio('/audio/collectbook.mp3')
+      };
+      Object.values(globalSoundEffects).forEach(a => {
+        a.volume = audioState.volume;
+        a.preload = 'auto';
+        a.crossOrigin = 'anonymous';
+        a.addEventListener('error', (e) => {
+          console.warn('Sound effect failed to load:', e);
+        });
+        a.load();
+      });
+    }
+    // Point local ref to global effects
+    soundEffectsRef.current = globalSoundEffects;
 
     return () => {
-      if (backgroundMusicRef.current) {
-        backgroundMusicRef.current.pause();
-        backgroundMusicRef.current = null;
-      }
-      Object.values(soundEffectsRef.current).forEach(audio => {
-        audio.pause();
-      });
-      soundEffectsRef.current = {};
+      // Detach per-hook listeners only (do not destroy global audio)
+      backgroundMusicRef.current?.removeEventListener('play', onPlay);
+      backgroundMusicRef.current?.removeEventListener('pause', onPause);
+      backgroundMusicRef.current?.removeEventListener('ended', onEnded);
     };
-  }, []); // Remove audioState dependency to prevent recreation
+  }, []);
 
   // Update volume when state changes
   useEffect(() => {
@@ -107,30 +106,9 @@ export const useAudio = () => {
     if (!audio || audioState.isPlaying) return;
 
     try {
-      // Reset audio state
-      if (!audio.paused) {
-        audio.pause();
-      }
+      // Stop any existing playback first
+      audio.pause();
       audio.currentTime = 0;
-      
-      // Ensure audio is loaded
-      if (audio.readyState < 2) {
-        await new Promise((resolve, reject) => {
-          const onCanPlay = () => {
-            audio.removeEventListener('canplaythrough', onCanPlay);
-            audio.removeEventListener('error', onError);
-            resolve(void 0);
-          };
-          const onError = (e: any) => {
-            audio.removeEventListener('canplaythrough', onCanPlay);
-            audio.removeEventListener('error', onError);
-            reject(e);
-          };
-          audio.addEventListener('canplaythrough', onCanPlay);
-          audio.addEventListener('error', onError);
-          audio.load();
-        });
-      }
       
       // Set audio properties
       audio.muted = audioState.isMuted;
@@ -138,13 +116,11 @@ export const useAudio = () => {
       
       // Attempt to play
       await audio.play();
-      setAudioState(prev => ({ ...prev, isPlaying: true }));
     } catch (error: any) {
       // Only warn for non-abort errors and user interaction required errors
       if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
         console.warn('Background music play failed:', error);
       }
-      setAudioState(prev => ({ ...prev, isPlaying: false }));
     }
   }, [audioState.volume, audioState.isMuted, audioState.isPlaying]);
 

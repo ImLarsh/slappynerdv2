@@ -72,24 +72,30 @@ const MainMenu: React.FC = () => {
   }, [user]);
   // Start background music on component mount and keep it playing
   useEffect(() => {
-    // Only start music if not already playing
+    // Start music immediately if not playing
     if (!isPlaying) {
-      playBackgroundMusic();
-    }
+      const timeoutId = setTimeout(() => {
+        if (!isPlaying) {
+          playBackgroundMusic();
+        }
+      }, 100); // Small delay to ensure audio hook is fully initialized
 
-    // Add click listener to start music on first user interaction if not already playing
-    const handleFirstClick = () => {
-      if (!isPlaying) {
-        playBackgroundMusic();
-      }
-      document.removeEventListener('click', handleFirstClick);
-    };
-    document.addEventListener('click', handleFirstClick);
-    
-    return () => {
-      document.removeEventListener('click', handleFirstClick);
-    };
-  }, []); // Remove dependencies to prevent re-running
+      // Add click listener to start music on first user interaction if not already playing
+      const handleFirstClick = () => {
+        clearTimeout(timeoutId);
+        if (!isPlaying) {
+          playBackgroundMusic();
+        }
+        document.removeEventListener('click', handleFirstClick);
+      };
+      document.addEventListener('click', handleFirstClick);
+      
+      return () => {
+        clearTimeout(timeoutId);
+        document.removeEventListener('click', handleFirstClick);
+      };
+    }
+  }, [isPlaying, playBackgroundMusic]);
 
   // Lock body scroll on Main Menu
   useEffect(() => {
