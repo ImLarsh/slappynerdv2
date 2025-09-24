@@ -102,7 +102,7 @@ const MainMenu: React.FC = () => {
       <div className="absolute inset-0 bg-background/60 md:backdrop-blur-sm" />
       
       {/* Title at absolute top */}
-      <div className="absolute top-2 md:top-8 left-0 right-0 z-10 animate-fade-in md:my-[40px] md:py-[20px] my-4 py-[49px]">
+      <div className="absolute top-2 md:top-8 left-0 right-0 z-10 animate-fade-in">
         <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[220px] md:max-w-lg mx-auto hover-scale" />
       </div>
       
@@ -150,7 +150,7 @@ const MainMenu: React.FC = () => {
         </Button>}
       
       {/* Centered Content */}
-      <div className="relative z-10 max-w-sm md:max-w-md w-full space-y-2 md:space-y-6 text-center mt-10 md:mt-0">
+      <div className="relative z-10 max-w-sm md:max-w-md w-full space-y-2 md:space-y-6 text-center mt-20 md:mt-16">
         {/* Character and Description */}
         <div className="space-y-2 md:space-y-4 animate-fade-in">
           
