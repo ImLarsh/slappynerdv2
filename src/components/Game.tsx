@@ -307,10 +307,10 @@ export const Game: React.FC = () => {
       return false; // No collision while ghost mode is active
     }
     
-    // Normal collision detection
-    const emojiMargin = BIRD_SIZE * 0.15;
-    const lockerHorizontalMargin = Math.max(42, LOCKER_WIDTH * 0.3);
-    const lockerVerticalMargin = 6;
+    // Normal collision detection - reduced hitboxes for more forgiving gameplay
+    const emojiMargin = BIRD_SIZE * 0.25; // Increased from 0.15 to 0.25
+    const lockerHorizontalMargin = Math.max(50, LOCKER_WIDTH * 0.35); // Increased margins
+    const lockerVerticalMargin = 10; // Increased from 6 to 10
     
     const isColliding = (
       bird.x + emojiMargin < pipe.x + pipe.width - lockerHorizontalMargin &&
