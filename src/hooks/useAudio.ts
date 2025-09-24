@@ -103,26 +103,20 @@ export const useAudio = () => {
 
   const playBackgroundMusic = useCallback(async () => {
     const audio = backgroundMusicRef.current;
-    if (!audio || audioState.isPlaying) return;
+    // If no audio or already playing, do nothing
+    if (!audio || !audio.paused) return;
 
     try {
-      // Stop any existing playback first
-      audio.pause();
-      audio.currentTime = 0;
-      
-      // Set audio properties
+      // Ensure properties are synced
       audio.muted = audioState.isMuted;
       audio.volume = audioState.isMuted ? 0 : audioState.volume * 0.3;
-      
-      // Attempt to play
       await audio.play();
     } catch (error: any) {
-      // Only warn for non-abort errors and user interaction required errors
       if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
         console.warn('Background music play failed:', error);
       }
     }
-  }, [audioState.volume, audioState.isMuted, audioState.isPlaying]);
+  }, [audioState.volume, audioState.isMuted]);
 
   const stopBackgroundMusic = useCallback(() => {
     if (backgroundMusicRef.current && audioState.isPlaying) {

@@ -18,6 +18,7 @@ import schoolHallwayBg from '@/assets/school-hallway-bg.png';
 import slappyNerdsTitle from '@/assets/slappy-nerds-title.png';
 import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+let hasAutoStartedMusic = false;
 const MainMenu: React.FC = () => {
   const [charactersOpen, setCharactersOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
@@ -70,32 +71,17 @@ const MainMenu: React.FC = () => {
     };
     fetchPlayerProfile();
   }, [user]);
-  // Start background music on component mount and keep it playing
+  // Start background music only from the music player, with a 1s delay on first load
   useEffect(() => {
-    // Start music immediately if not playing
-    if (!isPlaying) {
-      const timeoutId = setTimeout(() => {
-        if (!isPlaying) {
-          playBackgroundMusic();
-        }
-      }, 100); // Small delay to ensure audio hook is fully initialized
-
-      // Add click listener to start music on first user interaction if not already playing
-      const handleFirstClick = () => {
-        clearTimeout(timeoutId);
-        if (!isPlaying) {
-          playBackgroundMusic();
-        }
-        document.removeEventListener('click', handleFirstClick);
-      };
-      document.addEventListener('click', handleFirstClick);
-      
-      return () => {
-        clearTimeout(timeoutId);
-        document.removeEventListener('click', handleFirstClick);
-      };
+    if (!hasAutoStartedMusic) {
+      hasAutoStartedMusic = true;
+      const t = setTimeout(() => {
+        // Play once after page load settles
+        playBackgroundMusic();
+      }, 1000);
+      return () => clearTimeout(t);
     }
-  }, [isPlaying, playBackgroundMusic]);
+  }, []);
 
   // Lock body scroll on Main Menu
   useEffect(() => {
