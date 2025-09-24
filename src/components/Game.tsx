@@ -54,15 +54,12 @@ interface GameState {
   temporaryInvincibility?: number; // End time for temporary invincibility
 }
 
-// Force iOS users to use Android experience
+// iOS-specific performance settings
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
 const TARGET_FPS_MOBILE = 60; // Consistent 60fps for all mobile devices
 const TARGET_FPS_DESKTOP = 60;
 const getTargetFPS = () => 60; // Fixed 60fps across all devices
 const FRAME_TIME = () => 1000 / 60;
-
-// Force Android emoji experience for iOS users
-const forceAndroidExperience = isIOS;
 const GRAVITY = 0.6;
 const JUMP_FORCE = -9.4;
 const PIPE_WIDTH = 80;
@@ -949,41 +946,18 @@ export const Game: React.FC = () => {
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     
-    // Force Android emojis for iOS users, use native emojis for Android
-    let character = selectedCharacter ? selectedCharacter.emoji : '🤓';
-    
-    // Replace iOS emojis with Android-style equivalents
-    if (forceAndroidExperience) {
-      const androidEmojiMap: { [key: string]: string } = {
-        '🤓': '🤓', // Keep nerd emoji
-        '😎': '😎', // Keep cool emoji
-        '🥸': '🤡', // Replace disguise with clown for Android feel
-        '🤖': '🤖', // Keep robot
-        '👾': '👾', // Keep alien
-        '🦸‍♂️': '🦸', // Simplify superhero
-        '🦸‍♀️': '🦸', // Simplify superhero
-        '🧙‍♂️': '🧙', // Simplify wizard
-        '🧙‍♀️': '🧙', // Simplify wizard
-        '🐱‍👤': '🐱', // Simplify ninja cat
-        '🤵': '👤', // Replace with generic person
-        '👑': '⭐', // Replace crown with star for Android feel
-      };
-      
-      character = androidEmojiMap[character] || character;
-    }
-    
+    const character = selectedCharacter ? selectedCharacter.emoji : '🤓';
     ctx.fillText(
       character,
       gameState.bird.x + gameState.bird.width / 2,
       gameState.bird.y + gameState.bird.height / 2
     );
     
-    // Draw crown/star if beating personal best
+    // Draw crown if beating personal best
     if (gameState.crownCollected) {
       ctx.font = `${BIRD_SIZE * 0.6}px Arial`;
-      const crownEmoji = forceAndroidExperience ? '⭐' : '👑'; // Android users get star
       ctx.fillText(
-        crownEmoji,
+        '👑',
         gameState.bird.x + gameState.bird.width / 2,
         gameState.bird.y - 15
       );
@@ -1088,15 +1062,13 @@ export const Game: React.FC = () => {
           style={{ 
             touchAction: 'none', 
             WebkitTapHighlightColor: 'transparent', 
-            imageRendering: forceAndroidExperience ? 'auto' : 'pixelated', // Force Android rendering for iOS
+            imageRendering: isIOS ? 'auto' : 'pixelated',
             width: canvasSize.width + 'px',
             height: canvasSize.height + 'px',
             willChange: 'contents',
             transform: 'translateZ(0)',
             backfaceVisibility: 'hidden',
-            WebkitBackfaceVisibility: 'hidden',
-            // Force Android-style font rendering for iOS users
-            fontFamily: forceAndroidExperience ? 'Roboto, sans-serif' : 'system-ui'
+            WebkitBackfaceVisibility: 'hidden'
           }}
         />
 
@@ -1107,13 +1079,8 @@ export const Game: React.FC = () => {
               Score: {gameState.score}
             </div>
             <div className="text-xs sm:text-sm text-muted-foreground">
-              Best: {stats.best_score} {forceAndroidExperience ? '⭐' : '👑'}
+              Best: {stats.best_score} 👑
             </div>
-            {forceAndroidExperience && (
-              <div className="text-xs text-green-400 font-medium">
-                🤖 Android Mode
-              </div>
-            )}
           </Card>
         </div>
 
@@ -1233,11 +1200,9 @@ export const Game: React.FC = () => {
         {gameState.gameOver && (
           <div className="absolute inset-0 flex items-center justify-center bg-foreground/50 rounded-lg">
             <Card className="p-3 sm:p-4 md:p-8 text-center space-y-2 sm:space-y-3 md:space-y-4 animate-bounce-in shadow-game max-w-sm mx-2 sm:mx-4">
-              <div className="text-3xl sm:text-4xl">{forceAndroidExperience ? '💀' : '💥'}</div>
+              <div className="text-3xl sm:text-4xl">💥</div>
               {gameState.isNewRecord ? (
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-warning">
-                  New Record! {forceAndroidExperience ? '⭐' : '👑'}
-                </h2>
+                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-warning">New Record! 👑</h2>
               ) : (
                 <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-danger">Game Over!</h2>
               )}
@@ -1278,17 +1243,15 @@ export const Game: React.FC = () => {
         {!gameState.gameStarted && !gameState.gameOver && (
           <div className="absolute inset-0 flex items-center justify-center bg-foreground/30 rounded-lg">
             <Card className="p-3 sm:p-4 md:p-8 text-center space-y-2 sm:space-y-3 md:space-y-4 animate-bounce-in shadow-game max-w-md mx-2 sm:mx-4">
-              <div className="text-4xl sm:text-5xl md:text-6xl">{forceAndroidExperience ? '🤖' : '🤓'}</div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">
-                {forceAndroidExperience ? 'Android Nerds' : 'Slappy Nerds'}
-              </h1>
+              <div className="text-4xl sm:text-5xl md:text-6xl">🤓</div>
+              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Slappy Nerds</h1>
               <p className="text-xs sm:text-sm md:text-lg text-muted-foreground px-2">
                 Help your nerdy hero soar through the skies! Tap to flap and avoid obstacles.
               </p>
               <div className="space-y-1 sm:space-y-2 text-xs md:text-sm text-muted-foreground">
-                <p>{forceAndroidExperience ? '📱' : '📱'} Tap anywhere to flap</p>
-                <p className="hidden sm:block">{forceAndroidExperience ? '💻' : '🖥️'} Or press SPACE on desktop</p>
-                <p>{forceAndroidExperience ? '📖' : '📚'} Avoid the green pipes!</p>
+                <p>📱 Tap anywhere to flap</p>
+                <p className="hidden sm:block">🖥️ Or press SPACE on desktop</p>
+                <p>📚 Avoid the green pipes!</p>
               </div>
               <Button 
                 onClick={jump}
