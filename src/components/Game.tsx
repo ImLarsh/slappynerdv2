@@ -309,8 +309,8 @@ export const Game: React.FC = () => {
     
     // Normal collision detection - reduced hitboxes for more forgiving gameplay
     const emojiMargin = BIRD_SIZE * 0.25; // Increased from 0.15 to 0.25
-    const lockerHorizontalMargin = Math.max(50, LOCKER_WIDTH * 0.35); // Increased margins
-    const lockerVerticalMargin = 10; // Increased from 6 to 10
+    const lockerHorizontalMargin = Math.max(60, LOCKER_WIDTH * 0.4); // Further increased margins
+    const lockerVerticalMargin = 15; // Further increased from 10 to 15
     
     const isColliding = (
       bird.x + emojiMargin < pipe.x + pipe.width - lockerHorizontalMargin &&
