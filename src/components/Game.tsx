@@ -55,9 +55,9 @@ interface GameState {
 }
 
 const TARGET_FPS_MOBILE = 60;
-const TARGET_FPS_DESKTOP = 80;
-const getTargetFPS = () => window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
-const FRAME_TIME = () => 1000 / getTargetFPS();
+const TARGET_FPS_DESKTOP = 60; // Reduce desktop FPS for consistency
+const getTargetFPS = () => TARGET_FPS_MOBILE; // Use consistent 60fps across all devices
+const FRAME_TIME = () => 1000 / 60; // Fixed 60fps frame time
 const GRAVITY = 0.6;
 const JUMP_FORCE = -9.4;
 const PIPE_WIDTH = 80;
@@ -414,23 +414,21 @@ export const Game: React.FC = () => {
     setGameState(prev => {
       const newState = { ...prev };
       const deltaTime = currentTime - newState.lastFrameTime;
-      const isMobile = window.innerWidth < 768;
-      const currentFrameTime = FRAME_TIME();
-      const baseFrameTime = isMobile ? 1000 / TARGET_FPS_MOBILE : currentFrameTime;
+      const targetFrameTime = 16.67; // Fixed 60fps (1000/60)
 
-      // Desktop: throttle to target FPS. Mobile: no cap (always update).
-      if (!isMobile && deltaTime < currentFrameTime) {
+      // Throttle to consistent 60fps across all devices
+      if (deltaTime < targetFrameTime) {
         return newState;
       }
 
       // Clamp delta to avoid big jumps on tab switching/backgrounding
-      const clampedDelta = Math.min(deltaTime, 50);
+      const clampedDelta = Math.min(deltaTime, 33.33); // Max 30fps fallback
 
       // Get current power modifiers
       const modifiers = getGameModifiers();
       
       // Calculate frame multiplier for consistent movement across different frame rates
-      const frameMultiplier = clampedDelta / baseFrameTime;
+      const frameMultiplier = clampedDelta / targetFrameTime;
       newState.lastFrameTime = currentTime;
 
       // Clear expired temporary invincibility
@@ -475,8 +473,8 @@ export const Game: React.FC = () => {
         return newState;
       }
 
-      // Generate pipes (adjust frequency for mobile performance and locker spam power)
-      const basePipeFrequency = canvasSize.width < 500 ? 2200 : 1800; // Increased spawn rate further (reduced from 2500/2000)
+      // Generate pipes (consistent frequency across devices)
+      const basePipeFrequency = 2000; // Fixed frequency for consistent performance
       const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
       const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency; // Double spawn rate if locker spam is active
       
@@ -1022,9 +1020,12 @@ export const Game: React.FC = () => {
           style={{ 
             touchAction: 'none', 
             WebkitTapHighlightColor: 'transparent', 
-            imageRendering: 'pixelated',
+            imageRendering: 'auto',
             width: canvasSize.width + 'px',
-            height: canvasSize.height + 'px'
+            height: canvasSize.height + 'px',
+            willChange: 'contents',
+            transform: 'translateZ(0)',
+            backfaceVisibility: 'hidden'
           }}
         />
 

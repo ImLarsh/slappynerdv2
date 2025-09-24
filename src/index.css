@@ -394,4 +394,22 @@ html, body {
 canvas {
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
+  -webkit-transform: translateZ(0);
+  -webkit-backface-visibility: hidden;
+  will-change: contents;
+}
+
+/* iOS Performance Optimizations */
+.game-active {
+  -webkit-overflow-scrolling: touch;
+  -webkit-transform: translate3d(0, 0, 0);
+  transform: translate3d(0, 0, 0);
+}
+
+/* Optimize Canvas for iOS */
+canvas {
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
