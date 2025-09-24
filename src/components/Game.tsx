@@ -56,10 +56,10 @@ interface GameState {
 
 // iOS-specific performance settings
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-const TARGET_FPS_MOBILE = isIOS ? 75 : 60; // Higher FPS for iOS
+const TARGET_FPS_MOBILE = 60; // Consistent 60fps for all mobile devices
 const TARGET_FPS_DESKTOP = 60;
-const getTargetFPS = () => window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
-const FRAME_TIME = () => 1000 / getTargetFPS();
+const getTargetFPS = () => 60; // Fixed 60fps across all devices
+const FRAME_TIME = () => 1000 / 60;
 const GRAVITY = 0.6;
 const JUMP_FORCE = -9.4;
 const PIPE_WIDTH = 80;
@@ -111,6 +111,9 @@ export const Game: React.FC = () => {
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
   const lockerImagesRef = useRef<HTMLImageElement[]>([]);
   const nextBookIdRef = useRef(0);
+  
+  // iOS optimization: Pre-allocate canvas context to reduce stuttering
+  const canvasContextRef = useRef<CanvasRenderingContext2D | null>(null);
   
   const [gameState, setGameState] = useState<GameState>({
     bird: { x: 100, y: 200, width: BIRD_SIZE, height: BIRD_SIZE, velocity: 0 },
@@ -407,7 +410,9 @@ export const Game: React.FC = () => {
     if (!canvasRef.current || !gameState.gameStarted || gameState.gameOver || showPowerSelection || waitingForContinue) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    
+    // Use cached context for iOS optimization
+    const ctx = canvasContextRef.current || canvas.getContext('2d');
     if (!ctx) {
       console.error('Cannot get canvas context in game loop');
       return;
@@ -416,22 +421,30 @@ export const Game: React.FC = () => {
     setGameState(prev => {
       const newState = { ...prev };
       const deltaTime = currentTime - newState.lastFrameTime;
-      const targetFrameTime = FRAME_TIME();
+      const targetFrameTime = 16.67; // Fixed 60fps (1000/60)
 
-      // More aggressive throttling for iOS
-      if (deltaTime < targetFrameTime) {
-        return newState;
+      // iOS-specific frame limiting to reduce stuttering
+      if (isIOS) {
+        // Use more lenient frame timing on iOS to prevent micro-stutters
+        if (deltaTime < 14) { // Allow slightly faster frames
+          return newState;
+        }
+      } else {
+        // Standard frame limiting for other devices
+        if (deltaTime < targetFrameTime) {
+          return newState;
+        }
       }
 
-      // Clamp delta more aggressively for iOS stability
-      const maxDelta = isIOS ? 50 : 33.33;
+      // Clamp delta more conservatively for iOS
+      const maxDelta = isIOS ? 25 : 33.33; // Smaller jumps on iOS
       const clampedDelta = Math.min(deltaTime, maxDelta);
 
       // Get current power modifiers
       const modifiers = getGameModifiers();
       
-      // Calculate frame multiplier for consistent movement across different frame rates
-      const frameMultiplier = clampedDelta / targetFrameTime;
+      // Calculate frame multiplier - use more stable calculation for iOS
+      const frameMultiplier = isIOS ? clampedDelta / 16.67 : clampedDelta / targetFrameTime;
       newState.lastFrameTime = currentTime;
 
       // Clear expired temporary invincibility
@@ -675,7 +688,21 @@ export const Game: React.FC = () => {
       console.log('Canvas size set to:', canvasSize);
     }
 
-    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+    // Get or cache canvas context for iOS optimization
+    let ctx = canvasContextRef.current;
+    if (!ctx) {
+      ctx = canvas.getContext('2d', { 
+        alpha: false, // Disable alpha for better performance
+        desynchronized: isIOS, // Enable async rendering on iOS
+      });
+      if (isIOS && ctx) {
+        // iOS-specific context optimizations
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = 'medium';
+      }
+      canvasContextRef.current = ctx;
+    }
+    
     if (!ctx) {
       console.error('Cannot get canvas context');
       return;

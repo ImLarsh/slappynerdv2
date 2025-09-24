@@ -404,12 +404,18 @@ canvas {
   -webkit-overflow-scrolling: touch;
   -webkit-transform: translate3d(0, 0, 0);
   transform: translate3d(0, 0, 0);
+  -webkit-perspective: 1000px;
 }
 
-/* Optimize Canvas for iOS */
+/* Optimize Canvas for iOS - reduce stuttering */
 canvas {
   -webkit-user-select: none;
   -webkit-touch-callout: none;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  image-rendering: -webkit-optimize-contrast;
+  image-rendering: optimize-contrast;
+  -webkit-backface-visibility: hidden;
+  -webkit-transform: translateZ(0);
+  transform: translateZ(0);
 }
