@@ -88,7 +88,7 @@ export const Game: React.FC = () => {
     getGameModifiers, 
     resetPowers,
     setShowPowerSelection 
-  } = usePowers();
+  } = usePowers(playSound);
   const {
     startGamePowers,
     hasStartShield,

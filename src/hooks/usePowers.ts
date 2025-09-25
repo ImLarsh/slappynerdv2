@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from 'react';
 import { Power, ActivePower, AVAILABLE_POWERS } from '@/types/powers';
 
-export const usePowers = () => {
+export const usePowers = (playSound?: (soundName: string) => void) => {
   const [activePowers, setActivePowers] = useState<ActivePower[]>([]);
   const [showPowerSelection, setShowPowerSelection] = useState(false);
   const [pipesPassed, setPipesPassed] = useState(0);
-  const [nextPowerAt, setNextPowerAt] = useState(Math.floor(Math.random() * 6) + 5); // 5-10 pipes
+  const [nextPowerAt, setNextPowerAt] = useState(Math.floor(Math.random() * 6) + 10); // 10-15 pipes
 
   // Get 3 random powers for selection using weighted selection
   const getRandomPowers = useCallback((hasLuckyStart: boolean = false): Power[] => {
@@ -60,7 +60,7 @@ export const usePowers = () => {
     if (power.id === 'refresh_power') {
       setActivePowers([]);
       setShowPowerSelection(false);
-      setNextPowerAt(pipesPassed + Math.floor(Math.random() * 6) + 5);
+      setNextPowerAt(pipesPassed + Math.floor(Math.random() * 6) + 10);
       return;
     }
 
@@ -104,7 +104,7 @@ export const usePowers = () => {
     setShowPowerSelection(false);
     
     // Set next power selection
-    setNextPowerAt(pipesPassed + Math.floor(Math.random() * 6) + 5);
+    setNextPowerAt(pipesPassed + Math.floor(Math.random() * 6) + 10);
   }, [pipesPassed]);
 
   // Check if we should show power selection
@@ -112,6 +112,8 @@ export const usePowers = () => {
     setPipesPassed(currentPipesPassed);
     if (currentPipesPassed >= nextPowerAt) {
       setShowPowerSelection(true);
+      // Play powerup sound when menu opens
+      playSound?.('powerup');
     }
   }, [nextPowerAt]);
 
@@ -172,7 +174,7 @@ export const usePowers = () => {
   const resetPowers = useCallback(() => {
     setActivePowers([]);
     setPipesPassed(0);
-    setNextPowerAt(Math.floor(Math.random() * 6) + 5);
+    setNextPowerAt(Math.floor(Math.random() * 6) + 10);
     setShowPowerSelection(false);
   }, []);
 

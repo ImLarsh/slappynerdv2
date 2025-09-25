@@ -16,6 +16,7 @@ const SOUND_SOURCES: Record<string, string> = {
   tapFlap: '/audio/tapflapsound.mp3',
   defeat: '/audio/defeatsound.mp3',
   click: '/audio/clicksound.mp3',
+  powerup: '/audio/powerup.mp3',
 };
 
 export const useAudio = () => {
@@ -79,7 +80,8 @@ export const useAudio = () => {
         collectBook: new Audio('/audio/collectbook.mp3'),
         tapFlap: new Audio('/audio/tapflapsound.mp3'),
         defeat: new Audio('/audio/defeatsound.mp3'),
-        click: new Audio('/audio/clicksound.mp3')
+        click: new Audio('/audio/clicksound.mp3'),
+        powerup: new Audio('/audio/powerup.mp3')
       };
       Object.values(globalSoundEffects).forEach(a => {
         a.volume = audioState.volume;
