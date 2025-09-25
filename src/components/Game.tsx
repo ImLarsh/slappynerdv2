@@ -227,8 +227,8 @@ export const Game: React.FC = () => {
         height = Math.min(vh - 100, 820); // Account for UI elements
       } else {
         // Desktop - larger game canvas
-        width = 1200;
-        height = 800;
+        width = 1400;
+        height = 900;
       }
 
       // Ensure minimum sizes for playability
@@ -1180,7 +1180,7 @@ export const Game: React.FC = () => {
       width: '100vw',
       height: '100dvh'
     }}>
-        <div className="relative border-2 sm:border-4 border-border rounded-lg sm:rounded-xl shadow-game bg-gradient-sky overflow-hidden touch-none" style={{
+        <div className="relative border-2 sm:border-4 border-black rounded-lg sm:rounded-xl shadow-game bg-gradient-sky overflow-hidden touch-none" style={{
         width: canvasSize.width,
         height: canvasSize.height,
         maxWidth: '100vw',

@@ -12,9 +12,9 @@ All colors MUST be HSL.
     --background: 210 100% 97%;
     --foreground: 215 25% 15%;
 
-    /* Game Background & Sky - Dark Green Theme */
-    --sky-start: 120 40% 25%;
-    --sky-end: 140 35% 35%;
+    /* Game Background & Sky - Appealing Blue-Green Theme */
+    --sky-start: 200 60% 40%;
+    --sky-end: 160 45% 50%;
     --cloud-white: 0 0% 98%;
 
     /* Nerdy Character Colors */
