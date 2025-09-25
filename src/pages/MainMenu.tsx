@@ -146,7 +146,7 @@ const MainMenu: React.FC = () => {
       
       {/* Pop Counter - Top Left */}
       <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20">
-        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 sm:py-1.5 border border-purple-300 shadow-xl md:px-[55px] md:py-0 py-[3px] mx-[14px] my-[51px]">
+        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl">
           <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
             <span className="text-xs sm:text-sm md:text-lg">💥</span>
             <span className="font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">
@@ -158,7 +158,7 @@ const MainMenu: React.FC = () => {
 
       {/* User Info - Top Left (when signed in) - moved down */}
       {user && <div className="absolute top-12 sm:top-16 md:top-20 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30">
+          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30 mx-[15px] my-[35px]">
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-black font-bold">
               {playerName || 'Player'}
             </p>
@@ -173,7 +173,7 @@ const MainMenu: React.FC = () => {
         </div>}
 
       {/* Volume Control Button */}
-      <Button variant="outline" size="icon" onClick={() => handleButtonClick(() => setVolumeOpen(true))} className="absolute top-1 sm:top-2 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 mx-[14px] px-0 my-[50px]">
+      <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(() => setVolumeOpen(true))}>
         {isMuted ? <VolumeX className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" /> : <Volume2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />}
       </Button>
 
@@ -183,7 +183,7 @@ const MainMenu: React.FC = () => {
         </Button>}
       
       {/* Sign Out Button - Red Door Icon */}
-      {user && <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(signOut)}>
+      {user && <Button variant="outline" size="icon" onClick={() => handleButtonClick(signOut)} className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 mx-0 my-[96px]">
           <DoorOpen className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
         </Button>}
       
@@ -228,7 +228,7 @@ const MainMenu: React.FC = () => {
               animationDelay: '0.2s'
             }}>
               <Gamepad2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="text-[9px] sm:text-[10px] font-extrabold md:text-xl">Characters</span>
+              <span className="font-semibold text-[9px] sm:text-[10px] md:text-xs">Characters</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-green-600 to-green-700"></div>
             </Button>
@@ -237,7 +237,7 @@ const MainMenu: React.FC = () => {
               animationDelay: '0.3s'
             }}>
               <ShoppingCart className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="text-[9px] sm:text-[10px] font-extrabold md:text-xl">Shop</span>
+              <span className="font-semibold text-[9px] sm:text-[10px] md:text-xs">Shop</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-purple-600 to-purple-700"></div>
             </Button>
@@ -246,7 +246,7 @@ const MainMenu: React.FC = () => {
               animationDelay: '0.35s'
             }}>
               <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="text-[9px] sm:text-[10px] font-extrabold md:text-xl">Crates</span>
+              <span className="font-semibold text-[9px] sm:text-[10px] md:text-xs">Crates</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-orange-600 to-orange-700"></div>
             </Button>
@@ -255,7 +255,7 @@ const MainMenu: React.FC = () => {
               animationDelay: '0.4s'
             }}>
               <Trophy className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="text-[9px] sm:text-[10px] font-extrabold md:text-xl">Achievements</span>
+              <span className="font-semibold text-[9px] sm:text-[10px] md:text-xs">Achievements</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-amber-600 to-amber-700"></div>
             </Button>
@@ -265,7 +265,7 @@ const MainMenu: React.FC = () => {
             }}>
               {/* Crown icon */}
               <div className="text-sm sm:text-lg md:text-2xl lg:text-3xl">👑</div>
-              <span className="text-[10px] sm:text-xs md:text-sm font-extrabold lg:text-2xl">Leaderboard</span>
+              <span className="font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">Leaderboard</span>
               {/* Extended bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-yellow-600 to-yellow-700"></div>
             </Button>
