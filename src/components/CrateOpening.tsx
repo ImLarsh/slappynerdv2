@@ -47,7 +47,6 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const { playSound } = useAudio();
 
@@ -116,10 +115,11 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
     // Replace the middle reward with our actual reward
     allRewards[finalIndex] = finalReward;
 
-    // Animation parameters for exactly 5 seconds
+    // Animation parameters for exactly 5 seconds at 60fps
     const totalDuration = 5000; // 5 seconds
-    const startSpeed = 30; // Start faster
-    const endSpeed = 200; // End slower
+    const frameRate = 16.67; // ~60fps (1000ms / 60fps)
+    const startSpeed = frameRate; // Start at 60fps
+    const endSpeed = frameRate * 8; // End at ~7.5fps
     let startTime = Date.now();
     let currentIndex = 0;
 
@@ -127,11 +127,8 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
       const elapsed = Date.now() - startTime;
       const progressValue = Math.min(elapsed / totalDuration, 1);
       
-      // Update progress bar smoothly
-      setProgress(progressValue * 100);
-      
-      // Easing function for smooth deceleration (cubic ease-out)
-      const easeOut = 1 - Math.pow(1 - progressValue, 4);
+      // Easing function for smooth deceleration (quintic ease-out)
+      const easeOut = 1 - Math.pow(1 - progressValue, 5);
       
       // Calculate current speed based on progress
       const currentSpeed = startSpeed + (endSpeed - startSpeed) * easeOut;
@@ -139,22 +136,14 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
       setCurrentIndex(currentIndex);
       
       if (progressValue < 1) {
-        // Continue spinning with requestAnimationFrame for smoother animation
-        const nextFrame = () => {
+        // Continue spinning with smooth frame rate
+        setTimeout(() => {
           currentIndex = (currentIndex + 1) % totalRewards;
           animate();
-        };
-        
-        if (progressValue > 0.8) {
-          // Slow down more in the last 20%
-          setTimeout(nextFrame, currentSpeed * 1.5);
-        } else {
-          setTimeout(nextFrame, currentSpeed);
-        }
+        }, currentSpeed);
       } else {
         // Animation complete - stop at final reward
         setCurrentIndex(finalIndex);
-        setProgress(100);
         setPhase('revealing');
         
         // Show the final result after a brief pause
@@ -193,16 +182,6 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
         <div className="w-full max-w-4xl mx-auto p-4">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-2">🎰 Opening {crate.name}</h2>
-            <div className="w-full h-3 bg-border rounded-full overflow-hidden shadow-inner">
-              <div 
-                className="h-full bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all duration-100 ease-out shadow-lg"
-                style={{ 
-                  width: `${progress}%`,
-                  boxShadow: '0 0 10px hsl(var(--primary) / 0.5)'
-                }}
-              />
-            </div>
-            <p className="text-sm text-muted-foreground mt-2">{Math.round(progress)}% Complete</p>
           </div>
 
           {/* Spinning reel */}
@@ -212,7 +191,7 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
             </div>
             
             <div 
-              className="flex py-8 transition-transform duration-75 ease-out"
+              className="flex py-8 transition-transform duration-[16ms] ease-out"
               style={{
                 transform: `translateX(${-currentIndex * 128 + 200}px)`,
                 willChange: 'transform'
@@ -221,26 +200,26 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
               {rewards.map((reward, index) => {
                 const isCenter = index === currentIndex;
                 const distance = Math.abs(index - currentIndex);
-                const opacity = distance === 0 ? 1 : distance === 1 ? 0.9 : distance === 2 ? 0.6 : 0.3;
-                const scale = distance === 0 ? 1.4 : distance === 1 ? 1.15 : distance === 2 ? 0.95 : 0.75;
-                const blur = distance === 0 ? 'blur(0px)' : distance === 1 ? 'blur(0.5px)' : distance === 2 ? 'blur(1px)' : 'blur(2px)';
+                const opacity = distance === 0 ? 1 : distance === 1 ? 0.9 : distance === 2 ? 0.7 : distance === 3 ? 0.4 : 0.2;
+                const scale = distance === 0 ? 1.5 : distance === 1 ? 1.2 : distance === 2 ? 1.0 : distance === 3 ? 0.8 : 0.6;
+                const blur = distance === 0 ? 'blur(0px)' : distance === 1 ? 'blur(1px)' : distance === 2 ? 'blur(2px)' : distance === 3 ? 'blur(3px)' : 'blur(4px)';
                 
                 return (
                   <div
                     key={`${reward.id}-${index}`}
-                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-150 ease-out ${
+                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-[16ms] ease-out ${
                       isCenter ? `${getRarityStyle(reward.rarity)} animate-pulse` : ''
                     }`}
                     style={{
                       opacity,
                       transform: `scale(${scale})`,
-                      filter: `${blur} ${isCenter ? 'brightness(1.3) saturate(1.2)' : distance <= 2 ? 'brightness(0.8)' : 'brightness(0.5)'}`,
+                      filter: `${blur} ${isCenter ? 'brightness(1.4) saturate(1.3)' : distance <= 2 ? 'brightness(0.9)' : 'brightness(0.6)'}`,
                       willChange: 'transform, opacity, filter'
                     }}
                   >
-                    <div className="text-4xl mb-1 transition-all duration-150">{reward.emoji}</div>
-                    <div className="text-xs font-medium text-center px-1 transition-all duration-150">{reward.name}</div>
-                    <div className={`text-xs capitalize transition-all duration-150 ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
+                    <div className="text-4xl mb-1 transition-all duration-[16ms]">{reward.emoji}</div>
+                    <div className="text-xs font-medium text-center px-1 transition-all duration-[16ms]">{reward.name}</div>
+                    <div className={`text-xs capitalize transition-all duration-[16ms] ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
                       {reward.rarity}
                     </div>
                   </div>
