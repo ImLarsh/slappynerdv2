@@ -46,11 +46,11 @@ export const FallingEmojis: React.FC = () => {
   }, [characters]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-5">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-10">
       {emojis.map((emoji) => (
         <div
           key={emoji.id}
-          className="absolute text-4xl opacity-100 animate-fall"
+          className="absolute text-4xl font-bold antialiased animate-fall"
           style={{
             left: `${emoji.x}%`,
             animationDuration: `${emoji.duration}s`,

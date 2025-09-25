@@ -137,8 +137,8 @@ const MainMenu: React.FC = () => {
       {/* Falling Emojis Background */}
       <FallingEmojis />
       
-      {/* Background overlay - reduced blur for mobile performance */}
-      <div className="absolute inset-0 bg-background/60 md:backdrop-blur-sm z-1" />
+      {/* Background overlay - no blur to avoid affecting emojis */}
+      <div className="absolute inset-0 bg-background/60 z-1" />
       
       {/* Title at absolute top */}
       <div className="absolute top-0.5 sm:top-1 md:top-2 lg:top-6 left-0 right-0 z-10 animate-fade-in">
