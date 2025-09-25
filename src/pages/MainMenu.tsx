@@ -51,6 +51,7 @@ const MainMenu: React.FC = () => {
     toggleMute,
     playBackgroundMusic,
     stopBackgroundMusic,
+    pauseBackgroundMusic,
     playSound
   } = useAudio();
   const navigate = useNavigate();
@@ -354,7 +355,7 @@ const MainMenu: React.FC = () => {
                 <span className="text-sm text-muted-foreground">
                   {isPlaying ? 'Playing' : 'Stopped'}
                 </span>
-                <Button variant="outline" size="sm" onClick={isPlaying ? stopBackgroundMusic : playBackgroundMusic}>
+                <Button variant="outline" size="sm" onClick={isPlaying ? pauseBackgroundMusic : playBackgroundMusic}>
                   {isPlaying ? "⏸️" : "▶️"}
                 </Button>
               </div>
