@@ -15,19 +15,16 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import bgImage from '@/assets/school-hallway-bg.webp';
 import lockerYellow from '@/assets/locker-yellow.webp';
-
 interface GameObject {
   x: number;
   y: number;
   width: number;
   height: number;
 }
-
 interface Pipe extends GameObject {
   passed: boolean;
   lockerType: number; // 0, 1, or 2 for different locker images
 }
-
 interface Book {
   id: string;
   x: number;
@@ -36,9 +33,10 @@ interface Book {
   beingPulled?: boolean;
   pullStartTime?: number;
 }
-
 interface GameState {
-  bird: GameObject & { velocity: number };
+  bird: GameObject & {
+    velocity: number;
+  };
   pipes: Pipe[];
   books: Book[];
   score: number;
@@ -53,7 +51,6 @@ interface GameState {
   backgroundOffset: number;
   temporaryInvincibility?: number; // End time for temporary invincibility
 }
-
 const TARGET_FPS_MOBILE = 60;
 const TARGET_FPS_DESKTOP = 80;
 const getTargetFPS = () => window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
@@ -67,27 +64,43 @@ const LOCKER_WIDTH = 220;
 const PIPE_SPEED = 2.5;
 const PIPE_GAP = 220; // Reduced from 240 to make it harder
 const BIRD_SIZE = 50;
-
 export const Game: React.FC = () => {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const animationRef = useRef<number>();
-  const { submitScore } = useLeaderboard();
-  const { stats, updateGameStats } = useUserStats();
-  const { selectedCharacter } = useCharactersContext();
-  const { checkAchievements } = useAchievements();
-  const { user } = useAuth();
-  const { addBooks } = useCurrency();
-  const { toast } = useToast();
-  const { playSound } = useAudio();
-  const { 
-    showPowerSelection, 
-    getRandomPowers, 
-    addPower, 
-    checkPowerSelection, 
-    getGameModifiers, 
+  const {
+    submitScore
+  } = useLeaderboard();
+  const {
+    stats,
+    updateGameStats
+  } = useUserStats();
+  const {
+    selectedCharacter
+  } = useCharactersContext();
+  const {
+    checkAchievements
+  } = useAchievements();
+  const {
+    user
+  } = useAuth();
+  const {
+    addBooks
+  } = useCurrency();
+  const {
+    toast
+  } = useToast();
+  const {
+    playSound
+  } = useAudio();
+  const {
+    showPowerSelection,
+    getRandomPowers,
+    addPower,
+    checkPowerSelection,
+    getGameModifiers,
     resetPowers,
-    setShowPowerSelection 
+    setShowPowerSelection
   } = usePowers(playSound);
   const {
     startGamePowers,
@@ -102,10 +115,9 @@ export const Game: React.FC = () => {
     removeShieldMode,
     activePowers: shopActivePowers
   } = useShopPowers();
-  
+
   // Track whether the game is currently running to avoid resize-induced jank
   const isPlayingRef = useRef(false);
-  
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
   const lockerImagesRef = useRef<HTMLImageElement[]>([]);
   const nextBookIdRef = useRef(0);
@@ -114,11 +126,16 @@ export const Game: React.FC = () => {
   // Pre-scaled background tile canvas to avoid per-frame scaling cost (iOS jank)
   const backgroundTileCanvasRef = useRef<HTMLCanvasElement | null>(null);
   // iOS detection and delta smoothing to eliminate per-tap micro-jank
-  const isiOSRef = useRef<boolean>(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)));
+  const isiOSRef = useRef<boolean>(/iPad|iPhone|iPod/.test(navigator.userAgent) || navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
   const smoothedDeltaRef = useRef<number>(1000 / TARGET_FPS_MOBILE);
-  
   const [gameState, setGameState] = useState<GameState>({
-    bird: { x: 100, y: 200, width: BIRD_SIZE, height: BIRD_SIZE, velocity: 0 },
+    bird: {
+      x: 100,
+      y: 200,
+      width: BIRD_SIZE,
+      height: BIRD_SIZE,
+      velocity: 0
+    },
     pipes: [],
     books: [],
     score: 0,
@@ -130,16 +147,16 @@ export const Game: React.FC = () => {
     crownCollected: false,
     isNewRecord: false,
     lastFrameTime: performance.now(),
-    backgroundOffset: 0,
+    backgroundOffset: 0
   });
-  
-  
-  
-  const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
+  const [canvasSize, setCanvasSize] = useState({
+    width: 800,
+    height: 600
+  });
   const [powerChoices, setPowerChoices] = useState(() => getRandomPowers(hasLuckyStart()));
   const [waitingForContinue, setWaitingForContinue] = useState(false);
   const [pendingPower, setPendingPower] = useState<any>(null);
-const [gameStartTime, setGameStartTime] = useState<number>(0);
+  const [gameStartTime, setGameStartTime] = useState<number>(0);
   const [bgReady, setBgReady] = useState(false);
 
   // Load background image, locker images and get user record on component mount
@@ -154,7 +171,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     img.onload = () => {
       setBgReady(true);
     };
-    img.onerror = (e) => console.error('Background failed to load:', e);
+    img.onerror = e => console.error('Background failed to load:', e);
     img.src = bgImage;
     backgroundImageRef.current = img;
 
@@ -162,7 +179,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     const lockerImg = new Image();
     lockerImg.decoding = 'sync';
     lockerImg.onload = () => {};
-    lockerImg.onerror = (e) => console.error('Yellow locker failed to load:', e);
+    lockerImg.onerror = e => console.error('Yellow locker failed to load:', e);
     lockerImg.src = lockerYellow;
     lockerImagesRef.current[0] = lockerImg;
 
@@ -178,11 +195,9 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     const canvasW = canvasSize.width;
     const canvasH = canvasSize.height;
     if (!img || !img.complete || canvasW <= 0 || canvasH <= 0) return;
-
     const scale = Math.max(canvasW / img.width, canvasH / img.height);
     const scaledWidth = Math.ceil(img.width * scale);
     const scaledHeight = Math.ceil(img.height * scale);
-
     const tile = document.createElement('canvas');
     tile.width = scaledWidth;
     tile.height = scaledHeight;
@@ -197,15 +212,11 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     const updateCanvasSize = () => {
       // Avoid jank from mobile browser chrome expanding/collapsing while playing
       if (isPlayingRef.current) return;
-
       const vw = window.visualViewport?.width ?? window.innerWidth;
       const vh = window.visualViewport?.height ?? window.innerHeight;
-
       const isMobile = vw < 768;
       const isTinyMobile = vw < 400;
-      
       let width: number, height: number;
-      
       if (isTinyMobile) {
         width = Math.min(vw - 16, 420); // Account for padding
         height = Math.min(vh - 100, 720); // Account for UI elements
@@ -218,23 +229,26 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         width = 800;
         height = 600;
       }
-      
+
       // Ensure minimum sizes for playability
       width = Math.max(300, width);
       height = Math.max(400, height);
-      
-      setCanvasSize({ width: Math.round(width), height: Math.round(height) });
+      setCanvasSize({
+        width: Math.round(width),
+        height: Math.round(height)
+      });
     };
 
     // Initial size
     updateCanvasSize();
-    
+
     // Add event listeners with passive option for better performance
-    const resizeOptions = { passive: true };
+    const resizeOptions = {
+      passive: true
+    };
     window.addEventListener('resize', updateCanvasSize, resizeOptions);
     window.addEventListener('orientationchange', updateCanvasSize, resizeOptions);
     window.visualViewport?.addEventListener('resize', updateCanvasSize, resizeOptions);
-    
     return () => {
       window.removeEventListener('resize', updateCanvasSize);
       window.removeEventListener('orientationchange', updateCanvasSize);
@@ -247,7 +261,10 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     const playerBestScore = stats.best_score;
     setGameState(prev => {
       if (prev.record !== playerBestScore) {
-        return { ...prev, record: playerBestScore };
+        return {
+          ...prev,
+          record: playerBestScore
+        };
       }
       return prev;
     });
@@ -257,16 +274,20 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
   useEffect(() => {
     isPlayingRef.current = gameState.gameStarted && !gameState.gameOver;
   }, [gameState.gameStarted, gameState.gameOver]);
- 
   const resetGame = useCallback(() => {
     const currentRecord = stats.best_score;
     const now = Date.now();
     resetPowers(); // Reset powers when starting new game
     startGamePowers(); // Activate shop powers for new game
     setGameStartTime(now);
-    
     setGameState(prev => ({
-      bird: { x: 100, y: canvasSize.height / 3, width: BIRD_SIZE, height: BIRD_SIZE, velocity: 0 },
+      bird: {
+        x: 100,
+        y: canvasSize.height / 3,
+        width: BIRD_SIZE,
+        height: BIRD_SIZE,
+        velocity: 0
+      },
       pipes: [],
       books: [],
       score: 0,
@@ -278,14 +299,13 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       crownCollected: false,
       isNewRecord: false,
       lastFrameTime: performance.now(),
-      backgroundOffset: 0,
+      backgroundOffset: 0
     }));
   }, [canvasSize.height, resetPowers, startGamePowers]);
-
   const jump = useCallback(() => {
     // Don't allow jumping during power selection
     if (showPowerSelection) return;
-    
+
     // Handle tap to continue after power selection
     if (waitingForContinue && pendingPower) {
       // Activate the pending power
@@ -296,19 +316,19 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         endTime: pendingPower.effect.duration ? now + pendingPower.effect.duration : undefined
       };
       addPower(activePower);
-      
+
       // Grant 1 second of temporary invincibility to prevent instant death from the hop
       setGameState(prev => ({
         ...prev,
         temporaryInvincibility: performance.now() + 1000 // Use performance.now() for consistency
       }));
-      
+
       // Clear the waiting state
       setWaitingForContinue(false);
       setPendingPower(null);
       // Don't return here - let the character jump too!
     }
-    
+
     // Avoid any default browser gesture side-effects on touch handled via pointer events
     if (!gameState.gameStarted) {
       resetGame(); // This will start the game and activate shop powers
@@ -328,25 +348,20 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     if (currentGameState.temporaryInvincibility && now < currentGameState.temporaryInvincibility) {
       return false; // No collision while temporarily invincible
     }
-    
+
     // Check if player has ghost mode active (20-second time-based protection - go through objects)
     if (hasGhostMode()) {
       updateActivePowers(gameStartTime);
       return false; // No collision while ghost mode is active
     }
-    
+
     // Normal collision detection - reduced hitboxes for more forgiving gameplay
     const emojiMargin = BIRD_SIZE * 0.25; // Increased from 0.15 to 0.25
     const lockerHorizontalMargin = Math.max(55, LOCKER_WIDTH * 0.38); // Slightly reduced for bigger hitboxes
     const lockerVerticalMargin = 12; // Slightly reduced from 15 to 12
-    
-    const isColliding = (
-      bird.x + emojiMargin < pipe.x + pipe.width - lockerHorizontalMargin &&
-      bird.x + bird.width - emojiMargin > pipe.x + lockerHorizontalMargin &&
-      bird.y + emojiMargin < pipe.y + pipe.height - lockerVerticalMargin &&
-      bird.y + bird.height - emojiMargin > pipe.y + lockerVerticalMargin
-    );
-    
+
+    const isColliding = bird.x + emojiMargin < pipe.x + pipe.width - lockerHorizontalMargin && bird.x + bird.width - emojiMargin > pipe.x + lockerHorizontalMargin && bird.y + emojiMargin < pipe.y + pipe.height - lockerVerticalMargin && bird.y + bird.height - emojiMargin > pipe.y + lockerVerticalMargin;
+
     // If there's a collision and player has shield mode available, demolish the obstacle
     if (isColliding && hasStartShield()) {
       removeShieldMode(); // Remove shield mode permanently after use
@@ -354,31 +369,32 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       setTimeout(() => {
         toast({
           title: "Shield Mode Activated! 🛡️",
-          description: "You demolished the obstacle!",
+          description: "You demolished the obstacle!"
         });
       }, 0);
-      
+
       // Mark this pipe for removal by setting a special flag
       (pipe as any).shouldBeRemoved = true;
-      
       return false; // No collision damage - obstacle is demolished
     }
-    
     return isColliding;
   }, [hasGhostMode, updateActivePowers, gameStartTime, hasStartShield, removeShieldMode, toast]);
-
   const spawnBook = useCallback((pipes: Pipe[] = []) => {
     // Find safe Y positions by checking where pipes are NOT
-    const safeAreas: {start: number, end: number}[] = [];
-    
+    const safeAreas: {
+      start: number;
+      end: number;
+    }[] = [];
+
     // Start with the full canvas height as one big safe area
-    let occupiedRanges: {start: number, end: number}[] = [];
-    
+    let occupiedRanges: {
+      start: number;
+      end: number;
+    }[] = [];
+
     // Check nearby pipes that could interfere with book spawning
-    const nearbyPipes = pipes.filter(pipe => 
-      pipe.x > canvasSize.width - 300 && pipe.x < canvasSize.width + 400
-    );
-    
+    const nearbyPipes = pipes.filter(pipe => pipe.x > canvasSize.width - 300 && pipe.x < canvasSize.width + 400);
+
     // For each pipe, add its occupied Y range to the list
     for (const pipe of nearbyPipes) {
       occupiedRanges.push({
@@ -386,12 +402,15 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         end: pipe.y + pipe.height
       });
     }
-    
+
     // Sort occupied ranges by start position
     occupiedRanges.sort((a, b) => a.start - b.start);
-    
+
     // Merge overlapping ranges
-    const mergedRanges: {start: number, end: number}[] = [];
+    const mergedRanges: {
+      start: number;
+      end: number;
+    }[] = [];
     for (const range of occupiedRanges) {
       if (mergedRanges.length === 0 || mergedRanges[mergedRanges.length - 1].end < range.start) {
         mergedRanges.push(range);
@@ -399,89 +418,95 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         mergedRanges[mergedRanges.length - 1].end = Math.max(mergedRanges[mergedRanges.length - 1].end, range.end);
       }
     }
-    
+
     // Find gaps between occupied ranges as safe areas
     let currentY = 80; // Start with some padding from top
     const maxY = canvasSize.height - 80; // End with some padding from bottom
-    
+
     for (const occupiedRange of mergedRanges) {
       // Add safe area before this occupied range (with padding)
       if (currentY < occupiedRange.start - 40) {
-        safeAreas.push({ 
-          start: currentY, 
-          end: occupiedRange.start - 40 
+        safeAreas.push({
+          start: currentY,
+          end: occupiedRange.start - 40
         });
       }
       // Move past this occupied range (with padding)
       currentY = Math.max(currentY, occupiedRange.end + 40);
     }
-    
+
     // Add remaining safe area after all occupied ranges
     if (currentY < maxY) {
-      safeAreas.push({ start: currentY, end: maxY });
+      safeAreas.push({
+        start: currentY,
+        end: maxY
+      });
     }
-    
+
     // If no safe areas found (very unlikely), try to spawn in the largest gap
     if (safeAreas.length === 0) {
       // Find the largest gap between pipes and use it anyway
-      let largestGap = { start: 80, end: canvasSize.height - 80, size: canvasSize.height - 160 };
-      
+      let largestGap = {
+        start: 80,
+        end: canvasSize.height - 80,
+        size: canvasSize.height - 160
+      };
       for (let i = 0; i < mergedRanges.length - 1; i++) {
         const gapStart = mergedRanges[i].end;
         const gapEnd = mergedRanges[i + 1].start;
         const gapSize = gapEnd - gapStart;
-        
         if (gapSize > largestGap.size && gapSize > 60) {
-          largestGap = { start: gapStart + 20, end: gapEnd - 20, size: gapSize - 40 };
+          largestGap = {
+            start: gapStart + 20,
+            end: gapEnd - 20,
+            size: gapSize - 40
+          };
         }
       }
-      
       if (largestGap.size > 40) {
-        safeAreas.push({ start: largestGap.start, end: largestGap.end });
+        safeAreas.push({
+          start: largestGap.start,
+          end: largestGap.end
+        });
       } else {
         // Don't spawn book if no safe space
         return;
       }
     }
-    
+
     // Pick a random safe area and position within it
     const randomArea = safeAreas[Math.floor(Math.random() * safeAreas.length)];
     const safeY = randomArea.start + Math.random() * (randomArea.end - randomArea.start);
-    
     const newBook: Book = {
       id: `book_${nextBookIdRef.current++}`,
-      x: canvasSize.width + Math.random() * 200, // Spawn ahead of the player
+      x: canvasSize.width + Math.random() * 200,
+      // Spawn ahead of the player
       y: safeY,
       collected: false
     };
-    
     setGameState(prev => ({
       ...prev,
       books: [...prev.books, newBook]
     }));
   }, [canvasSize]);
-
-  const checkBookCollisions = useCallback((bird: GameObject, books: Book[]): { updatedBooks: Book[], booksCollected: number } => {
+  const checkBookCollisions = useCallback((bird: GameObject, books: Book[]): {
+    updatedBooks: Book[];
+    booksCollected: number;
+  } => {
     let booksCollected = 0;
-    
     const updatedBooks = books.map(book => {
       if (book.collected) return book;
-      
+
       // Use stable book id
       const bookId = book.id;
-      
+
       // Track when book is first seen (for auto-collection)
       onBookSeen(bookId);
-      
-      const distance = Math.sqrt(
-        Math.pow(book.x - (bird.x + bird.width / 2), 2) + 
-        Math.pow(book.y - (bird.y + bird.height / 2), 2)
-      );
-      
+      const distance = Math.sqrt(Math.pow(book.x - (bird.x + bird.width / 2), 2) + Math.pow(book.y - (bird.y + bird.height / 2), 2));
+
       // Check collection logic
       let shouldCollect = false;
       let shouldStartPull = false;
-      
       if (hasBookMagnet()) {
         // If player has book magnet, start pulling after 1-second delay
         if (shouldAutoCollectBook(bookId) && !book.beingPulled) {
@@ -495,35 +520,39 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         // If no book magnet, collect on direct collision
         shouldCollect = distance < bird.width * 0.8;
       }
-      
       if (shouldCollect && !book.collected) {
         booksCollected++;
-        return { ...book, collected: true };
+        return {
+          ...book,
+          collected: true
+        };
       }
-      
       if (shouldStartPull) {
-        return { ...book, beingPulled: true, pullStartTime: Date.now() };
+        return {
+          ...book,
+          beingPulled: true,
+          pullStartTime: Date.now()
+        };
       }
-      
       return book;
     });
-    
-    return { updatedBooks, booksCollected };
+    return {
+      updatedBooks,
+      booksCollected
+    };
   }, [onBookSeen, shouldAutoCollectBook, hasBookMagnet]);
-
-
   const gameLoop = useCallback((currentTime: number) => {
     if (!canvasRef.current || !gameState.gameStarted || gameState.gameOver || showPowerSelection || waitingForContinue) return;
-
     const canvas = canvasRef.current;
     const ctx = canvas.getContext('2d');
     if (!ctx) {
       console.error('Cannot get canvas context in game loop');
       return;
     }
-
     setGameState(prev => {
-      const newState = { ...prev };
+      const newState = {
+        ...prev
+      };
       const deltaTime = currentTime - newState.lastFrameTime;
       const isMobile = window.innerWidth < 768;
       const currentFrameTime = FRAME_TIME();
@@ -539,12 +568,12 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
 
       // Get current power modifiers
       const modifiers = getGameModifiers();
-      
+
       // Calculate frame multiplier with iOS-smoothed delta to avoid tap spikes
       let usedDelta = clampedDelta;
       if (isiOSRef.current) {
         const alpha = 0.08; // more aggressive smoothing for iOS
-        const prev = smoothedDeltaRef.current ?? (1000 / TARGET_FPS_MOBILE);
+        const prev = smoothedDeltaRef.current ?? 1000 / TARGET_FPS_MOBILE;
         const smoothed = prev + alpha * (clampedDelta - prev);
         smoothedDeltaRef.current = smoothed;
         // Cap delta variations to prevent any remaining micro-jank
@@ -558,8 +587,6 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         newState.temporaryInvincibility = undefined;
       }
 
-      
-
       // Apply pending jumps before physics to avoid setState in input handlers
       if (pendingJumpsRef.current > 0) {
         newState.bird.velocity = JUMP_FORCE;
@@ -570,19 +597,19 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       newState.bird.y += newState.bird.velocity * frameMultiplier;
 
       // Update background scrolling
-      newState.backgroundOffset += (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
+      newState.backgroundOffset += PIPE_SPEED * modifiers.speedMultiplier * frameMultiplier;
 
       // Check ground/ceiling collision - game over when emoji completely falls off screen
       if (newState.bird.y > canvasSize.height || newState.bird.y + newState.bird.height < 0) {
         newState.gameOver = true;
         newState.gameEnded = true;
-        
+
         // Play defeat sound
         playSound('defeat');
-        
+
         // Update stats in database and get new totals
         if (user) {
-          updateGameStats(newState.score).then((updatedStats) => {
+          updateGameStats(newState.score).then(updatedStats => {
             if (updatedStats) {
               // Check achievements with updated stats
               checkAchievements({
@@ -596,7 +623,6 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
           // Submit score to leaderboard
           submitScore(newState.score, selectedCharacter?.id);
         }
-
         return newState;
       }
 
@@ -604,62 +630,59 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       const basePipeFrequency = canvasSize.width < 500 ? 2200 : 1800; // Increased spawn rate further (reduced from 2500/2000)
       const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
       const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency; // Double spawn rate if locker spam is active
-      
+
       // Prevent pipe spawning during power selection or right after power activation to avoid stacking
       const timeSinceLastPipe = currentTime - newState.lastPipeTime;
-      const canSpawnPipe = timeSinceLastPipe > pipeFrequency && 
-                          (!newState.temporaryInvincibility || currentTime > newState.temporaryInvincibility + 500);
-      
+      const canSpawnPipe = timeSinceLastPipe > pipeFrequency && (!newState.temporaryInvincibility || currentTime > newState.temporaryInvincibility + 500);
       if (canSpawnPipe) {
         // Calculate gap size - only affected by gap-specific powers, not speed powers
         const gapPowers = modifiers.activePowers.filter(p => p.effect.gapMultiplier);
         const gapMultiplier = gapPowers.reduce((mult, power) => mult * power.effect.gapMultiplier!, 1);
-        
-        const gapStart = Math.random() * (canvasSize.height - (PIPE_GAP * gapMultiplier) - 100) + 50;
+        const gapStart = Math.random() * (canvasSize.height - PIPE_GAP * gapMultiplier - 100) + 50;
         const lockerType = 0; // Always use yellow locker
         // Position lockers from the right edge - ensure consistent spacing
         const lockerX = canvasSize.width + LOCKER_WIDTH + 10; // Add small buffer to prevent immediate collision
-        
+
         // Ensure minimum gap size to prevent impossible passages
         const finalGapSize = Math.max(MIN_PIPE_GAP, PIPE_GAP * gapMultiplier);
         const finalGapStart = Math.max(60, Math.min(gapStart, canvasSize.height - finalGapSize - 60));
-        
+
         // Only add pipes if they don't overlap with existing ones
-        const wouldOverlap = newState.pipes.some(existingPipe => 
-          Math.abs(existingPipe.x - lockerX) < LOCKER_WIDTH + 50
-        );
-        
+        const wouldOverlap = newState.pipes.some(existingPipe => Math.abs(existingPipe.x - lockerX) < LOCKER_WIDTH + 50);
         if (!wouldOverlap) {
-          newState.pipes.push(
-            {
-              x: lockerX,
-              y: 0, // Top locker starts from screen top
-              width: LOCKER_WIDTH,
-              height: finalGapStart, // Extends down to gap start
-              passed: false,
-              lockerType,
-            },
-            {
-              x: lockerX,
-              y: finalGapStart + finalGapSize, // Bottom locker starts after gap
-              width: LOCKER_WIDTH,
-              height: canvasSize.height - (finalGapStart + finalGapSize), // Extends to screen bottom
-              passed: false,
-              lockerType,
-            }
-          );
+          newState.pipes.push({
+            x: lockerX,
+            y: 0,
+            // Top locker starts from screen top
+            width: LOCKER_WIDTH,
+            height: finalGapStart,
+            // Extends down to gap start
+            passed: false,
+            lockerType
+          }, {
+            x: lockerX,
+            y: finalGapStart + finalGapSize,
+            // Bottom locker starts after gap
+            width: LOCKER_WIDTH,
+            height: canvasSize.height - (finalGapStart + finalGapSize),
+            // Extends to screen bottom
+            passed: false,
+            lockerType
+          });
           newState.lastPipeTime = currentTime;
-          
+
           // 10% chance to spawn a book with the new pipe (not affected by locker spam)
           if (Math.random() < 0.1 && !hasLockerSpam) {
             // Use the existing gapStart calculation for safe spawn area
             const gapMiddle = finalGapStart + finalGapSize / 2;
             const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6); // Keep books in middle of gap
-            
+
             const newBook: Book = {
               id: `book_${nextBookIdRef.current++}`,
-              x: lockerX + LOCKER_WIDTH / 2, // Spawn at the same X position as the pipe gap
-              y: Math.max(80, Math.min(safeY, canvasSize.height - 80)), // Ensure books stay in reachable area
+              x: lockerX + LOCKER_WIDTH / 2,
+              // Spawn at the same X position as the pipe gap
+              y: Math.max(80, Math.min(safeY, canvasSize.height - 80)),
+              // Ensure books stay in reachable area
               collected: false
             };
             newState.books.push(newBook);
@@ -674,33 +697,30 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
             // Calculate pull force toward character
             const birdCenterX = newState.bird.x + newState.bird.width / 2;
             const birdCenterY = newState.bird.y + newState.bird.height / 2;
-            
             const dx = birdCenterX - book.x;
             const dy = birdCenterY - book.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance > 5) { // Only pull if not too close
+            if (distance > 5) {
+              // Only pull if not too close
               // Normalize direction and apply pull speed (faster when farther)
               const pullSpeed = Math.min(12, 6 + distance * 0.1) * frameMultiplier;
               const normalizedDx = dx / distance;
               const normalizedDy = dy / distance;
-              
               book.x += normalizedDx * pullSpeed;
               book.y += normalizedDy * pullSpeed;
             }
           } else {
             // Normal book movement (scroll with world)
-            book.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
+            book.x -= PIPE_SPEED * modifiers.speedMultiplier * frameMultiplier;
           }
         }
-        
         return book.x > -50 && !book.collected;
       });
 
       // Check book collisions after position updates
       const bookCollisionResult = checkBookCollisions(newState.bird, newState.books);
       newState.books = bookCollisionResult.updatedBooks;
-      
+
       // Handle book collection side effects
       if (bookCollisionResult.booksCollected > 0) {
         // Use setTimeout to avoid setState during render
@@ -718,21 +738,21 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         if ((pipe as any).shouldBeRemoved) {
           return false; // Remove this pipe completely
         }
-        
-        pipe.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
-        
+        pipe.x -= PIPE_SPEED * modifiers.speedMultiplier * frameMultiplier;
+
         // Check scoring
         if (!pipe.passed && pipe.x + pipe.width < newState.bird.x) {
           pipe.passed = true;
-          if (pipe.y === 0) { // Only count top pipes
+          if (pipe.y === 0) {
+            // Only count top pipes
             newState.score += 1;
-            
+
             // Play pass locker sound effect
             playSound('passLocker');
-            
+
             // Check for power selection trigger
             checkPowerSelection(newState.score);
-            
+
             // Check if we need to show crown (only when beating personal best)
             const currentBest = stats.best_score;
             if (newState.score > currentBest && !newState.crownCollected) {
@@ -746,13 +766,13 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         if (!modifiers.isInvincible && !hasTemporaryInvincibility && checkCollision(newState.bird, pipe, newState)) {
           newState.gameOver = true;
           newState.gameEnded = true;
-          
+
           // Play defeat sound
           playSound('defeat');
-          
+
           // Update stats in database and get new totals
           if (user) {
-            updateGameStats(newState.score).then((updatedStats) => {
+            updateGameStats(newState.score).then(updatedStats => {
               if (updatedStats) {
                 // Check achievements with updated stats
                 checkAchievements({
@@ -771,10 +791,8 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         // Remove pipes that should be demolished or have moved off screen
         return pipe.x > -pipe.width && !(pipe as any).shouldBeRemoved;
       });
-
       return newState;
     });
-
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [getGameModifiers, checkPowerSelection, checkBookCollisions, addBooks, playSound, toast]);
 
@@ -798,8 +816,10 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       canvas.height = canvasSize.height;
       console.log('Canvas size set to:', canvasSize);
     }
-
-    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+    const ctx = canvas.getContext('2d', {
+      alpha: false,
+      desynchronized: true
+    });
     if (!ctx) {
       console.error('Cannot get canvas context');
       return;
@@ -817,11 +837,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       const offsetY = (canvas.height - scaledHeight) / 2;
       const scrollOffset = gameState.backgroundOffset % scaledWidth;
       for (let i = -1; i <= Math.ceil(canvas.width / scaledWidth) + 1; i++) {
-        ctx.drawImage(
-          tile,
-          i * scaledWidth - scrollOffset,
-          offsetY
-        );
+        ctx.drawImage(tile, i * scaledWidth - scrollOffset, offsetY);
       }
     } else if (backgroundImageRef.current && backgroundImageRef.current.complete) {
       const img = backgroundImageRef.current;
@@ -835,13 +851,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       const offsetY = (canvas.height - scaledHeight) / 2;
       const scrollOffset = gameState.backgroundOffset % scaledWidth;
       for (let i = -1; i <= Math.ceil(canvas.width / scaledWidth) + 1; i++) {
-        ctx.drawImage(
-          img,
-          i * scaledWidth - scrollOffset,
-          offsetY,
-          scaledWidth,
-          scaledHeight
-        );
+        ctx.drawImage(img, i * scaledWidth - scrollOffset, offsetY, scaledWidth, scaledHeight);
       }
     } else {
       // Fallback: Clear canvas with sky gradient if image not loaded
@@ -856,40 +866,29 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03)); // extend offscreen to avoid top/bottom gaps
     gameState.pipes.forEach(pipe => {
       const lockerImage = lockerImagesRef.current[0]; // Always use yellow locker (index 0)
-      
+
       if (lockerImage && lockerImage.complete) {
         const targetWidth = LOCKER_WIDTH;
         const targetHeight = pipe.height;
-        
         const drawX = pipe.x;
         const drawY = pipe.y;
-        
+
         // Check if this is a top locker (starts at y=0) and flip it
         const isTopLocker = pipe.y === 0;
-        
         if (isTopLocker) {
           // Flip the top locker vertically
           ctx.save();
           ctx.scale(1, -1);
-          ctx.drawImage(
-            lockerImage,
-            drawX,
-            -drawY - targetHeight, // keep bottom aligned to gap start
-            targetWidth,
-            targetHeight + EDGE_OVERDRAW // extend upward offscreen to remove top gap
+          ctx.drawImage(lockerImage, drawX, -drawY - targetHeight,
+          // keep bottom aligned to gap start
+          targetWidth, targetHeight + EDGE_OVERDRAW // extend upward offscreen to remove top gap
           );
           ctx.restore();
         } else {
           // Draw bottom locker normally, extend below screen to remove bottom gap
-          ctx.drawImage(
-            lockerImage,
-            drawX,
-            drawY,
-            targetWidth,
-            targetHeight + EDGE_OVERDRAW
-          );
+          ctx.drawImage(lockerImage, drawX, drawY, targetWidth, targetHeight + EDGE_OVERDRAW);
         }
-        
+
         // Add a subtle shadow for depth
         ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
         ctx.shadowBlur = 5;
@@ -902,13 +901,13 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         const rectY = isTopLocker ? pipe.y - EDGE_OVERDRAW : pipe.y;
         const rectH = pipe.height + EDGE_OVERDRAW;
         ctx.fillRect(pipe.x, rectY, pipe.width, rectH);
-        
+
         // Add border
         ctx.strokeStyle = '#333';
         ctx.lineWidth = 2;
         ctx.strokeRect(pipe.x, rectY, pipe.width, rectH);
       }
-      
+
       // Reset shadow
       ctx.shadowColor = 'transparent';
       ctx.shadowBlur = 0;
@@ -920,17 +919,17 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     gameState.books.forEach(book => {
       if (!book.collected) {
         const bookSize = 32; // Increased from 24px
-        
+
         // Draw bright yellow ring around book
         ctx.save();
-        
+
         // Add extra glow effect for books being pulled
         if (book.beingPulled) {
           ctx.strokeStyle = '#00FF00'; // Green for being pulled
           ctx.lineWidth = 6;
           ctx.shadowColor = '#00FF00';
           ctx.shadowBlur = 12;
-          
+
           // Draw pulsing effect
           const pulseIntensity = 0.8 + 0.2 * Math.sin(Date.now() * 0.01);
           ctx.globalAlpha = pulseIntensity;
@@ -940,35 +939,34 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
           ctx.shadowColor = '#FFD700';
           ctx.shadowBlur = 8;
         }
-        
+
         // Draw the glowing ring
         ctx.beginPath();
-        ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2 + 6, 0, 2 * Math.PI);
+        ctx.arc(book.x + bookSize / 2, book.y - bookSize / 2, bookSize / 2 + 6, 0, 2 * Math.PI);
         ctx.stroke();
-        
+
         // Reset shadow for the emoji
         ctx.shadowBlur = 0;
         ctx.shadowColor = 'transparent';
         ctx.globalAlpha = 1;
-        
+
         // Draw the book emoji larger
         ctx.font = `${bookSize}px Arial`;
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText('📚', book.x + bookSize/2, book.y - bookSize/2);
-        
+        ctx.fillText('📚', book.x + bookSize / 2, book.y - bookSize / 2);
         ctx.restore();
       }
     });
 
     // Draw selected character or default nerd emoji
     ctx.save();
-    
+
     // Get shop power status for visual effects
     const hasActiveGhostMode = hasGhostMode();
     const hasActiveShield = hasStartShield();
     const hasActiveMagnet = hasBookMagnet();
-    
+
     // Draw light blue circle for ghost mode (behind character)
     if (hasActiveGhostMode) {
       ctx.save();
@@ -977,17 +975,11 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       ctx.globalAlpha = 0.7;
       ctx.setLineDash([10, 10]); // Dotted line for ghost effect
       ctx.beginPath();
-      ctx.arc(
-        gameState.bird.x + gameState.bird.width / 2,
-        gameState.bird.y + gameState.bird.height / 2,
-        BIRD_SIZE * 0.85,
-        0,
-        2 * Math.PI
-      );
+      ctx.arc(gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2, BIRD_SIZE * 0.85, 0, 2 * Math.PI);
       ctx.stroke();
       ctx.restore();
     }
-    
+
     // Draw green outline for shield mode
     if (hasActiveShield) {
       ctx.save();
@@ -995,17 +987,11 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       ctx.lineWidth = 5;
       ctx.globalAlpha = 0.8;
       ctx.beginPath();
-      ctx.arc(
-        gameState.bird.x + gameState.bird.width / 2,
-        gameState.bird.y + gameState.bird.height / 2,
-        BIRD_SIZE * 0.8,
-        0,
-        2 * Math.PI
-      );
+      ctx.arc(gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2, BIRD_SIZE * 0.8, 0, 2 * Math.PI);
       ctx.stroke();
       ctx.restore();
     }
-    
+
     // Draw yellow glow for book magnet (behind character)
     if (hasActiveMagnet) {
       ctx.save();
@@ -1014,44 +1000,27 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       ctx.fillStyle = '#FFD700';
       ctx.globalAlpha = 0.3;
       ctx.beginPath();
-      ctx.arc(
-        gameState.bird.x + gameState.bird.width / 2,
-        gameState.bird.y + gameState.bird.height / 2,
-        BIRD_SIZE * 0.8,
-        0,
-        2 * Math.PI
-      );
+      ctx.arc(gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2, BIRD_SIZE * 0.8, 0, 2 * Math.PI);
       ctx.fill();
       ctx.restore();
     }
-    
     ctx.font = `${BIRD_SIZE}px Arial`;
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
-    
+
     // Add subtle shadow for character
     ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
     ctx.shadowBlur = 3;
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
-    
     const character = selectedCharacter ? selectedCharacter.emoji : '🤓';
-    ctx.fillText(
-      character,
-      gameState.bird.x + gameState.bird.width / 2,
-      gameState.bird.y + gameState.bird.height / 2
-    );
-    
+    ctx.fillText(character, gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2);
+
     // Draw crown if beating personal best
     if (gameState.crownCollected) {
       ctx.font = `${BIRD_SIZE * 0.6}px Arial`;
-      ctx.fillText(
-        '👑',
-        gameState.bird.x + gameState.bird.width / 2,
-        gameState.bird.y - 15
-      );
+      ctx.fillText('👑', gameState.bird.x + gameState.bird.width / 2, gameState.bird.y - 15);
     }
-    
     ctx.restore();
   }, [gameState, canvasSize, selectedCharacter, hasGhostMode, hasStartShield, hasBookMagnet]);
 
@@ -1060,7 +1029,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     // Hide power selection immediately
     setShowPowerSelection(false);
     setPowerChoices(getRandomPowers(hasLuckyStart())); // Generate new choices for next time
-    
+
     // Set waiting state instead of countdown
     setWaitingForContinue(true);
     setPendingPower(power);
@@ -1091,25 +1060,26 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         requestAnimationFrame(jump);
       }
     };
-
     const handleKeyPress = (e: KeyboardEvent) => {
       if (e.code === 'Space') {
         e.preventDefault();
         jump();
       }
     };
-
     window.addEventListener('keydown', handleKeyPress);
     const canvas = canvasRef.current;
     if (canvas) {
-      canvas.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      canvas.addEventListener('pointerdown', handlePointerDown, {
+        passive: true
+      });
     }
 
     // Also add global event listener for waiting for continue
     if (waitingForContinue) {
-      document.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      document.addEventListener('pointerdown', handlePointerDown, {
+        passive: true
+      });
     }
-
     return () => {
       window.removeEventListener('keydown', handleKeyPress);
       if (canvas) {
@@ -1120,41 +1090,27 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       }
     };
   }, [jump, waitingForContinue]);
-
-  return (
-    <div className="fixed inset-0 bg-gradient-to-b from-sky-start to-sky-end overflow-hidden">
+  return <div className="fixed inset-0 bg-gradient-to-b from-sky-start to-sky-end overflow-hidden">
       {/* Game Canvas Container */}
-      <div 
-        className="absolute inset-0 flex items-center justify-center touch-none"
-        style={{ 
-          width: '100vw',
-          height: '100dvh'
-        }}
-      >
-        <div
-          className="relative border-2 sm:border-4 border-border rounded-lg sm:rounded-xl shadow-game bg-gradient-sky overflow-hidden touch-none"
-          style={{ 
-            width: canvasSize.width, 
-            height: canvasSize.height,
-            maxWidth: '100vw',
-            maxHeight: '100svh'
-          }}
-        >
-        <canvas
-          ref={canvasRef}
-          width={canvasSize.width}
-          height={canvasSize.height}
-          className="block touch-none select-none w-full h-full"
-          style={{ 
-            touchAction: 'none', 
-            WebkitTapHighlightColor: 'transparent', 
-            WebkitTouchCallout: 'none',
-            WebkitUserSelect: 'none',
-            imageRendering: 'pixelated',
-            width: canvasSize.width + 'px',
-            height: canvasSize.height + 'px'
-          }}
-        />
+      <div className="absolute inset-0 flex items-center justify-center touch-none" style={{
+      width: '100vw',
+      height: '100dvh'
+    }}>
+        <div className="relative border-2 sm:border-4 border-border rounded-lg sm:rounded-xl shadow-game bg-gradient-sky overflow-hidden touch-none" style={{
+        width: canvasSize.width,
+        height: canvasSize.height,
+        maxWidth: '100vw',
+        maxHeight: '100svh'
+      }}>
+        <canvas ref={canvasRef} width={canvasSize.width} height={canvasSize.height} className="block touch-none select-none w-full h-full" style={{
+          touchAction: 'none',
+          WebkitTapHighlightColor: 'transparent',
+          WebkitTouchCallout: 'none',
+          WebkitUserSelect: 'none',
+          imageRendering: 'pixelated',
+          width: canvasSize.width + 'px',
+          height: canvasSize.height + 'px'
+        }} />
 
         {/* Score Display */}
         <div className="absolute top-2 left-2 sm:top-4 sm:left-4 z-10">
@@ -1171,7 +1127,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
         {/* Active Powers Display */}
         {(() => {
           const modifiers = getGameModifiers();
-          
+
           // Create display items for UI
           const displayPowers: Array<{
             id: string;
@@ -1181,14 +1137,13 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
             startTime: number;
             stackCount?: number;
           }> = [];
-          
           const topLeftPowers: Array<{
             id: string;
             emoji: string;
             name: string;
             startTime: number;
           }> = [];
-          
+
           // Add regular powers (excluding ghost mode to avoid duplicates)
           modifiers.activePowers.forEach(power => {
             displayPowers.push({
@@ -1200,7 +1155,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
               stackCount: power.stackCount
             });
           });
-          
+
           // Add ghost mode with timer (only once)
           shopActivePowers.forEach(shopPower => {
             if (shopPower.power_id === 'ghost_mode') {
@@ -1216,7 +1171,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
               }
             }
           });
-          
+
           // Add shield mode indicator to top-right
           if (hasStartShield()) {
             displayPowers.push({
@@ -1236,7 +1191,6 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
               startTime: gameStartTime
             });
           }
-
           if (hasDoublePoints()) {
             displayPowers.push({
               id: 'double-points',
@@ -1255,77 +1209,49 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
               startTime: gameStartTime
             });
           }
-          
-          return (
-            <>
+          return <>
               {/* All powers moved to top-right */}
-              {displayPowers.length > 0 && (
-                <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 space-y-1">
-                  {displayPowers.map((power, index) => (
-                    <Card key={`${power.id}-${power.startTime}`} className="px-2 py-1 bg-accent/90 shadow-soft">
+              {displayPowers.length > 0 && <div className="absolute top-2 right-2 sm:top-4 sm:right-4 z-10 space-y-1">
+                  {displayPowers.map((power, index) => <Card key={`${power.id}-${power.startTime}`} className="px-2 py-1 bg-accent/90 shadow-soft">
                       <div className="flex items-center space-x-1 text-xs sm:text-sm">
                         <span>{power.emoji}</span>
                         <span className="font-medium">{power.name}</span>
-                        {(power.stackCount && power.stackCount > 1) && (
-                          <span className="bg-warning text-warning-foreground px-1 rounded text-xs font-bold">
+                        {power.stackCount && power.stackCount > 1 && <span className="bg-warning text-warning-foreground px-1 rounded text-xs font-bold">
                             x{power.stackCount}
-                          </span>
-                        )}
+                          </span>}
                       </div>
-                    </Card>
-                  ))}
-                </div>
-              )}
-            </>
-          );
+                    </Card>)}
+                </div>}
+            </>;
         })()}
 
         {/* Game Over Screen */}
-        {gameState.gameOver && (
-          <div className="absolute inset-0 flex items-center justify-center bg-foreground/50 rounded-lg">
+        {gameState.gameOver && <div className="absolute inset-0 flex items-center justify-center bg-foreground/50 rounded-lg">
             <Card className="p-3 sm:p-4 md:p-8 text-center space-y-2 sm:space-y-3 md:space-y-4 animate-bounce-in shadow-game max-w-sm mx-2 sm:mx-4">
               <div className="text-3xl sm:text-4xl">💥</div>
-              {gameState.isNewRecord ? (
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-warning">New Record! 👑</h2>
-              ) : (
-                <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-danger">Game Over!</h2>
-              )}
+              {gameState.isNewRecord ? <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-warning">New Record! 👑</h2> : <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-danger">Game Over!</h2>}
               <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
                 {gameState.isNewRecord ? '"I\'m the smartest nerd ever!"' : '"I should\'ve studied more!"'}
               </p>
               <div className="text-base sm:text-lg md:text-xl font-semibold">
                 Final Score: {gameState.score}
               </div>
-              {gameState.record > 0 && !gameState.isNewRecord && (
-                <div className="text-xs sm:text-sm md:text-base text-muted-foreground">
+              {gameState.record > 0 && !gameState.isNewRecord && <div className="text-xs sm:text-sm md:text-base text-muted-foreground">
                   Record: {gameState.record} 👑
-                </div>
-              )}
+                </div>}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                <Button 
-                  onClick={resetGame}
-                  variant="default"
-                  size="lg"
-                  className="bg-gradient-button shadow-glow flex-1 text-sm sm:text-base"
-                >
+                <Button onClick={resetGame} variant="default" size="lg" className="bg-gradient-button shadow-glow flex-1 text-sm sm:text-base">
                   Try Again 🎮
                 </Button>
-                <Button 
-                  onClick={() => navigate('/')}
-                  variant="outline"
-                  size="lg"
-                  className="flex-1 text-sm sm:text-base"
-                >
+                <Button onClick={() => navigate('/')} variant="outline" size="lg" className="flex-1 text-sm sm:text-base">
                   Main Menu 🏠
                 </Button>
               </div>
             </Card>
-          </div>
-        )}
+          </div>}
 
         {/* Start Screen */}
-        {!gameState.gameStarted && !gameState.gameOver && (
-          <div className="absolute inset-0 flex items-center justify-center bg-foreground/30 rounded-lg">
+        {!gameState.gameStarted && !gameState.gameOver && <div className="absolute inset-0 flex items-center justify-center bg-foreground/30 rounded-lg">
             <Card className="p-3 sm:p-4 md:p-8 text-center space-y-2 sm:space-y-3 md:space-y-4 animate-bounce-in shadow-game max-w-md mx-2 sm:mx-4">
               <div className="text-4xl sm:text-5xl md:text-6xl">🤓</div>
               <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Slappy Nerds</h1>
@@ -1333,32 +1259,21 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
                 Help your nerdy hero soar through the skies! Tap to flap and avoid obstacles.
               </p>
               <div className="space-y-1 sm:space-y-2 text-xs md:text-sm text-muted-foreground">
-                <p>📱 Tap anywhere to flap</p>
+                <p>Tap anywhere to flap</p>
                 <p className="hidden sm:block">🖥️ Or press SPACE on desktop</p>
                 <p>📚 Avoid the green pipes!</p>
               </div>
-              <Button 
-                onClick={jump}
-                variant="default"
-                size="lg"
-                className="bg-gradient-button shadow-glow animate-pulse-glow w-full text-sm sm:text-base"
-              >
+              <Button onClick={jump} variant="default" size="lg" className="bg-gradient-button shadow-glow animate-pulse-glow w-full text-sm sm:text-base">
                 Start Flying! 🚀
               </Button>
             </Card>
-          </div>
-        )}
+          </div>}
 
         {/* Power Selection Modal */}
-        <PowerSelection
-          isOpen={showPowerSelection}
-          powers={powerChoices}
-          onSelectPower={handlePowerSelect}
-        />
+        <PowerSelection isOpen={showPowerSelection} powers={powerChoices} onSelectPower={handlePowerSelect} />
 
         {/* Tap to Continue Modal */}
-        {waitingForContinue && pendingPower && (
-          <div className="absolute inset-0 flex items-center justify-center bg-foreground/50 z-50 rounded-lg">
+        {waitingForContinue && pendingPower && <div className="absolute inset-0 flex items-center justify-center bg-foreground/50 z-50 rounded-lg">
             <Card className="p-6 sm:p-8 text-center space-y-4 animate-scale-in shadow-game max-w-sm mx-4">
               <div className="text-4xl sm:text-5xl">{pendingPower.emoji}</div>
               <h2 className="text-xl sm:text-2xl font-bold text-primary">
@@ -1374,12 +1289,9 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
                 📱 Tap anywhere or press SPACE
               </div>
             </Card>
-          </div>
-        )}
+          </div>}
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Game;
