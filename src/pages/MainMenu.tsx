@@ -141,7 +141,7 @@ const MainMenu: React.FC = () => {
       
       {/* Title at absolute top */}
       <div className="absolute top-0.5 sm:top-1 md:top-2 lg:top-6 left-0 right-0 z-10 animate-fade-in">
-        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[140px] sm:max-w-[180px] md:max-w-[220px] lg:max-w-md xl:max-w-lg mx-auto hover-scale" />
+        <img src={slappyNerdsTitle} alt="Slappy Nerds" className={`w-full mx-auto hover-scale ${isIOS ? 'max-w-[200px] sm:max-w-[240px]' : 'max-w-[140px] sm:max-w-[180px]'} md:max-w-[220px] lg:max-w-md xl:max-w-lg`} />
       </div>
       
       {/* Pop Counter - Top Left */}
@@ -173,13 +173,13 @@ const MainMenu: React.FC = () => {
         </div>}
 
       {/* Volume Control Button */}
-      <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(() => setVolumeOpen(true))}>
-        {isMuted ? <VolumeX className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" /> : <Volume2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />}
+      <Button variant="outline" size="icon" className="absolute top-3 sm:top-4 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-8 h-8 sm:w-10 sm:h-10 md:w-10 md:h-10" onClick={() => handleButtonClick(() => setVolumeOpen(true))}>
+        {isMuted ? <VolumeX className="h-3 w-3 sm:h-4 sm:w-4 md:h-4 md:w-4" /> : <Volume2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-4 md:w-4" />}
       </Button>
 
       {/* Add to Home Screen Button - Only show on mobile when installable */}
-      {isInstallable && <Button variant="outline" size="icon" className="absolute top-8 sm:top-12 md:top-16 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-green-500 hover:bg-green-600 border-green-400 text-white" onClick={() => handleButtonClick(installApp)}>
-          <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
+      {isInstallable && <Button variant="outline" size="icon" className="absolute top-12 sm:top-16 md:top-16 right-8 sm:right-12 md:right-16 z-20 hover-scale w-8 h-8 sm:w-10 sm:h-10 md:w-10 md:h-10 bg-green-500 hover:bg-green-600 border-green-400 text-white" onClick={() => handleButtonClick(installApp)}>
+          <Plus className="h-3 w-3 sm:h-4 sm:w-4 md:h-4 md:w-4" />
         </Button>}
       
       {/* Sign Out Button - Red Door Icon */}
@@ -205,7 +205,7 @@ const MainMenu: React.FC = () => {
             animationDelay: '0.6s'
           }}>
             <div className="relative">
-              <div className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl hover-scale py-2 sm:py-3 md:py-4 lg:py-[21px]">
+              <div className={`hover-scale py-2 sm:py-3 md:py-4 lg:py-[21px] ${isIOS ? 'text-4xl sm:text-5xl' : 'text-2xl sm:text-3xl'} md:text-4xl lg:text-5xl`}>
                 {selectedCharacter ? selectedCharacter.emoji : '🤓'}
               </div>
               {/* Yellow rotating arrow indicator */}
@@ -224,7 +224,7 @@ const MainMenu: React.FC = () => {
 
           {/* Game Feature Buttons */}
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
-            <Button variant="default" onClick={() => handleButtonClick(() => setCharactersOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-green-400 via-green-500 to-green-600 text-green-900 font-bold shadow-xl border sm:border-2 border-green-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setCharactersOpen(true))} disabled={!user} className={`relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-green-400 via-green-500 to-green-600 text-green-900 font-bold shadow-xl border sm:border-2 border-green-300 overflow-hidden ${isIOS ? 'h-12 sm:h-16' : 'h-10 sm:h-12'} md:h-16 lg:h-24`} style={{
               animationDelay: '0.2s'
             }}>
               <Gamepad2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
@@ -233,7 +233,7 @@ const MainMenu: React.FC = () => {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-green-600 to-green-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setShopOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 text-purple-900 font-bold shadow-xl border sm:border-2 border-purple-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setShopOpen(true))} disabled={!user} className={`relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 text-purple-900 font-bold shadow-xl border sm:border-2 border-purple-300 overflow-hidden ${isIOS ? 'h-12 sm:h-16' : 'h-10 sm:h-12'} md:h-16 lg:h-24`} style={{
               animationDelay: '0.3s'
             }}>
               <ShoppingCart className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
@@ -242,7 +242,7 @@ const MainMenu: React.FC = () => {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-purple-600 to-purple-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 text-orange-900 font-bold shadow-xl border sm:border-2 border-orange-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className={`relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 text-orange-900 font-bold shadow-xl border sm:border-2 border-orange-300 overflow-hidden ${isIOS ? 'h-12 sm:h-16' : 'h-10 sm:h-12'} md:h-16 lg:h-24`} style={{
               animationDelay: '0.35s'
             }}>
               <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
@@ -251,7 +251,7 @@ const MainMenu: React.FC = () => {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-orange-600 to-orange-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-amber-900 font-bold shadow-xl border sm:border-2 border-amber-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className={`relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-amber-900 font-bold shadow-xl border sm:border-2 border-amber-300 overflow-hidden ${isIOS ? 'h-12 sm:h-16' : 'h-10 sm:h-12'} md:h-16 lg:h-24`} style={{
               animationDelay: '0.4s'
             }}>
               <Trophy className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
@@ -260,7 +260,7 @@ const MainMenu: React.FC = () => {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-amber-600 to-amber-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-11 sm:h-14 md:h-20 lg:h-28 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border sm:border-2 border-yellow-300 overflow-hidden col-span-2" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className={`relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border sm:border-2 border-yellow-300 overflow-hidden col-span-2 ${isIOS ? 'h-14 sm:h-18' : 'h-11 sm:h-14'} md:h-20 lg:h-28`} style={{
               animationDelay: '0.5s'
             }}>
               {/* Crown icon */}
