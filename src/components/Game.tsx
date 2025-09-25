@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
+import { RotateCcw } from 'lucide-react';
 import { Card } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
@@ -1240,8 +1241,8 @@ export const Game: React.FC = () => {
                   Record: {gameState.record} 👑
                 </div>}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                <Button onClick={resetGame} variant="default" size="lg" className="bg-gradient-button shadow-glow flex-1 text-sm sm:text-base">
-                  Try Again 🎮
+                <Button onClick={resetGame} variant="default" size="lg" className="bg-warning text-warning-foreground shadow-glow p-4 h-14 w-14 sm:h-16 sm:w-16">
+                  <RotateCcw size={24} />
                 </Button>
                 <Button onClick={() => navigate('/')} variant="outline" size="lg" className="flex-1 text-sm sm:text-base">Main Menu </Button>
               </div>
