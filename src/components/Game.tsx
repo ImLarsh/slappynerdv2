@@ -1261,8 +1261,7 @@ export const Game: React.FC = () => {
               <div className="space-y-1 sm:space-y-2 text-xs md:text-sm text-muted-foreground">
                 <p>Tap anywhere to flap</p>
                 
-                <p>📚 Avoid the lockers!
-while</p>
+                <p>📚 Avoid The Lockers, While Collecting The Books! 📚</p>
               </div>
               <Button onClick={jump} variant="default" size="lg" className="bg-gradient-button shadow-glow animate-pulse-glow w-full text-sm sm:text-base">
                 Start Flying! 🚀
