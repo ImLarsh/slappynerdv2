@@ -19,7 +19,7 @@ export const useAudio = () => {
   const [audioState, setAudioState] = useState<AudioState>({
     volume: 0.5,
     isMuted: false,
-    isPlaying: false
+    isPlaying: true // Start with music playing by default
   });
 
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -44,7 +44,18 @@ export const useAudio = () => {
         console.warn('Background music failed to load:', e);
         setAudioState(prev => ({ ...prev, isPlaying: false }));
       });
-      // Don't auto-load - only load when explicitly requested
+      
+      // Auto-start music when loaded
+      audio.addEventListener('canplaythrough', () => {
+        console.log('Background music loaded successfully');
+        // Start playing automatically on first load
+        audio.play().catch(error => {
+          if (error.name !== 'NotAllowedError') {
+            console.warn('Auto-play failed:', error);
+          }
+          setAudioState(prev => ({ ...prev, isPlaying: false }));
+        });
+      }, { once: true });
     }
     // Point local ref to global instance
     backgroundMusicRef.current = globalBackgroundMusic;
