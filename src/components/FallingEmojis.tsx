@@ -46,7 +46,7 @@ export const FallingEmojis: React.FC = () => {
   }, [characters]);
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-0">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-5">
       {emojis.map((emoji) => (
         <div
           key={emoji.id}
