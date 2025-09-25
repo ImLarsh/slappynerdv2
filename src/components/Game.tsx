@@ -289,7 +289,8 @@ export const Game: React.FC = () => {
         ...prev,
         bird: { ...prev.bird, velocity: JUMP_FORCE }
       }));
-      // Remove the annoying jump sound
+      // Play tap/flap sound
+      playSound('tapFlap');
     }
   }, [gameState.gameStarted, gameState.gameOver, showPowerSelection, resetGame, waitingForContinue, pendingPower, addPower]);
 
@@ -532,8 +533,8 @@ export const Game: React.FC = () => {
         newState.gameOver = true;
         newState.gameEnded = true;
         
-        // Play game over sound
-        playSound('gameOver');
+        // Play defeat sound
+        playSound('defeat');
         
         // Update stats in database and get new totals
         if (user) {
@@ -702,8 +703,8 @@ export const Game: React.FC = () => {
           newState.gameOver = true;
           newState.gameEnded = true;
           
-          // Play game over sound
-          playSound('gameOver');
+          // Play defeat sound
+          playSound('defeat');
           
           // Update stats in database and get new totals
           if (user) {

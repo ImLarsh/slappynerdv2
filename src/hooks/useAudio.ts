@@ -13,6 +13,9 @@ const SOUND_SOURCES: Record<string, string> = {
   gameOver: '/audio/game-over-sound.mp3',
   passLocker: '/audio/passlocker.mp3',
   collectBook: '/audio/collectbook.mp3',
+  tapFlap: '/audio/tapflapsound.mp3',
+  defeat: '/audio/defeatsound.mp3',
+  click: '/audio/clicksound.mp3',
 };
 
 export const useAudio = () => {
@@ -73,7 +76,10 @@ export const useAudio = () => {
       globalSoundEffects = {
         gameOver: new Audio('/audio/game-over-sound.mp3'),
         passLocker: new Audio('/audio/passlocker.mp3'),
-        collectBook: new Audio('/audio/collectbook.mp3')
+        collectBook: new Audio('/audio/collectbook.mp3'),
+        tapFlap: new Audio('/audio/tapflapsound.mp3'),
+        defeat: new Audio('/audio/defeatsound.mp3'),
+        click: new Audio('/audio/clicksound.mp3')
       };
       Object.values(globalSoundEffects).forEach(a => {
         a.volume = audioState.volume;
