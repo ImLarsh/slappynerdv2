@@ -30,10 +30,7 @@ export const useAudio = () => {
   const soundEffectsRef = useRef<{ [key: string]: HTMLAudioElement }>({});
   const tapPoolRef = useRef<HTMLAudioElement[]>([]);
   const tapPoolIndexRef = useRef(0);
-  // WebAudio (iOS-optimized) for ultra-low-latency tap sound
-  const audioCtxRef = useRef<AudioContext | null>(null);
-  const tapBufferRef = useRef<AudioBuffer | null>(null);
-  const tapGainRef = useRef<GainNode | null>(null);
+
   // Initialize audio elements (singleton across app)
   useEffect(() => {
     // Create global background music if needed
@@ -119,50 +116,11 @@ export const useAudio = () => {
     // Point local ref to global effects
     soundEffectsRef.current = globalSoundEffects;
 
-    // iOS WebAudio: prepare on first user interaction to cache tap sound and avoid decode/seek jank
-    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                  (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1);
-    let onFirstInteraction: ((e: Event) => void) | null = null;
-    if (isiOS) {
-      onFirstInteraction = async () => {
-        try {
-          if (!audioCtxRef.current) {
-            const Ctx = (window.AudioContext || (window as any).webkitAudioContext);
-            const ctx = new Ctx();
-            audioCtxRef.current = ctx;
-            const gain = ctx.createGain();
-            gain.gain.value = audioState.isMuted ? 0 : audioState.volume;
-            gain.connect(ctx.destination);
-            tapGainRef.current = gain;
-          }
-          // Resume if needed
-          if (audioCtxRef.current?.state === 'suspended') {
-            await audioCtxRef.current.resume();
-          }
-          // Fetch & decode once
-          if (!tapBufferRef.current) {
-            const res = await fetch('/audio/tapflapsound.mp3');
-            const arr = await res.arrayBuffer();
-            const ctx = audioCtxRef.current!;
-            tapBufferRef.current = await new Promise<AudioBuffer>((resolve, reject) => {
-              ctx.decodeAudioData(arr.slice(0), resolve, reject);
-            });
-          }
-        } catch (e) {
-          console.warn('WebAudio init failed', e);
-        }
-      };
-      window.addEventListener('pointerdown', onFirstInteraction, { once: true, passive: true });
-    }
-
     return () => {
       // Detach per-hook listeners only (do not destroy global audio)
       backgroundMusicRef.current?.removeEventListener('play', onPlay);
       backgroundMusicRef.current?.removeEventListener('pause', onPause);
       backgroundMusicRef.current?.removeEventListener('ended', onEnded);
-      if (onFirstInteraction) {
-        window.removeEventListener('pointerdown', onFirstInteraction as any);
-      }
     };
   }, []);
 
@@ -184,10 +142,6 @@ export const useAudio = () => {
         a.volume = audioState.isMuted ? 0 : audioState.volume;
         a.muted = audioState.isMuted;
       }
-    }
-    // Sync WebAudio gain for iOS tap sound
-    if (tapGainRef.current) {
-      tapGainRef.current.gain.value = audioState.isMuted ? 0 : audioState.volume;
     }
   }, [audioState.volume, audioState.isMuted]);
 
@@ -239,23 +193,7 @@ export const useAudio = () => {
   const playSound = useCallback((soundName: string) => {
     if (audioState.isMuted) return;
 
-    // iOS WebAudio path for ultra-low-latency tap sound
-    if (soundName === 'tapFlap' && audioCtxRef.current && tapBufferRef.current && audioCtxRef.current.state === 'running') {
-      try {
-        const ctx = audioCtxRef.current;
-        const src = ctx!.createBufferSource();
-        src.buffer = tapBufferRef.current;
-        if (tapGainRef.current) {
-          src.connect(tapGainRef.current);
-        } else {
-          src.connect(ctx!.destination);
-        }
-        src.start(0);
-      } catch {}
-      return;
-    }
-
-    // Fallback: prewarmed HTMLAudio pool for iOS, or normal audio elements
+    // Optimized tap sound on iOS using a small prewarmed pool
     if (soundName === 'tapFlap' && tapPoolRef.current.length) {
       const a = tapPoolRef.current[tapPoolIndexRef.current];
       tapPoolIndexRef.current = (tapPoolIndexRef.current + 1) % tapPoolRef.current.length;
