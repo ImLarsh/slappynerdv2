@@ -56,7 +56,7 @@ export const AVAILABLE_POWERS: Power[] = [
     id: 'micro_gaps',
     name: 'Needle Threading',
     description: 'Tiny gaps for 8 seconds',
-    emoji: '🪡',
+    emoji: '🎯',
     type: 'temporary',
     beneficial: false,
     weight: 10,
