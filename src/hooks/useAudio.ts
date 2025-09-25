@@ -193,17 +193,11 @@ export const useAudio = () => {
   const playSound = useCallback((soundName: string) => {
     if (audioState.isMuted) return;
 
-    // Optimized tap sound on iOS using a small prewarmed pool
-    if (soundName === 'tapFlap' && tapPoolRef.current.length) {
-      const a = tapPoolRef.current[tapPoolIndexRef.current];
-      tapPoolIndexRef.current = (tapPoolIndexRef.current + 1) % tapPoolRef.current.length;
-      try {
-        a.currentTime = 0;
-        a.volume = audioState.volume;
-        a.muted = audioState.isMuted;
-        a.play().catch(() => {});
-      } catch {}
-      return;
+    // Disable all sound effects on iOS to test if they're causing stutter
+    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                  (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1);
+    if (isiOS) {
+      return; // Skip all sound effects on iOS
     }
 
     const sound = soundEffectsRef.current[soundName];
