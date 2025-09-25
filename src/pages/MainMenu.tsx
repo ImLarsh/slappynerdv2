@@ -158,7 +158,7 @@ const MainMenu: React.FC = () => {
 
       {/* User Info - Top Left (when signed in) - moved down */}
       {user && <div className="absolute top-12 sm:top-16 md:top-20 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30">
+          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30 my-[32px] mx-[16px]">
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-black font-bold">
               {playerName || 'Player'}
             </p>
