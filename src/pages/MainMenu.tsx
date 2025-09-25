@@ -173,8 +173,8 @@ const MainMenu: React.FC = () => {
         </div>}
 
       {/* Volume Control Button */}
-      <Button variant="outline" size="icon" onClick={() => handleButtonClick(() => setVolumeOpen(true))} className="absolute top-16 sm:top-20 md:top-24 right-2 sm:right-3 md:right-4 z-20 hover-scale w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12">
-        {isMuted ? <VolumeX className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" /> : <Volume2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />}
+      <Button variant="outline" size="icon" onClick={() => handleButtonClick(() => setVolumeOpen(true))} className="absolute top-16 sm:top-20 md:top-24 right-2 sm:right-3 md:right-4 z-20 hover-scale w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16">
+        {isMuted ? <VolumeX className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" /> : <Volume2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />}
       </Button>
 
       {/* Add to Home Screen Button - Only show on mobile when installable */}
@@ -182,10 +182,6 @@ const MainMenu: React.FC = () => {
           <Plus className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
         </Button>}
       
-      {/* Sign Out Button - Red Door Icon */}
-      {user && <Button variant="outline" size="icon" onClick={() => handleButtonClick(signOut)} className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12">
-          <DoorOpen className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
-        </Button>}
       
       {/* Centered Content */}
       <div className="relative z-10 max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md w-full space-y-1.5 sm:space-y-2 md:space-y-3 lg:space-y-6 text-center mt-12 sm:mt-16 md:mt-20 lg:mt-16 px-1 sm:px-2">{/* Character and Description */}
@@ -276,6 +272,14 @@ const MainMenu: React.FC = () => {
             animationDelay: '0.15s'
           }}>
               🔐 Sign In / Sign Up
+            </Button>}
+
+          {/* Sign Out Button - Below leaderboard (when signed in) */}
+          {user && <Button onClick={() => handleButtonClick(signOut)} variant="default" size="lg" className="w-full text-sm sm:text-base md:text-lg py-2 sm:py-3 md:py-4 hover-scale animate-scale-in bg-gradient-to-r from-red-500 via-red-600 to-red-700 text-white font-black shadow-2xl border-2 sm:border-3 border-red-300 transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
+            animationDelay: '0.15s'
+          }}>
+              <DoorOpen className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+              Sign Out
             </Button>}
         </div>
         </div>
