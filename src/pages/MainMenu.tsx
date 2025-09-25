@@ -141,7 +141,7 @@ const MainMenu: React.FC = () => {
       
       {/* Title at absolute top */}
       <div className="absolute top-2 sm:top-4 md:top-6 lg:top-8 left-0 right-0 z-30 animate-fade-in">
-        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px] lg:max-w-lg xl:max-w-xl mx-auto hover-scale" />
+        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[240px] sm:max-w-[260px] md:max-w-[280px] lg:max-w-sm xl:max-w-md mx-auto hover-scale" />
       </div>
       
       {/* Pop Counter - Top Left */}
