@@ -94,6 +94,7 @@ export default {
         "gradient-sky": "var(--gradient-sky)",
         "gradient-ground": "var(--gradient-ground)",
         "gradient-button": "var(--gradient-button)",
+        "gradient-button-green": "var(--gradient-button-green)",
         "gradient-score": "var(--gradient-score)",
       },
       boxShadow: {

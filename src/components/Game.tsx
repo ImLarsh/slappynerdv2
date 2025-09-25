@@ -1263,7 +1263,7 @@ export const Game: React.FC = () => {
                 
                 <p>📚 Avoid The Lockers, While Collecting The Books! 📚</p>
               </div>
-              <Button onClick={jump} variant="default" size="lg" className="bg-gradient-button-green shadow-glow animate-pulse-glow w-full text-sm sm:text-base">
+              <Button onClick={jump} variant="default" size="lg" className="bg-gradient-button-green text-white shadow-glow animate-pulse-glow w-full text-sm sm:text-base">
                 Start Learning! 📚
               </Button>
             </Card>
