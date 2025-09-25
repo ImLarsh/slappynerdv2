@@ -110,23 +110,39 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
   };
 
   const startSpinAnimation = (allRewards: Reward[], finalReward: Reward) => {
-    let currentSpeed = 50;
-    let index = 0;
     const totalRewards = allRewards.length;
     const finalIndex = Math.floor(totalRewards / 2); // Place the final reward in the middle
-
+    
     // Replace the middle reward with our actual reward
     allRewards[finalIndex] = finalReward;
 
-    const animate = () => {
-      setCurrentIndex(index);
-      index = (index + 1) % totalRewards;
-      currentSpeed += 5; // Gradually slow down
+    // Animation parameters for exactly 5 seconds
+    const totalDuration = 5000; // 5 seconds
+    const startSpeed = 50; // Start fast
+    const endSpeed = 300; // End slow
+    let startTime = Date.now();
+    let currentIndex = 0;
 
-      if (currentSpeed < 500) {
-        setTimeout(animate, currentSpeed);
+    const animate = () => {
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / totalDuration, 1);
+      
+      // Easing function for smooth deceleration
+      const easeOut = 1 - Math.pow(1 - progress, 3);
+      
+      // Calculate current speed based on progress
+      const currentSpeed = startSpeed + (endSpeed - startSpeed) * easeOut;
+      
+      setCurrentIndex(currentIndex);
+      
+      if (progress < 1) {
+        // Continue spinning
+        setTimeout(() => {
+          currentIndex = (currentIndex + 1) % totalRewards;
+          animate();
+        }, currentSpeed);
       } else {
-        // Stop at the final reward
+        // Animation complete - stop at final reward
         setCurrentIndex(finalIndex);
         setPhase('revealing');
         
@@ -137,7 +153,7 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
             title: "Congratulations!",
             description: `You won: ${finalReward.emoji} ${finalReward.name}`,
           });
-        }, 1000);
+        }, 500);
       }
     };
 
@@ -180,28 +196,33 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
               <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-4 border-yellow-400 rounded-lg shadow-lg shadow-yellow-400/50" />
             </div>
             
-            <div className="flex py-8">
+            <div 
+              className="flex py-8 transition-transform duration-100 ease-linear"
+              style={{
+                transform: `translateX(${-currentIndex * 128 + 200}px)`
+              }}
+            >
               {rewards.map((reward, index) => {
                 const isCenter = index === currentIndex;
                 const distance = Math.abs(index - currentIndex);
-                const opacity = distance === 0 ? 1 : distance === 1 ? 0.7 : distance === 2 ? 0.4 : 0.2;
-                const scale = distance === 0 ? 1.2 : distance === 1 ? 1 : 0.8;
+                const opacity = distance === 0 ? 1 : distance === 1 ? 0.8 : distance === 2 ? 0.5 : 0.2;
+                const scale = distance === 0 ? 1.3 : distance === 1 ? 1.1 : distance === 2 ? 0.9 : 0.7;
                 
                 return (
                   <div
                     key={`${reward.id}-${index}`}
-                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-200 ${
+                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-300 ease-out ${
                       isCenter ? getRarityStyle(reward.rarity) : ''
                     }`}
                     style={{
                       opacity,
                       transform: `scale(${scale})`,
-                      marginLeft: index === 0 ? `${50 - currentIndex * 128}px` : '0'
+                      filter: isCenter ? 'brightness(1.2)' : distance <= 2 ? 'brightness(0.8)' : 'brightness(0.5)'
                     }}
                   >
-                    <div className="text-4xl mb-1">{reward.emoji}</div>
-                    <div className="text-xs font-medium text-center px-1">{reward.name}</div>
-                    <div className={`text-xs capitalize ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
+                    <div className="text-4xl mb-1 transition-all duration-200">{reward.emoji}</div>
+                    <div className="text-xs font-medium text-center px-1 transition-all duration-200">{reward.name}</div>
+                    <div className={`text-xs capitalize transition-all duration-200 ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
                       {reward.rarity}
                     </div>
                   </div>
