@@ -72,7 +72,17 @@ const MainMenu: React.FC = () => {
     };
     fetchPlayerProfile();
   }, [user]);
-  // No automatic music - only controlled via player controls
+  
+  // Auto-play background music when the app fully loads
+  useEffect(() => {
+    if (!authLoading && !booksLoading && !adminLoading) {
+      // Small delay to ensure everything is loaded
+      const timer = setTimeout(() => {
+        playBackgroundMusic();
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [authLoading, booksLoading, adminLoading, playBackgroundMusic]);
 
   // Lock body scroll on Main Menu
   useEffect(() => {
