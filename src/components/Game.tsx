@@ -1254,7 +1254,7 @@ export const Game: React.FC = () => {
         {!gameState.gameStarted && !gameState.gameOver && <div className="absolute inset-0 flex items-center justify-center bg-foreground/30 rounded-lg">
             <Card className="p-3 sm:p-4 md:p-8 text-center space-y-2 sm:space-y-3 md:space-y-4 animate-bounce-in shadow-game max-w-md mx-2 sm:mx-4">
               <div className="text-4xl sm:text-5xl md:text-6xl">🤓</div>
-              <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-primary">Ready Nerd?</h1>
+              <h1 className="text-2xl sm:text-3xl text-green-400 font-extrabold md:text-6xl">Ready Nerd?</h1>
               <p className="text-xs sm:text-sm md:text-lg text-muted-foreground px-2">
                 Help your nerdy hero soar through the skies! Tap to flap and avoid obstacles.
               </p>
