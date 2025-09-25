@@ -5,7 +5,7 @@ export const usePowers = (playSound?: (soundName: string) => void) => {
   const [activePowers, setActivePowers] = useState<ActivePower[]>([]);
   const [showPowerSelection, setShowPowerSelection] = useState(false);
   const [pipesPassed, setPipesPassed] = useState(0);
-  const [nextPowerAt, setNextPowerAt] = useState(Math.floor(Math.random() * 6) + 10); // 10-15 pipes
+  const [nextPowerAt, setNextPowerAt] = useState(Math.floor(Math.random() * 6) + 5); // 5-10 pipes
 
   // Get 3 random powers for selection using weighted selection
   const getRandomPowers = useCallback((hasLuckyStart: boolean = false): Power[] => {
@@ -60,7 +60,7 @@ export const usePowers = (playSound?: (soundName: string) => void) => {
     if (power.id === 'refresh_power') {
       setActivePowers([]);
       setShowPowerSelection(false);
-      setNextPowerAt(pipesPassed + Math.floor(Math.random() * 6) + 10);
+      setNextPowerAt(pipesPassed + Math.floor(Math.random() * 6) + 5);
       return;
     }
 
@@ -104,7 +104,7 @@ export const usePowers = (playSound?: (soundName: string) => void) => {
     setShowPowerSelection(false);
     
     // Set next power selection
-    setNextPowerAt(pipesPassed + Math.floor(Math.random() * 6) + 10);
+    setNextPowerAt(pipesPassed + Math.floor(Math.random() * 6) + 5);
   }, [pipesPassed]);
 
   // Check if we should show power selection
@@ -174,7 +174,7 @@ export const usePowers = (playSound?: (soundName: string) => void) => {
   const resetPowers = useCallback(() => {
     setActivePowers([]);
     setPipesPassed(0);
-    setNextPowerAt(Math.floor(Math.random() * 6) + 10);
+    setNextPowerAt(Math.floor(Math.random() * 6) + 5);
     setShowPowerSelection(false);
   }, []);
 
