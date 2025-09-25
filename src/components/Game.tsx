@@ -546,11 +546,12 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       // Calculate frame multiplier with iOS-smoothed delta to avoid tap spikes
       let usedDelta = clampedDelta;
       if (isiOSRef.current) {
-        const alpha = 0.15; // smoothing factor
+        const alpha = 0.08; // more aggressive smoothing for iOS
         const prev = smoothedDeltaRef.current ?? (1000 / TARGET_FPS_MOBILE);
         const smoothed = prev + alpha * (clampedDelta - prev);
         smoothedDeltaRef.current = smoothed;
-        usedDelta = smoothed;
+        // Cap delta variations to prevent any remaining micro-jank
+        usedDelta = Math.max(8, Math.min(smoothed, 25));
       }
       const frameMultiplier = usedDelta / baseFrameTime;
       newState.lastFrameTime = currentTime;
