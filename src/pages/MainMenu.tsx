@@ -97,31 +97,31 @@ const MainMenu: React.FC = () => {
       </div>;
   }
   return <>
-      <div className="h-[100dvh] overflow-hidden bg-cover bg-center bg-no-repeat relative flex flex-col items-center justify-center p-4" style={{
+      <div className="min-h-screen max-h-screen overflow-hidden bg-cover bg-center bg-no-repeat relative flex flex-col items-center justify-center p-2 sm:p-4" style={{
       backgroundImage: `url(${schoolHallwayBg})`
     }}>
       {/* Background overlay - reduced blur for mobile performance */}
       <div className="absolute inset-0 bg-background/60 md:backdrop-blur-sm" />
       
       {/* Title at absolute top */}
-      <div className="absolute top-2 md:top-8 left-0 right-0 z-10 animate-fade-in">
-        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[220px] md:max-w-lg mx-auto hover-scale" />
+      <div className="absolute top-1 sm:top-2 md:top-6 left-0 right-0 z-10 animate-fade-in">
+        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[180px] sm:max-w-[220px] md:max-w-md lg:max-w-lg mx-auto hover-scale" />
       </div>
       
       {/* User Info - Top Left (when signed in) */}
       {user && (
-        <div className="absolute top-4 left-4 z-20 space-y-2">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary/30">
-            <p className="text-sm md:text-base text-muted-foreground">
+        <div className="absolute top-2 sm:top-4 left-2 sm:left-4 z-20 space-y-2">
+          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-2 sm:px-3 py-1.5 sm:py-2 border border-primary/30">
+            <p className="text-xs sm:text-sm md:text-base text-muted-foreground">
               Welcome back!{' '}
-              <span className="text-primary font-semibold bg-primary/10 px-2 py-1 rounded text-xs md:text-sm">
+              <span className="text-primary font-semibold bg-primary/10 px-1.5 sm:px-2 py-0.5 sm:py-1 rounded text-xs">
                 {playerName || 'Player'}
               </span>
             </p>
             {/* Currency Display */}
-            <div className="flex items-center gap-2 mt-1">
-              <span className="text-lg">📚</span>
-              <span className="font-semibold text-sm md:text-base">
+            <div className="flex items-center gap-1.5 sm:gap-2 mt-0.5 sm:mt-1">
+              <span className="text-sm sm:text-lg">📚</span>
+              <span className="font-semibold text-xs sm:text-sm md:text-base">
                 {booksLoading ? '...' : books} Books
               </span>
             </div>
@@ -134,25 +134,25 @@ const MainMenu: React.FC = () => {
         <Button 
           onClick={() => handleButtonClick(() => navigate('/auth'))} 
           variant="default" 
-          size="lg"
-          className="absolute top-4 left-4 z-20 hover-scale bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-3 border-blue-300 px-6 py-3 md:px-8 md:py-4 text-base md:text-lg transform hover:scale-110 transition-all duration-300"
+          size="sm"
+          className="absolute top-2 sm:top-4 left-2 sm:left-4 z-20 hover-scale bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-3 border-blue-300 px-3 py-2 sm:px-6 sm:py-3 md:px-8 md:py-4 text-xs sm:text-base md:text-lg transform hover:scale-110 transition-all duration-300"
         >
           🔐 Sign In / Sign Up
         </Button>
       )}
 
       {/* Volume Control Button */}
-      <Button variant="outline" size="icon" className="absolute top-4 right-16 z-20 hover-scale" onClick={() => handleButtonClick(() => setVolumeOpen(true))}>
-        {isMuted ? <VolumeX className="h-4 w-4" /> : <Volume2 className="h-4 w-4" />}
+      <Button variant="outline" size="icon" className="absolute top-2 sm:top-4 right-12 sm:right-16 z-20 hover-scale" onClick={() => handleButtonClick(() => setVolumeOpen(true))}>
+        {isMuted ? <VolumeX className="h-3 w-3 sm:h-4 sm:w-4" /> : <Volume2 className="h-3 w-3 sm:h-4 sm:w-4" />}
       </Button>
       
       {/* Sign Out Button - Red Door Icon */}
-      {user && <Button variant="outline" size="icon" className="absolute top-4 right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground" onClick={() => handleButtonClick(signOut)}>
-          <DoorOpen className="h-4 w-4" />
+      {user && <Button variant="outline" size="icon" className="absolute top-2 sm:top-4 right-2 sm:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground" onClick={() => handleButtonClick(signOut)}>
+          <DoorOpen className="h-3 w-3 sm:h-4 sm:w-4" />
         </Button>}
       
       {/* Centered Content */}
-      <div className="relative z-10 max-w-sm md:max-w-md w-full space-y-2 md:space-y-6 text-center mt-20 md:mt-16">
+      <div className="relative z-10 max-w-xs sm:max-w-sm md:max-w-md w-full space-y-2 sm:space-y-3 md:space-y-6 text-center mt-16 sm:mt-20 md:mt-16 px-2 sm:px-0">
         {/* Character and Description */}
         <div className="space-y-2 md:space-y-4 animate-fade-in">
           
@@ -169,71 +169,71 @@ const MainMenu: React.FC = () => {
             animationDelay: '0.6s'
           }}>
             <div className="relative">
-              <div className="text-4xl md:text-5xl hover-scale py-[21px]">
+              <div className="text-3xl sm:text-4xl md:text-5xl hover-scale py-3 sm:py-4 md:py-[21px]">
                 {selectedCharacter ? selectedCharacter.emoji : '🤓'}
               </div>
               {/* Yellow rotating arrow indicator */}
-              <div className="absolute -top-2 -right-2 text-yellow-400 retro-rotate">
+              <div className="absolute -top-1 sm:-top-2 -right-1 sm:-right-2 text-yellow-400 retro-rotate text-sm sm:text-base">
                 ⭐
               </div>
             </div>
           </div>
 
-          <Button onClick={handleStartGame} size="lg" className="relative w-full text-lg md:text-2xl py-4 md:py-8 hover-scale animate-scale-in bg-gradient-to-b from-red-400 via-red-500 to-red-600 text-red-900 font-black shadow-2xl border-4 border-red-300 overflow-hidden transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-3" style={{
+          <Button onClick={handleStartGame} size="lg" className="relative w-full text-base sm:text-lg md:text-2xl py-3 sm:py-4 md:py-8 hover-scale animate-scale-in bg-gradient-to-b from-red-400 via-red-500 to-red-600 text-red-900 font-black shadow-2xl border-2 sm:border-4 border-red-300 overflow-hidden transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-2 sm:gap-3" style={{
             animationDelay: '0.1s'
           }}>
-            <Play className="h-6 w-6 md:h-8 md:w-8" />
+            <Play className="h-4 w-4 sm:h-6 sm:w-6 md:h-8 md:w-8" />
             Play!
             {/* Enhanced 3D bottom decoration */}
-            <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-r from-red-600 to-red-700"></div>
+            <div className="absolute bottom-0 left-0 right-0 h-2 sm:h-3 bg-gradient-to-r from-red-600 to-red-700"></div>
           </Button>
 
           {/* Game Feature Buttons */}
-          <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <Button variant="default" onClick={() => handleButtonClick(() => setCharactersOpen(true))} disabled={!user} className="relative flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-green-400 via-green-500 to-green-600 text-green-900 font-bold shadow-xl border-2 border-green-300 overflow-hidden" style={{
+          <div className="grid grid-cols-2 gap-2 sm:gap-3 md:gap-4">
+            <Button variant="default" onClick={() => handleButtonClick(() => setCharactersOpen(true))} disabled={!user} className="relative flex flex-col gap-1 sm:gap-2 h-12 sm:h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-green-400 via-green-500 to-green-600 text-green-900 font-bold shadow-xl border border-green-300 sm:border-2 overflow-hidden" style={{
               animationDelay: '0.2s'
             }}>
-              <Gamepad2 className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="font-semibold">Characters</span>
+              <Gamepad2 className="h-3 w-3 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+              <span className="font-semibold text-xs sm:text-xs">Characters</span>
               {/* 3D bottom decoration */}
-              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-green-600 to-green-700"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 sm:h-2 bg-gradient-to-r from-green-600 to-green-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setShopOpen(true))} disabled={!user} className="relative flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 text-purple-900 font-bold shadow-xl border-2 border-purple-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setShopOpen(true))} disabled={!user} className="relative flex flex-col gap-1 sm:gap-2 h-12 sm:h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 text-purple-900 font-bold shadow-xl border border-purple-300 sm:border-2 overflow-hidden" style={{
               animationDelay: '0.3s'
             }}>
-              <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="font-semibold">Shop</span>
+              <ShoppingCart className="h-3 w-3 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+              <span className="font-semibold text-xs sm:text-xs">Shop</span>
               {/* 3D bottom decoration */}
-              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-600 to-purple-700"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 sm:h-2 bg-gradient-to-r from-purple-600 to-purple-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className="relative flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 text-orange-900 font-bold shadow-xl border-2 border-orange-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className="relative flex flex-col gap-1 sm:gap-2 h-12 sm:h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 text-orange-900 font-bold shadow-xl border border-orange-300 sm:border-2 overflow-hidden" style={{
               animationDelay: '0.35s'
             }}>
-              <Package className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="font-semibold">Crates</span>
+              <Package className="h-3 w-3 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+              <span className="font-semibold text-xs sm:text-xs">Crates</span>
               {/* 3D bottom decoration */}
-              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-600 to-orange-700"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 sm:h-2 bg-gradient-to-r from-orange-600 to-orange-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className="relative flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-amber-900 font-bold shadow-xl border-2 border-amber-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className="relative flex flex-col gap-1 sm:gap-2 h-12 sm:h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-amber-900 font-bold shadow-xl border border-amber-300 sm:border-2 overflow-hidden" style={{
               animationDelay: '0.4s'
             }}>
-              <Trophy className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="font-semibold">Achievements</span>
+              <Trophy className="h-3 w-3 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+              <span className="font-semibold text-xs sm:text-xs">Achievements</span>
               {/* 3D bottom decoration */}
-              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-600 to-amber-700"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 sm:h-2 bg-gradient-to-r from-amber-600 to-amber-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-2 h-20 md:h-28 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border-2 border-yellow-300 overflow-hidden col-span-2" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-1 sm:gap-2 h-14 sm:h-20 md:h-28 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border border-yellow-300 sm:border-2 overflow-hidden col-span-2" style={{
               animationDelay: '0.5s'
             }}>
               {/* Crown icon */}
-              <div className="text-2xl md:text-3xl">👑</div>
-              <span className="font-bold text-sm md:text-base">Leaderboard</span>
+              <div className="text-lg sm:text-2xl md:text-3xl">👑</div>
+              <span className="font-bold text-xs sm:text-sm md:text-base">Leaderboard</span>
               {/* Extended bottom decoration */}
-              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-600 to-yellow-700"></div>
+              <div className="absolute bottom-0 left-0 right-0 h-1 sm:h-2 bg-gradient-to-r from-yellow-600 to-yellow-700"></div>
             </Button>
           </div>
         </div>
