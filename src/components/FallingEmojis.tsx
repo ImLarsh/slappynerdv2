@@ -17,38 +17,43 @@ export const FallingEmojis: React.FC = () => {
   const { characters } = useCharactersContext();
   const { playSound } = useAudio();
 
+  const createEmoji = () => {
+    if (characters.length === 0) return null;
+    
+    const characterEmojis = characters.map(char => char.emoji);
+    const randomEmoji = characterEmojis[Math.floor(Math.random() * characterEmojis.length)];
+    
+    return {
+      id: Math.random(),
+      emoji: randomEmoji,
+      x: Math.random() * 80 + 10, // Random x position (10-90% to avoid edges)
+      duration: Math.random() * 8 + 12, // Random duration between 12-20 seconds
+      delay: 0,
+      isPopped: false
+    };
+  };
+
+  const addNewEmoji = () => {
+    const newEmoji = createEmoji();
+    if (newEmoji) {
+      setEmojis([newEmoji]);
+    }
+  };
+
   useEffect(() => {
     if (characters.length === 0) return;
 
-    const createEmoji = () => {
-      const characterEmojis = characters.map(char => char.emoji);
-      const randomEmoji = characterEmojis[Math.floor(Math.random() * characterEmojis.length)];
-      
-      return {
-        id: Math.random(),
-        emoji: randomEmoji,
-        x: Math.random() * 100, // Random x position (0-100%)
-        duration: Math.random() * 10 + 15, // Random duration between 15-25 seconds
-        delay: 0,
-        isPopped: false
-      };
-    };
-
-    // Create initial emojis
-    const initialEmojis = Array.from({ length: 8 }, createEmoji);
-    setEmojis(initialEmojis);
-
-    // Add new emojis periodically
-    const interval = setInterval(() => {
-      setEmojis(prev => {
-        const newEmoji = createEmoji();
-        // Keep only the last 12 emojis to prevent memory issues
-        return [...prev.slice(-11), newEmoji];
-      });
-    }, 5000); // Add new emoji every 5 seconds
-
-    return () => clearInterval(interval);
+    // Start with one emoji
+    addNewEmoji();
   }, [characters]);
+
+  // Add new emoji when current one is removed
+  useEffect(() => {
+    if (characters.length > 0 && emojis.length === 0) {
+      const timeout = setTimeout(addNewEmoji, 1000); // Wait 1 second before new emoji
+      return () => clearTimeout(timeout);
+    }
+  }, [emojis.length, characters.length]);
 
   const handleEmojiClick = (
     emojiId: number,
