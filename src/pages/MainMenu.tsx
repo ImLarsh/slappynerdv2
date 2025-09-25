@@ -135,9 +135,9 @@ const MainMenu: React.FC = () => {
           onClick={() => handleButtonClick(() => navigate('/auth'))} 
           variant="default" 
           size="lg"
-          className="absolute top-4 left-4 z-20 hover-scale bg-primary text-primary-foreground hover:bg-primary/90 font-semibold px-4 py-2 md:px-6 md:py-3 text-sm md:text-base"
+          className="absolute top-4 left-4 z-20 hover-scale bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-3 border-blue-300 px-6 py-3 md:px-8 md:py-4 text-base md:text-lg animate-pulse hover:animate-none transform hover:scale-110 transition-all duration-300"
         >
-          Sign In / Sign Up
+          🔐 Sign In / Sign Up
         </Button>
       )}
 
