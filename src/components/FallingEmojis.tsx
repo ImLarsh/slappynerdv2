@@ -66,6 +66,28 @@ export const FallingEmojis: React.FC = () => {
     }, 300);
   };
 
+  const getEmojiStyles = (emoji: FallingEmoji) => {
+    const baseStyles = {
+      left: `${emoji.x}%`,
+      transform: 'translateX(-50%)',
+    };
+
+    if (emoji.isPopped) {
+      // Pop animation - stay in current position
+      return {
+        ...baseStyles,
+        animation: 'emoji-pop 0.3s ease-out forwards',
+      };
+    } else {
+      // Falling animation
+      return {
+        ...baseStyles,
+        animation: `fall ${emoji.duration}s ease-out infinite`,
+        animationDelay: `${emoji.delay}s`,
+      };
+    }
+  };
+
   return (
     <div className="fixed inset-0 pointer-events-none overflow-hidden z-10">
       {emojis.map((emoji) => (
@@ -73,17 +95,10 @@ export const FallingEmojis: React.FC = () => {
           key={emoji.id}
           className={`absolute text-4xl font-bold antialiased cursor-pointer transition-all duration-300 ${
             emoji.isPopped 
-              ? 'animate-emoji-pop pointer-events-none' 
-              : 'animate-fall pointer-events-auto hover:scale-110'
+              ? 'pointer-events-none' 
+              : 'pointer-events-auto hover:scale-110'
           }`}
-          style={{
-            left: `${emoji.x}%`,
-            animationDuration: `${emoji.duration}s`,
-            animationDelay: `${emoji.delay}s`,
-            animationTimingFunction: 'ease-out',
-            animationIterationCount: 'infinite',
-            transform: 'translateX(-50%)',
-          }}
+          style={getEmojiStyles(emoji)}
           onClick={() => handleEmojiClick(emoji.id)}
         >
           {emoji.emoji}
