@@ -56,23 +56,91 @@ interface GameState {
 
 // iOS-specific performance optimizations
 const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
-const TARGET_FPS_IOS = 30; // Lower FPS for iOS to improve performance
-const TARGET_FPS_MOBILE = 45;
-const TARGET_FPS_DESKTOP = 60;
-const getTargetFPS = () => {
-  if (isIOS()) return TARGET_FPS_IOS;
-  return window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
+const TARGET_FPS = 60; // Lock to 60fps for consistency
+const FRAME_TIME = 1000 / TARGET_FPS;
+
+// iOS Safari specific optimizations
+const IOS_OPTIMIZATIONS = {
+  REDUCE_PARTICLES: true,
+  BATCH_DRAW_CALLS: true,
+  HARDWARE_ACCELERATION: true,
+  MEMORY_POOLING: true,
+  AGGRESSIVE_GC_PREVENTION: true
 };
-const FRAME_TIME = () => 1000 / getTargetFPS();
+
+// Performance monitoring
+class PerformanceMonitor {
+  private frameCount = 0;
+  private lastTime = performance.now();
+  private fps = 0;
+  private frameTimeHistory: number[] = [];
+  private maxHistory = 60; // Track last 60 frames
+  
+  update(): { fps: number; frameTime: number; isStutter: boolean } {
+    const now = performance.now();
+    const frameTime = now - this.lastTime;
+    this.frameTimeHistory.push(frameTime);
+    
+    if (this.frameTimeHistory.length > this.maxHistory) {
+      this.frameTimeHistory.shift();
+    }
+    
+    this.frameCount++;
+    if (this.frameCount >= 60) {
+      this.fps = Math.round(1000 / (this.frameTimeHistory.reduce((a, b) => a + b, 0) / this.frameTimeHistory.length));
+      this.frameCount = 0;
+    }
+    
+    // Detect frame stutter (frame time > 20ms = under 50fps)
+    const isStutter = frameTime > 20;
+    this.lastTime = now;
+    
+    return { fps: this.fps, frameTime, isStutter };
+  }
+  
+  getAverageFrameTime(): number {
+    return this.frameTimeHistory.reduce((a, b) => a + b, 0) / this.frameTimeHistory.length;
+  }
+}
+
+// Object pooling for iOS memory optimization
+class ObjectPool<T> {
+  private pool: T[] = [];
+  private createFn: () => T;
+  private resetFn: (obj: T) => void;
+  
+  constructor(createFn: () => T, resetFn: (obj: T) => void, initialSize = 10) {
+    this.createFn = createFn;
+    this.resetFn = resetFn;
+    
+    // Pre-populate pool
+    for (let i = 0; i < initialSize; i++) {
+      this.pool.push(createFn());
+    }
+  }
+  
+  get(): T {
+    const obj = this.pool.pop();
+    return obj || this.createFn();
+  }
+  
+  release(obj: T): void {
+    this.resetFn(obj);
+    this.pool.push(obj);
+  }
+}
 const GRAVITY = 0.6;
 const JUMP_FORCE = -9.4;
 const PIPE_WIDTH = 80;
 const BASE_PIPE_GAP = 280;
-const MIN_PIPE_GAP = 180; // Reduced from 200 to make it harder
+const MIN_PIPE_GAP = 180;
 const LOCKER_WIDTH = 220;
 const PIPE_SPEED = 2.5;
-const PIPE_GAP = 220; // Reduced from 240 to make it harder
+const PIPE_GAP = 220;
 const BIRD_SIZE = 50;
+
+// iOS-optimized constants
+const IOS_RENDER_SCALE = isIOS() ? 0.8 : 1; // Reduce render complexity on iOS
 
 export const Game: React.FC = () => {
   const navigate = useNavigate();
@@ -109,12 +177,32 @@ export const Game: React.FC = () => {
     activePowers: shopActivePowers
   } = useShopPowers();
   
+  // iOS Performance monitoring
+  const performanceMonitorRef = useRef(new PerformanceMonitor());
+  const [performanceStats, setPerformanceStats] = useState({ fps: 60, frameTime: 16.67, isStutter: false });
+  
+  // Object pools for iOS memory optimization
+  const bookPoolRef = useRef(new ObjectPool<Book>(
+    () => ({ id: '', x: 0, y: 0, collected: false }),
+    (book) => { book.collected = false; book.beingPulled = false; book.pullStartTime = undefined; }
+  ));
+  
+  const pipePoolRef = useRef(new ObjectPool<Pipe>(
+    () => ({ x: 0, y: 0, width: LOCKER_WIDTH, height: 0, passed: false, lockerType: 0 }),
+    (pipe) => { pipe.passed = false; }
+  ));
+  
   // Track whether the game is currently running to avoid resize-induced jank
   const isPlayingRef = useRef(false);
   
+  // Cached image references for iOS optimization
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
   const lockerImagesRef = useRef<HTMLImageElement[]>([]);
   const nextBookIdRef = useRef(0);
+  
+  // iOS-specific rendering optimization flags
+  const shouldRenderEffectsRef = useRef(!isIOS());
+  const renderFrameCountRef = useRef(0);
   
   const [gameState, setGameState] = useState<GameState>({
     bird: { x: 100, y: 200, width: BIRD_SIZE, height: BIRD_SIZE, velocity: 0 },
@@ -141,28 +229,70 @@ export const Game: React.FC = () => {
   const [gameStartTime, setGameStartTime] = useState<number>(0);
 
   // Load background image, locker images and get user record on component mount
-
   useEffect(() => {
+    // iOS-specific DOM optimizations
+    if (isIOS()) {
+      const bodyStyle = document.body.style as any;
+      bodyStyle.WebkitTapHighlightColor = 'transparent';
+      bodyStyle.WebkitTouchCallout = 'none';
+      bodyStyle.webkitUserSelect = 'none';
+      bodyStyle.transform = 'translateZ(0)'; // Hardware acceleration
+    }
+    
     // Prevent body scrolling on mobile when game is active
     document.body.classList.add('game-active');
 
-    // Load background image
+    // Load and optimize images for iOS
     const img = new Image();
-    img.onload = () => {}; // Remove debug log
+    img.onload = () => {
+      // iOS optimization: create an offscreen canvas for better performance
+      if (isIOS() && img.complete) {
+        const offscreenCanvas = document.createElement('canvas');
+        const ctx = offscreenCanvas.getContext('2d');
+        if (ctx) {
+          offscreenCanvas.width = img.width * IOS_RENDER_SCALE;
+          offscreenCanvas.height = img.height * IOS_RENDER_SCALE;
+          ctx.drawImage(img, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+          // Replace original image with optimized version
+          const optimizedImg = new Image();
+          optimizedImg.src = offscreenCanvas.toDataURL();
+          backgroundImageRef.current = optimizedImg;
+        }
+      } else {
+        backgroundImageRef.current = img;
+      }
+    };
     img.onerror = (e) => console.error('Background failed to load:', e);
     img.src = bgImage;
-    backgroundImageRef.current = img;
 
-    // Load locker image (only yellow) with error handling
+    // Load and optimize locker image for iOS
     const lockerImg = new Image();
-    lockerImg.onload = () => {}; // Remove debug log
+    lockerImg.onload = () => {
+      if (isIOS() && lockerImg.complete) {
+        const offscreenCanvas = document.createElement('canvas');
+        const ctx = offscreenCanvas.getContext('2d');
+        if (ctx) {
+          offscreenCanvas.width = lockerImg.width * IOS_RENDER_SCALE;
+          offscreenCanvas.height = lockerImg.height * IOS_RENDER_SCALE;
+          ctx.drawImage(lockerImg, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
+          const optimizedImg = new Image();
+          optimizedImg.src = offscreenCanvas.toDataURL();
+          lockerImagesRef.current[0] = optimizedImg;
+        }
+      } else {
+        lockerImagesRef.current[0] = lockerImg;
+      }
+    };
     lockerImg.onerror = (e) => console.error('Yellow locker failed to load:', e);
     lockerImg.src = lockerYellow;
-    lockerImagesRef.current[0] = lockerImg;
 
     // Cleanup function
     return () => {
       document.body.classList.remove('game-active');
+      if (isIOS()) {
+        const bodyStyle = document.body.style as any;
+        bodyStyle.transform = '';
+      }
     };
   }, []);
 
@@ -488,6 +618,15 @@ export const Game: React.FC = () => {
   const gameLoop = useCallback((currentTime: number) => {
     if (!canvasRef.current || !gameState.gameStarted || gameState.gameOver || showPowerSelection || waitingForContinue) return;
 
+    // iOS-specific performance monitoring
+    const perfStats = performanceMonitorRef.current.update();
+    
+    // Update performance stats every 30 frames to avoid UI thrashing
+    if (renderFrameCountRef.current % 30 === 0) {
+      setPerformanceStats(perfStats);
+    }
+    renderFrameCountRef.current++;
+
     const canvas = canvasRef.current;
     // iOS-optimized canvas context with performance hints
     const ctx = canvas.getContext('2d', { 
@@ -503,26 +642,20 @@ export const Game: React.FC = () => {
     setGameState(prev => {
       const newState = { ...prev };
       const deltaTime = currentTime - newState.lastFrameTime;
-      const isMobile = window.innerWidth < 768;
-      const currentFrameTime = FRAME_TIME();
-      const baseFrameTime = isMobile ? 1000 / TARGET_FPS_MOBILE : currentFrameTime;
-
-      // iOS: Aggressive frame limiting for performance
-      // Desktop: throttle to target FPS. Mobile: moderate throttling.
-      if (isIOS() && deltaTime < currentFrameTime * 1.2) {
-        return newState;
-      } else if (!isMobile && deltaTime < currentFrameTime) {
-        return newState;
+      
+      // iOS: Consistent frame timing for 60fps
+      if (isIOS() && deltaTime < FRAME_TIME * 0.9) {
+        return newState; // Skip frame to maintain consistent timing
       }
 
       // Clamp delta to avoid big jumps on tab switching/backgrounding
       const clampedDelta = Math.min(deltaTime, 50);
-
+      
       // Get current power modifiers
       const modifiers = getGameModifiers();
       
       // Calculate frame multiplier for consistent movement across different frame rates
-      const frameMultiplier = clampedDelta / baseFrameTime;
+      const frameMultiplier = clampedDelta / FRAME_TIME;
       newState.lastFrameTime = currentTime;
 
       // Clear expired temporary invincibility
@@ -568,8 +701,8 @@ export const Game: React.FC = () => {
       }
 
       // Generate pipes (iOS-optimized spawn rates)
-      const iosMultiplier = isIOS() ? 1.5 : 1; // Reduce spawn rate on iOS
-      const basePipeFrequency = (canvasSize.width < 500 ? 2200 : 1800) * iosMultiplier;
+      const iosSpawnMultiplier = isIOS() ? 1.3 : 1; // Slightly reduce spawn rate on iOS
+      const basePipeFrequency = (canvasSize.width < 500 ? 2200 : 1800) * iosSpawnMultiplier;
       const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
       const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency;
       
@@ -598,38 +731,62 @@ export const Game: React.FC = () => {
         );
         
         if (!wouldOverlap) {
-          newState.pipes.push(
-            {
-              x: lockerX,
-              y: 0, // Top locker starts from screen top
-              width: LOCKER_WIDTH,
-              height: finalGapStart, // Extends down to gap start
-              passed: false,
-              lockerType,
-            },
-            {
-              x: lockerX,
-              y: finalGapStart + finalGapSize, // Bottom locker starts after gap
-              width: LOCKER_WIDTH,
-              height: canvasSize.height - (finalGapStart + finalGapSize), // Extends to screen bottom
-              passed: false,
-              lockerType,
-            }
-          );
+          // Use object pooling for iOS memory optimization
+          const topPipe = IOS_OPTIMIZATIONS.MEMORY_POOLING ? pipePoolRef.current.get() : {
+            x: lockerX,
+            y: 0,
+            width: LOCKER_WIDTH,
+            height: finalGapStart,
+            passed: false,
+            lockerType,
+          };
+          
+          const bottomPipe = IOS_OPTIMIZATIONS.MEMORY_POOLING ? pipePoolRef.current.get() : {
+            x: lockerX,
+            y: finalGapStart + finalGapSize,
+            width: LOCKER_WIDTH,
+            height: canvasSize.height - (finalGapStart + finalGapSize),
+            passed: false,
+            lockerType,
+          };
+          
+          // Set properties for pooled objects
+          if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
+            Object.assign(topPipe, {
+              x: lockerX, y: 0, width: LOCKER_WIDTH, height: finalGapStart, passed: false, lockerType
+            });
+            Object.assign(bottomPipe, {
+              x: lockerX, y: finalGapStart + finalGapSize, width: LOCKER_WIDTH, 
+              height: canvasSize.height - (finalGapStart + finalGapSize), passed: false, lockerType
+            });
+          }
+          
+          newState.pipes.push(topPipe, bottomPipe);
           newState.lastPipeTime = currentTime;
           
-          // 10% chance to spawn a book with the new pipe (not affected by locker spam)
-          if (Math.random() < 0.1 && !hasLockerSpam) {
-            // Use the existing gapStart calculation for safe spawn area
+          // 10% chance to spawn a book with the new pipe (reduced on iOS for performance)
+          const bookSpawnChance = isIOS() ? 0.08 : 0.1;
+          if (Math.random() < bookSpawnChance && !hasLockerSpam) {
             const gapMiddle = finalGapStart + finalGapSize / 2;
-            const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6); // Keep books in middle of gap
+            const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6);
             
-            const newBook: Book = {
+            // Use object pooling for books on iOS
+            const newBook = IOS_OPTIMIZATIONS.MEMORY_POOLING ? bookPoolRef.current.get() : {
               id: `book_${nextBookIdRef.current++}`,
-              x: lockerX + LOCKER_WIDTH / 2, // Spawn at the same X position as the pipe gap
-              y: Math.max(80, Math.min(safeY, canvasSize.height - 80)), // Ensure books stay in reachable area
+              x: lockerX + LOCKER_WIDTH / 2,
+              y: Math.max(80, Math.min(safeY, canvasSize.height - 80)),
               collected: false
             };
+            
+            if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
+              Object.assign(newBook, {
+                id: `book_${nextBookIdRef.current++}`,
+                x: lockerX + LOCKER_WIDTH / 2,
+                y: Math.max(80, Math.min(safeY, canvasSize.height - 80)),
+                collected: false
+              });
+            }
+            
             newState.books.push(newBook);
           }
         }
@@ -680,11 +837,15 @@ export const Game: React.FC = () => {
         }, 0);
       }
 
-      // Update pipes with frame rate compensation
+      // Update pipes with frame rate compensation and iOS memory optimization
       newState.pipes = newState.pipes.filter(pipe => {
         // Remove pipes marked for demolition by Ghost Mode
         if ((pipe as any).shouldBeRemoved) {
-          return false; // Remove this pipe completely
+          // Return to object pool if using iOS optimizations
+          if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
+            pipePoolRef.current.release(pipe);
+          }
+          return false;
         }
         
         pipe.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
@@ -737,7 +898,11 @@ export const Game: React.FC = () => {
         }
 
         // Remove pipes that should be demolished or have moved off screen
-        return pipe.x > -pipe.width && !(pipe as any).shouldBeRemoved;
+        const shouldRemove = pipe.x <= -pipe.width || (pipe as any).shouldBeRemoved;
+        if (shouldRemove && IOS_OPTIMIZATIONS.MEMORY_POOLING) {
+          pipePoolRef.current.release(pipe);
+        }
+        return !shouldRemove;
       });
 
       return newState;
@@ -1113,13 +1278,37 @@ export const Game: React.FC = () => {
   }, [jump, waitingForContinue]);
 
   return (
-    <div className="fixed inset-0 bg-gradient-to-b from-sky-start to-sky-end overflow-hidden">
+    <div 
+      className="fixed inset-0 bg-gradient-to-b from-sky-start to-sky-end overflow-hidden"
+      style={{
+        // iOS-specific hardware acceleration
+        ...(isIOS() && {
+          WebkitTransform: 'translateZ(0)',
+          WebkitBackfaceVisibility: 'hidden',
+          WebkitPerspective: '1000px'
+        })
+      }}
+    >
+      {/* Performance Monitor (iOS only) */}
+      {isIOS() && (
+        <div className="absolute top-4 left-4 z-50 bg-black/80 text-white p-2 rounded text-xs">
+          <div>FPS: {performanceStats.fps}</div>
+          <div>Frame: {performanceStats.frameTime.toFixed(1)}ms</div>
+          {performanceStats.isStutter && <div className="text-red-400">STUTTER</div>}
+        </div>
+      )}
+      
       {/* Game Canvas Container */}
       <div 
         className="absolute inset-0 flex items-center justify-center touch-none"
         style={{ 
           width: '100vw',
-          height: '100dvh'
+          height: '100dvh',
+          // iOS hardware acceleration
+          ...(isIOS() && {
+            WebkitTransform: 'translateZ(0)',
+            transform: 'translateZ(0)'
+          })
         }}
       >
         <div
@@ -1128,7 +1317,13 @@ export const Game: React.FC = () => {
             width: canvasSize.width, 
             height: canvasSize.height,
             maxWidth: '100vw',
-            maxHeight: '100svh'
+            maxHeight: '100svh',
+            // iOS hardware acceleration
+            ...(isIOS() && {
+              WebkitTransform: 'translateZ(0)',
+              transform: 'translateZ(0)',
+              WebkitBackfaceVisibility: 'hidden'
+            })
           }}
         >
         <canvas
@@ -1142,11 +1337,14 @@ export const Game: React.FC = () => {
             imageRendering: isIOS() ? 'auto' : 'pixelated', // Smooth rendering on iOS
             width: canvasSize.width + 'px',
             height: canvasSize.height + 'px',
-            // iOS-specific optimizations
+            // iOS-specific hardware acceleration optimizations
             ...(isIOS() && {
-              WebkitTransform: 'translateZ(0)', // Hardware acceleration
+              WebkitTransform: 'translateZ(0)',
+              transform: 'translateZ(0)',
               WebkitBackfaceVisibility: 'hidden',
-              WebkitPerspective: '1000'
+              WebkitPerspective: '1000px',
+              WebkitUserSelect: 'none',
+              WebkitTouchCallout: 'none'
             })
           }}
         />
