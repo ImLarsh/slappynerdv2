@@ -183,9 +183,7 @@ const MainMenu: React.FC = () => {
         </Button>}
       
       {/* Sign Out Button - Red Door Icon */}
-      {user && <Button variant="outline" size="icon" onClick={() => handleButtonClick(signOut)} className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 my-[70px] mx-[70px] py-[13px] px-[21px]">
-          <DoorOpen className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
-        </Button>}
+      {user}
       
       {/* Centered Content */}
       <div className="relative z-10 max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md w-full space-y-1.5 sm:space-y-2 md:space-y-3 lg:space-y-6 text-center mt-12 sm:mt-16 md:mt-20 lg:mt-16 px-1 sm:px-2">{/* Character and Description */}
