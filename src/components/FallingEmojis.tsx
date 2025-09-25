@@ -9,6 +9,7 @@ interface FallingEmoji {
   duration: number;
   delay: number;
   isPopped: boolean;
+  popTop?: number;
 }
 
 export const FallingEmojis: React.FC = () => {
@@ -49,14 +50,22 @@ export const FallingEmojis: React.FC = () => {
     return () => clearInterval(interval);
   }, [characters]);
 
-  const handleEmojiClick = (emojiId: number) => {
+  const handleEmojiClick = (
+    emojiId: number,
+    e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
+  ) => {
     // Play pop sound
     playSound('emojipop');
-    
-    // Mark emoji as popped and trigger animation
-    setEmojis(prev => prev.map(emoji => 
-      emoji.id === emojiId 
-        ? { ...emoji, isPopped: true }
+
+    // Capture current screen position to avoid teleporting
+    const target = e.currentTarget as HTMLDivElement;
+    const rect = target.getBoundingClientRect();
+    const top = rect.top;
+
+    // Mark emoji as popped and freeze its position
+    setEmojis(prev => prev.map(emoji =>
+      emoji.id === emojiId
+        ? { ...emoji, isPopped: true, popTop: top }
         : emoji
     ));
 
@@ -76,6 +85,7 @@ export const FallingEmojis: React.FC = () => {
       // Pop animation - stay in current position
       return {
         ...baseStyles,
+        top: `${emoji.popTop ?? 0}px`,
         animation: 'emoji-pop 0.3s ease-out forwards',
       };
     } else {
@@ -99,7 +109,8 @@ export const FallingEmojis: React.FC = () => {
               : 'pointer-events-auto hover:scale-110'
           }`}
           style={getEmojiStyles(emoji)}
-          onClick={() => handleEmojiClick(emoji.id)}
+          onClick={(e) => handleEmojiClick(emoji.id, e)}
+          onTouchStart={(e) => handleEmojiClick(emoji.id, e)}
         >
           {emoji.emoji}
         </div>
