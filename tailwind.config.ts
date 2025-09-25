@@ -133,6 +133,10 @@ export default {
           "0%, 100%": { transform: "translateY(0px)" },
           "50%": { transform: "translateY(-10px)" },
         },
+        "matrix-fall": {
+          "0%": { transform: "translateY(-100vh)", opacity: "1" },
+          "100%": { transform: "translateY(100vh)", opacity: "0" },
+        },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
@@ -142,6 +146,9 @@ export default {
         "slide-up": "slide-up 0.4s ease-out",
         "pulse-glow": "pulse-glow 2s ease-in-out infinite",
         "float": "float 3s ease-in-out infinite",
+        "matrix-fall-slow": "matrix-fall 8s linear infinite",
+        "matrix-fall-medium": "matrix-fall 6s linear infinite",
+        "matrix-fall-fast": "matrix-fall 4s linear infinite",
       },
     },
   },
