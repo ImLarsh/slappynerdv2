@@ -54,9 +54,15 @@ interface GameState {
   temporaryInvincibility?: number; // End time for temporary invincibility
 }
 
-const TARGET_FPS_MOBILE = 60;
-const TARGET_FPS_DESKTOP = 80;
-const getTargetFPS = () => window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
+// iOS-specific performance optimizations
+const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
+const TARGET_FPS_IOS = 30; // Lower FPS for iOS to improve performance
+const TARGET_FPS_MOBILE = 45;
+const TARGET_FPS_DESKTOP = 60;
+const getTargetFPS = () => {
+  if (isIOS()) return TARGET_FPS_IOS;
+  return window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
+};
 const FRAME_TIME = () => 1000 / getTargetFPS();
 const GRAVITY = 0.6;
 const JUMP_FORCE = -9.4;
@@ -483,7 +489,12 @@ export const Game: React.FC = () => {
     if (!canvasRef.current || !gameState.gameStarted || gameState.gameOver || showPowerSelection || waitingForContinue) return;
 
     const canvas = canvasRef.current;
-    const ctx = canvas.getContext('2d');
+    // iOS-optimized canvas context with performance hints
+    const ctx = canvas.getContext('2d', { 
+      alpha: false, 
+      desynchronized: isIOS(), // Enable for iOS only
+      willReadFrequently: false 
+    }) as CanvasRenderingContext2D;
     if (!ctx) {
       console.error('Cannot get canvas context in game loop');
       return;
@@ -496,8 +507,11 @@ export const Game: React.FC = () => {
       const currentFrameTime = FRAME_TIME();
       const baseFrameTime = isMobile ? 1000 / TARGET_FPS_MOBILE : currentFrameTime;
 
-      // Desktop: throttle to target FPS. Mobile: no cap (always update).
-      if (!isMobile && deltaTime < currentFrameTime) {
+      // iOS: Aggressive frame limiting for performance
+      // Desktop: throttle to target FPS. Mobile: moderate throttling.
+      if (isIOS() && deltaTime < currentFrameTime * 1.2) {
+        return newState;
+      } else if (!isMobile && deltaTime < currentFrameTime) {
         return newState;
       }
 
@@ -553,10 +567,11 @@ export const Game: React.FC = () => {
         return newState;
       }
 
-      // Generate pipes (adjust frequency for mobile performance and locker spam power)
-      const basePipeFrequency = canvasSize.width < 500 ? 2200 : 1800; // Increased spawn rate further (reduced from 2500/2000)
+      // Generate pipes (iOS-optimized spawn rates)
+      const iosMultiplier = isIOS() ? 1.5 : 1; // Reduce spawn rate on iOS
+      const basePipeFrequency = (canvasSize.width < 500 ? 2200 : 1800) * iosMultiplier;
       const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
-      const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency; // Double spawn rate if locker spam is active
+      const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency;
       
       // Prevent pipe spawning during power selection or right after power activation to avoid stacking
       const timeSinceLastPipe = currentTime - newState.lastPipeTime;
@@ -752,17 +767,28 @@ export const Game: React.FC = () => {
       console.log('Canvas size set to:', canvasSize);
     }
 
-    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+    // iOS-optimized canvas context
+    const ctx = canvas.getContext('2d', { 
+      alpha: false, 
+      desynchronized: isIOS(),
+      willReadFrequently: false
+    }) as CanvasRenderingContext2D;
     if (!ctx) {
       console.error('Cannot get canvas context');
       return;
+    }
+    
+    // iOS-specific optimizations
+    ctx.imageSmoothingEnabled = !isIOS();
+    if (isIOS() && 'imageSmoothingQuality' in ctx) {
+      (ctx as any).imageSmoothingQuality = 'low';
     }
 
     // Ensure canvas is visible - draw initial background
     ctx.fillStyle = 'hsl(200, 100%, 85%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw scrolling background
+    // Draw scrolling background (iOS-optimized)
     if (backgroundImageRef.current && backgroundImageRef.current.complete) {
       const img = backgroundImageRef.current;
       const bgWidth = img.width;
@@ -771,7 +797,7 @@ export const Game: React.FC = () => {
       // Scale background to cover entire canvas (stretch to fill)
       const scaleX = canvas.width / bgWidth;
       const scaleY = canvas.height / bgHeight;
-      const scale = Math.max(scaleX, scaleY); // Use max to ensure full coverage
+      const scale = Math.max(scaleX, scaleY);
       
       const scaledWidth = bgWidth * scale;
       const scaledHeight = bgHeight * scale;
@@ -782,8 +808,11 @@ export const Game: React.FC = () => {
       // Calculate offset for seamless looping
       const scrollOffset = gameState.backgroundOffset % scaledWidth;
       
-      // Draw multiple copies of the background for seamless scrolling
-      for (let i = -1; i <= Math.ceil(canvas.width / scaledWidth) + 1; i++) {
+      // iOS optimization: reduce background complexity
+      const maxCopies = isIOS() ? 2 : Math.ceil(canvas.width / scaledWidth) + 1;
+      
+      // Draw background copies
+      for (let i = -1; i <= maxCopies; i++) {
         ctx.drawImage(
           img,
           i * scaledWidth - scrollOffset,
@@ -801,10 +830,19 @@ export const Game: React.FC = () => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Draw lockers instead of pipes
-    const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03)); // extend offscreen to avoid top/bottom gaps
+    // Draw lockers instead of pipes (iOS-optimized)
+    const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03));
+    
+    // iOS optimization: reduce shadow effects
+    if (!isIOS()) {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 5;
+      ctx.shadowOffsetX = 3;
+      ctx.shadowOffsetY = 3;
+    }
+    
     gameState.pipes.forEach(pipe => {
-      const lockerImage = lockerImagesRef.current[0]; // Always use yellow locker (index 0)
+      const lockerImage = lockerImagesRef.current[0];
       
       if (lockerImage && lockerImage.complete) {
         const targetWidth = LOCKER_WIDTH;
@@ -839,11 +877,7 @@ export const Game: React.FC = () => {
           );
         }
         
-        // Add a subtle shadow for depth
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        ctx.shadowBlur = 5;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 3;
+        // Skip shadow on iOS for performance
       } else {
         // Fallback: draw yellow rectangle if image not loaded
         ctx.fillStyle = '#FFD700'; // Yellow
@@ -858,36 +892,39 @@ export const Game: React.FC = () => {
         ctx.strokeRect(pipe.x, rectY, pipe.width, rectH);
       }
       
-      // Reset shadow
-      ctx.shadowColor = 'transparent';
-      ctx.shadowBlur = 0;
-      ctx.shadowOffsetX = 0;
-      ctx.shadowOffsetY = 0;
+      // Reset shadow (if not iOS)
+      if (!isIOS()) {
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+      }
     });
 
-    // Draw books with bright yellow ring
+    // Draw books with optimized effects for iOS
     gameState.books.forEach(book => {
       if (!book.collected) {
-        const bookSize = 32; // Increased from 24px
+        const bookSize = 32;
         
-        // Draw bright yellow ring around book
         ctx.save();
         
-        // Add extra glow effect for books being pulled
+        // Simplified effects for iOS performance
         if (book.beingPulled) {
-          ctx.strokeStyle = '#00FF00'; // Green for being pulled
-          ctx.lineWidth = 6;
-          ctx.shadowColor = '#00FF00';
-          ctx.shadowBlur = 12;
-          
-          // Draw pulsing effect
-          const pulseIntensity = 0.8 + 0.2 * Math.sin(Date.now() * 0.01);
-          ctx.globalAlpha = pulseIntensity;
+          ctx.strokeStyle = '#00FF00';
+          ctx.lineWidth = isIOS() ? 3 : 6; // Thinner on iOS
+          if (!isIOS()) {
+            ctx.shadowColor = '#00FF00';
+            ctx.shadowBlur = 12;
+            const pulseIntensity = 0.8 + 0.2 * Math.sin(Date.now() * 0.01);
+            ctx.globalAlpha = pulseIntensity;
+          }
         } else {
           ctx.strokeStyle = '#FFD700';
-          ctx.lineWidth = 4;
-          ctx.shadowColor = '#FFD700';
-          ctx.shadowBlur = 8;
+          ctx.lineWidth = isIOS() ? 2 : 4; // Thinner on iOS
+          if (!isIOS()) {
+            ctx.shadowColor = '#FFD700';
+            ctx.shadowBlur = 8;
+          }
         }
         
         // Draw the glowing ring
@@ -895,9 +932,11 @@ export const Game: React.FC = () => {
         ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2 + 6, 0, 2 * Math.PI);
         ctx.stroke();
         
-        // Reset shadow for the emoji
-        ctx.shadowBlur = 0;
-        ctx.shadowColor = 'transparent';
+        // Reset effects
+        if (!isIOS()) {
+          ctx.shadowBlur = 0;
+          ctx.shadowColor = 'transparent';
+        }
         ctx.globalAlpha = 1;
         
         // Draw the book emoji larger
@@ -918,13 +957,13 @@ export const Game: React.FC = () => {
     const hasActiveShield = hasStartShield();
     const hasActiveMagnet = hasBookMagnet();
     
-    // Draw light blue circle for ghost mode (behind character)
-    if (hasActiveGhostMode) {
+    // Draw simplified power effects for iOS performance
+    if (hasActiveGhostMode && !isIOS()) {
       ctx.save();
-      ctx.strokeStyle = '#87CEEB'; // Light blue
+      ctx.strokeStyle = '#87CEEB';
       ctx.lineWidth = 6;
       ctx.globalAlpha = 0.7;
-      ctx.setLineDash([10, 10]); // Dotted line for ghost effect
+      ctx.setLineDash([10, 10]);
       ctx.beginPath();
       ctx.arc(
         gameState.bird.x + gameState.bird.width / 2,
@@ -937,12 +976,12 @@ export const Game: React.FC = () => {
       ctx.restore();
     }
     
-    // Draw green outline for shield mode
+    // Simplified shield effect for iOS
     if (hasActiveShield) {
       ctx.save();
-      ctx.strokeStyle = '#22C55E'; // Green
-      ctx.lineWidth = 5;
-      ctx.globalAlpha = 0.8;
+      ctx.strokeStyle = '#22C55E';
+      ctx.lineWidth = isIOS() ? 3 : 5;
+      ctx.globalAlpha = isIOS() ? 0.6 : 0.8;
       ctx.beginPath();
       ctx.arc(
         gameState.bird.x + gameState.bird.width / 2,
@@ -955,8 +994,8 @@ export const Game: React.FC = () => {
       ctx.restore();
     }
     
-    // Draw yellow glow for book magnet (behind character)
-    if (hasActiveMagnet) {
+    // Simplified magnet effect for iOS
+    if (hasActiveMagnet && !isIOS()) {
       ctx.save();
       ctx.shadowColor = '#FFD700';
       ctx.shadowBlur = 20;
@@ -1100,9 +1139,15 @@ export const Game: React.FC = () => {
           style={{ 
             touchAction: 'none', 
             WebkitTapHighlightColor: 'transparent', 
-            imageRendering: 'pixelated',
+            imageRendering: isIOS() ? 'auto' : 'pixelated', // Smooth rendering on iOS
             width: canvasSize.width + 'px',
-            height: canvasSize.height + 'px'
+            height: canvasSize.height + 'px',
+            // iOS-specific optimizations
+            ...(isIOS() && {
+              WebkitTransform: 'translateZ(0)', // Hardware acceleration
+              WebkitBackfaceVisibility: 'hidden',
+              WebkitPerspective: '1000'
+            })
           }}
         />
 
