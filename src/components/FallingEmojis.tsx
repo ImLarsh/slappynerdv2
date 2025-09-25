@@ -50,7 +50,7 @@ export const FallingEmojis: React.FC = () => {
   // Add new emoji when current one is removed
   useEffect(() => {
     if (characters.length > 0 && emojis.length === 0) {
-      const timeout = setTimeout(addNewEmoji, 1000); // Wait 1 second before new emoji
+      const timeout = setTimeout(addNewEmoji, 500); // Wait 0.5 seconds before new emoji
       return () => clearTimeout(timeout);
     }
   }, [emojis.length, characters.length]);
@@ -104,7 +104,7 @@ export const FallingEmojis: React.FC = () => {
   };
 
   return (
-    <div className="fixed inset-0 pointer-events-none overflow-hidden z-10">
+    <div className="fixed inset-0 pointer-events-none overflow-hidden z-50">
       {emojis.map((emoji) => (
         <div
           key={emoji.id}
