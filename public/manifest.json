@@ -1,0 +1,24 @@
+{
+  "name": "Slappy Nerds",
+  "short_name": "Slappy Nerds",
+  "description": "Help your nerdy hero soar through the skies! Tap to flap, avoid lockers, and collect quirky nerdy books in this addictive Flappy Bird-style game.",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#000000",
+  "theme_color": "#000000",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/RyUAXWxhEAXhxjFqA3XUTWVSUGC3/uploads/1758698980206-Gemini_Generated_Image_psaruqpsaruqpsar-removebg-preview (2).png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://storage.googleapis.com/gpt-engineer-file-uploads/RyUAXWxhEAXhxjFqA3XUTWVSUGC3/uploads/1758698980206-Gemini_Generated_Image_psaruqpsaruqpsar-removebg-preview (2).png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "categories": ["games", "entertainment"],
+  "lang": "en"
+}

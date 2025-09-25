@@ -17,8 +17,9 @@ import { CratesMenu } from '@/components/CratesMenu';
 import { supabase } from '@/integrations/supabase/client';
 import schoolHallwayBg from '@/assets/school-hallway-bg.png';
 import slappyNerdsTitle from '@/assets/slappy-nerds-title.png';
-import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen, Package } from 'lucide-react';
+import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen, Package, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import { usePWA } from '@/hooks/usePWA';
 const MainMenu: React.FC = () => {
   const [charactersOpen, setCharactersOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
@@ -53,6 +54,7 @@ const MainMenu: React.FC = () => {
     stopBackgroundMusic,
     playSound
   } = useAudio();
+  const { isInstallable, installApp } = usePWA();
   const navigate = useNavigate();
 
   // Fetch player profile data
@@ -149,6 +151,18 @@ const MainMenu: React.FC = () => {
       <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(() => setVolumeOpen(true))}>
         {isMuted ? <VolumeX className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" /> : <Volume2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />}
       </Button>
+
+      {/* Add to Home Screen Button - Only show on mobile when installable */}
+      {isInstallable && (
+        <Button 
+          variant="outline" 
+          size="icon" 
+          className="absolute top-8 sm:top-12 md:top-16 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-green-500 hover:bg-green-600 border-green-400 text-white" 
+          onClick={() => handleButtonClick(installApp)}
+        >
+          <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
+        </Button>
+      )}
       
       {/* Sign Out Button - Red Door Icon */}
       {user && <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(signOut)}>
