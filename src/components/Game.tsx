@@ -1092,40 +1092,6 @@ export const Game: React.FC = () => {
     };
   }, [jump, waitingForContinue]);
   return <div className="fixed inset-0 bg-gradient-to-b from-sky-start to-sky-end overflow-hidden">
-      {/* Matrix Falling Code Background */}
-      <div className="hidden lg:block absolute inset-0 pointer-events-none overflow-hidden z-0">
-        {/* Falling Matrix Code Columns */}
-        <div className="absolute left-[5%] top-0 text-green-400/40 font-mono text-sm animate-matrix-fall-slow">
-          1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0
-        </div>
-        <div className="absolute left-[15%] top-0 text-green-400/30 font-mono text-sm animate-matrix-fall-medium" style={{animationDelay: '1s'}}>
-          0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>1
-        </div>
-        <div className="absolute left-[25%] top-0 text-green-400/35 font-mono text-sm animate-matrix-fall-fast" style={{animationDelay: '2s'}}>
-          1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>0<br/>1
-        </div>
-        <div className="absolute left-[35%] top-0 text-green-400/25 font-mono text-sm animate-matrix-fall-slow" style={{animationDelay: '3s'}}>
-          0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>1<br/>0
-        </div>
-        <div className="absolute left-[45%] top-0 text-green-400/30 font-mono text-sm animate-matrix-fall-medium" style={{animationDelay: '0.5s'}}>
-          1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0
-        </div>
-        <div className="absolute left-[55%] top-0 text-green-400/35 font-mono text-sm animate-matrix-fall-fast" style={{animationDelay: '1.5s'}}>
-          0<br/>1<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1
-        </div>
-        <div className="absolute left-[65%] top-0 text-green-400/25 font-mono text-sm animate-matrix-fall-slow" style={{animationDelay: '2.5s'}}>
-          1<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>1<br/>1<br/>1<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>0<br/>1<br/>1
-        </div>
-        <div className="absolute left-[75%] top-0 text-green-400/30 font-mono text-sm animate-matrix-fall-medium" style={{animationDelay: '3.5s'}}>
-          0<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>1<br/>1<br/>0
-        </div>
-        <div className="absolute left-[85%] top-0 text-green-400/35 font-mono text-sm animate-matrix-fall-fast" style={{animationDelay: '4s'}}>
-          1<br/>0<br/>1<br/>0<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>0<br/>1<br/>0<br/>0<br/>0<br/>1<br/>1<br/>0<br/>1<br/>0
-        </div>
-        <div className="absolute left-[95%] top-0 text-green-400/25 font-mono text-sm animate-matrix-fall-slow" style={{animationDelay: '4.5s'}}>
-          0<br/>1<br/>0<br/>1<br/>1<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1<br/>0<br/>1<br/>1<br/>0<br/>0<br/>0<br/>1<br/>0<br/>1<br/>1<br/>1<br/>0<br/>0<br/>1<br/>0<br/>1
-        </div>
-      </div>
       
       {/* Retro Nerdy Background Elements - Desktop Only */}
       <div className="hidden lg:block absolute inset-0 pointer-events-none">
