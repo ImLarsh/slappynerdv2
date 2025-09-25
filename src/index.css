@@ -394,4 +394,7 @@ html, body {
 canvas {
   -webkit-tap-highlight-color: transparent;
   touch-action: none;
+  contain: strict;
+  will-change: transform;
+  transform: translateZ(0);
 }

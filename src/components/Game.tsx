@@ -109,6 +109,8 @@ export const Game: React.FC = () => {
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
   const lockerImagesRef = useRef<HTMLImageElement[]>([]);
   const nextBookIdRef = useRef(0);
+  // Queue jumps to process inside rAF to avoid per-tap React state updates on iOS
+  const pendingJumpsRef = useRef(0);
   
   const [gameState, setGameState] = useState<GameState>({
     bird: { x: 100, y: 200, width: BIRD_SIZE, height: BIRD_SIZE, velocity: 0 },
@@ -282,10 +284,8 @@ export const Game: React.FC = () => {
       resetGame(); // This will start the game and activate shop powers
     }
     if (!gameState.gameOver) {
-      setGameState(prev => ({
-        ...prev,
-        bird: { ...prev.bird, velocity: JUMP_FORCE }
-      }));
+      // Queue the jump; the game loop will apply it at the next frame
+      pendingJumpsRef.current++;
       // Play tap/flap sound asynchronously to avoid blocking iOS main thread
       requestAnimationFrame(() => playSound('tapFlap'));
     }
@@ -518,6 +518,11 @@ export const Game: React.FC = () => {
 
       
 
+      // Apply pending jumps before physics to avoid setState in input handlers
+      if (pendingJumpsRef.current > 0) {
+        newState.bird.velocity = JUMP_FORCE;
+        pendingJumpsRef.current = 0;
+      }
       // Update bird physics with frame rate compensation
       newState.bird.velocity += GRAVITY * frameMultiplier;
       newState.bird.y += newState.bird.velocity * frameMultiplier;
