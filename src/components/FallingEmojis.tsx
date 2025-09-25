@@ -74,18 +74,16 @@ export const FallingEmojis: React.FC = () => {
         : emoji
     ));
 
-    // Start new emoji immediately when one is popped
+    // Create new emoji immediately
     const newEmoji = createEmoji();
-    if (newEmoji) {
-      setTimeout(() => {
-        setEmojis(prev => [...prev.filter(emoji => emoji.id !== emojiId), newEmoji]);
-      }, 300); // Replace after pop animation completes
-    } else {
-      // Remove emoji after animation if no new emoji to add
-      setTimeout(() => {
-        setEmojis(prev => prev.filter(emoji => emoji.id !== emojiId));
-      }, 300);
-    }
+    
+    // Remove popped emoji and add new one after animation
+    setTimeout(() => {
+      setEmojis(prev => {
+        const filtered = prev.filter(emoji => emoji.id !== emojiId);
+        return newEmoji ? [newEmoji] : filtered;
+      });
+    }, 300);
   };
 
   const getEmojiStyles = (emoji: FallingEmoji) => {
