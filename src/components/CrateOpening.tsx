@@ -43,6 +43,7 @@ const rarityGlows = {
 };
 
 export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
+  const [currentRotation, setCurrentRotation] = useState(0);
   const [phase, setPhase] = useState<'opening' | 'spinning' | 'revealing' | 'complete'>('opening');
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
@@ -115,58 +116,38 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
     // Replace the middle reward with our actual reward
     allRewards[finalIndex] = finalReward;
 
-    // CSGO-style animation parameters
-    const totalDuration = 4500; // 4.5 seconds for smoother feel
-    const minRotations = 4; // Minimum full rotations
-    const extraSpins = 3; // Extra spins to land on target
-    const targetSpins = (minRotations * totalRewards) + finalIndex + extraSpins;
+    // Wheel rotation animation parameters
+    const totalDuration = 4000; // 4 seconds
+    const minRotations = 5; // Minimum full rotations
+    const degreesPerItem = 360 / totalRewards;
     
-    let currentSpins = 0;
-    let currentIndex = 0;
+    // Calculate target rotation to land on the final reward
+    const finalRotation = (minRotations * 360) + (finalIndex * degreesPerItem);
+    
     let startTime = Date.now();
-    let lastFrameTime = startTime;
+    let currentRotation = 0;
 
     const animate = () => {
-      const now = Date.now();
-      const elapsed = now - startTime;
-      const deltaTime = now - lastFrameTime;
-      lastFrameTime = now;
+      const elapsed = Date.now() - startTime;
+      const progress = Math.min(elapsed / totalDuration, 1);
       
-      // Calculate progress (0 to 1)
-      const timeProgress = Math.min(elapsed / totalDuration, 1);
-      const spinProgress = currentSpins / targetSpins;
+      // Smooth easing function for wheel rotation
+      const easeOutCubic = 1 - Math.pow(1 - progress, 3);
       
-      // Use a combination of time and spin progress for smooth ending
-      const combinedProgress = Math.max(timeProgress * 0.7, spinProgress * 0.3);
+      // Calculate current rotation
+      currentRotation = finalRotation * easeOutCubic;
       
-      // CSGO-style easing: starts fast, gradually slows down with smooth curve
-      // Using a custom easing function that mimics CSGO's feel
-      const easeOutQuart = 1 - Math.pow(1 - combinedProgress, 4);
-      const easeOutExpo = combinedProgress === 1 ? 1 : 1 - Math.pow(2, -10 * combinedProgress);
+      // Update rotation state for the wheel
+      setCurrentRotation(currentRotation);
       
-      // Blend both easing functions for perfect CSGO feel
-      const easingValue = easeOutQuart * 0.7 + easeOutExpo * 0.3;
-      
-      // Calculate delay between frames (starts at ~16ms, ends at ~200ms)
-      const minDelay = 16; // 60fps start
-      const maxDelay = 200; // Very slow end
-      const currentDelay = minDelay + (maxDelay - minDelay) * easingValue;
-      
-      setCurrentIndex(currentIndex);
-      
-      // Continue spinning until we reach our target
-      if (currentSpins < targetSpins && timeProgress < 0.98) {
-        setTimeout(() => {
-          currentIndex = (currentIndex + 1) % totalRewards;
-          currentSpins++;
-          animate();
-        }, currentDelay);
+      if (progress < 1) {
+        requestAnimationFrame(animate);
       } else {
-        // Final positioning - ensure we land exactly on the reward
+        // Animation complete - ensure we're at the final reward
         setCurrentIndex(finalIndex);
         setPhase('revealing');
         
-        // Brief pause before showing result
+        // Show the final result after a brief pause
         setTimeout(() => {
           setPhase('complete');
           toast({
@@ -205,64 +186,82 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
             <h2 className="text-3xl font-bold mb-2">🎰 Opening {crate.name}</h2>
           </div>
 
-          {/* Spinning reel */}
-          <div className="relative overflow-hidden border-2 border-primary rounded-lg bg-card/80 backdrop-blur-sm">
-            <div className="absolute inset-0 pointer-events-none z-10">
-              <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2 w-32 h-32 border-4 border-yellow-400 rounded-lg shadow-lg shadow-yellow-400/50" />
-            </div>
-            
-            <div 
-              className="flex py-8"
-              style={{
-                transform: `translateX(${-currentIndex * 128 + 256}px)`,
-                transition: 'transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
-                willChange: 'transform'
-              }}
-            >
-              {rewards.map((reward, index) => {
-                const isCenter = index === currentIndex;
-                const distance = Math.abs(index - currentIndex);
-                
-                // Enhanced visual effects for CSGO-like feel
-                const opacity = distance === 0 ? 1 : 
-                              distance === 1 ? 0.95 : 
-                              distance === 2 ? 0.8 : 
-                              distance === 3 ? 0.5 : 
-                              distance === 4 ? 0.3 : 0.15;
-                              
-                const scale = distance === 0 ? 1.6 : 
-                             distance === 1 ? 1.25 : 
-                             distance === 2 ? 1.05 : 
-                             distance === 3 ? 0.9 : 
-                             distance === 4 ? 0.75 : 0.6;
-                             
-                const blur = distance === 0 ? 'blur(0px)' : 
-                            distance === 1 ? 'blur(0.5px)' : 
-                            distance === 2 ? 'blur(1.5px)' : 
-                            distance === 3 ? 'blur(3px)' : 
-                            distance === 4 ? 'blur(4px)' : 'blur(6px)';
-                
-                return (
-                  <div
-                    key={`${reward.id}-${index}`}
-                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-100 ease-out ${
-                      isCenter ? `${getRarityStyle(reward.rarity)}` : ''
-                    }`}
-                    style={{
-                      opacity,
-                      transform: `scale(${scale})`,
-                      filter: `${blur} ${isCenter ? 'brightness(1.5) saturate(1.4) drop-shadow(0 0 20px currentColor)' : distance <= 2 ? 'brightness(0.9)' : 'brightness(0.6)'}`,
-                      willChange: 'transform, opacity, filter'
-                    }}
-                  >
-                    <div className="text-4xl mb-1">{reward.emoji}</div>
-                    <div className="text-xs font-medium text-center px-1">{reward.name}</div>
-                    <div className={`text-xs capitalize font-semibold ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
-                      {reward.rarity}
+          {/* Spinning wheel */}
+          <div className="relative flex items-center justify-center">
+            <div className="relative w-96 h-96 border-4 border-primary rounded-full bg-card/80 backdrop-blur-sm overflow-hidden">
+              {/* Pointer/Indicator */}
+              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-yellow-400"></div>
+              </div>
+              
+              {/* Wheel segments */}
+              <div 
+                className="relative w-full h-full transition-transform duration-100 ease-out"
+                style={{
+                  transform: `rotate(${-currentRotation}deg)`,
+                  willChange: 'transform'
+                }}
+              >
+                {rewards.map((reward, index) => {
+                  const angle = (360 / rewards.length) * index;
+                  const isSelected = index === currentIndex;
+                  
+                  return (
+                    <div
+                      key={`${reward.id}-${index}`}
+                      className={`absolute w-full h-full transition-all duration-200 ${
+                        isSelected ? getRarityStyle(reward.rarity) : ''
+                      }`}
+                      style={{
+                        transform: `rotate(${angle}deg)`,
+                        transformOrigin: 'center'
+                      }}
+                    >
+                      {/* Segment background */}
+                      <div 
+                        className={`absolute top-0 left-1/2 w-4 origin-bottom transition-all duration-200 ${
+                          isSelected ? 'opacity-30' : 'opacity-10'
+                        }`}
+                        style={{
+                          height: '50%',
+                          backgroundColor: rarityColors[reward.rarity as keyof typeof rarityColors].replace('text-', ''),
+                          transform: 'translateX(-50%) rotate(0deg)',
+                          clipPath: `polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)`
+                        }}
+                      />
+                      
+                      {/* Reward content */}
+                      <div
+                        className="absolute top-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+                        style={{
+                          transform: `translateX(-50%) rotate(${-angle}deg)`
+                        }}
+                      >
+                        <div className={`text-2xl mb-1 transition-all duration-200 ${
+                          isSelected ? 'scale-150 drop-shadow-lg' : 'scale-100'
+                        }`}>
+                          {reward.emoji}
+                        </div>
+                        <div className={`text-xs font-medium text-center transition-all duration-200 ${
+                          isSelected ? 'font-bold' : ''
+                        }`}>
+                          {reward.name}
+                        </div>
+                        <div className={`text-xs capitalize font-semibold transition-all duration-200 ${
+                          rarityColors[reward.rarity as keyof typeof rarityColors]
+                        } ${isSelected ? 'text-shadow' : ''}`}>
+                          {reward.rarity}
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
+              
+              {/* Center decoration */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-primary rounded-full border-4 border-background z-10 flex items-center justify-center">
+                <div className="text-xl">{crate.emoji}</div>
+              </div>
             </div>
           </div>
         </div>
