@@ -29,7 +29,7 @@ export const PowerSelection: React.FC<PowerSelectionProps> = ({
   return <div className="absolute inset-0 flex items-center justify-center bg-foreground/70 z-50 rounded-lg">
       <div className="p-4 sm:p-6 text-center space-y-4 animate-scale-in max-w-md mx-4">
         {!selectedPower ? <>
-            <h2 className="text-xl sm:text-2xl font-bold text-amber-500">Modifiers</h2>
+            <h2 className="text-xl text-amber-500 font-extrabold sm:text-5xl">Modifiers</h2>
             <p className="text-sm sm:text-base text-amber-300">Select one of these nerdy abilities</p>
             
             <div className="grid gap-3">
