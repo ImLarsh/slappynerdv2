@@ -111,6 +111,8 @@ export const Game: React.FC = () => {
   const nextBookIdRef = useRef(0);
   // Queue jumps to process inside rAF to avoid per-tap React state updates on iOS
   const pendingJumpsRef = useRef(0);
+  // Pre-scaled background tile canvas to avoid per-frame scaling cost (iOS jank)
+  const backgroundTileCanvasRef = useRef<HTMLCanvasElement | null>(null);
   
   const [gameState, setGameState] = useState<GameState>({
     bird: { x: 100, y: 200, width: BIRD_SIZE, height: BIRD_SIZE, velocity: 0 },
@@ -134,7 +136,8 @@ export const Game: React.FC = () => {
   const [powerChoices, setPowerChoices] = useState(() => getRandomPowers(hasLuckyStart()));
   const [waitingForContinue, setWaitingForContinue] = useState(false);
   const [pendingPower, setPendingPower] = useState<any>(null);
-  const [gameStartTime, setGameStartTime] = useState<number>(0);
+const [gameStartTime, setGameStartTime] = useState<number>(0);
+  const [bgReady, setBgReady] = useState(false);
 
   // Load background image, locker images and get user record on component mount
 
@@ -144,14 +147,18 @@ export const Game: React.FC = () => {
 
     // Load background image
     const img = new Image();
-    img.onload = () => {}; // Remove debug log
+    img.decoding = 'sync';
+    img.onload = () => {
+      setBgReady(true);
+    };
     img.onerror = (e) => console.error('Background failed to load:', e);
     img.src = bgImage;
     backgroundImageRef.current = img;
 
     // Load locker image (only yellow) with error handling
     const lockerImg = new Image();
-    lockerImg.onload = () => {}; // Remove debug log
+    lockerImg.decoding = 'sync';
+    lockerImg.onload = () => {};
     lockerImg.onerror = (e) => console.error('Yellow locker failed to load:', e);
     lockerImg.src = lockerYellow;
     lockerImagesRef.current[0] = lockerImg;
@@ -161,6 +168,26 @@ export const Game: React.FC = () => {
       document.body.classList.remove('game-active');
     };
   }, []);
+
+  // Prepare pre-scaled background tile whenever bg is ready or canvas size changes
+  useEffect(() => {
+    const img = backgroundImageRef.current;
+    const canvasW = canvasSize.width;
+    const canvasH = canvasSize.height;
+    if (!img || !img.complete || canvasW <= 0 || canvasH <= 0) return;
+
+    const scale = Math.max(canvasW / img.width, canvasH / img.height);
+    const scaledWidth = Math.ceil(img.width * scale);
+    const scaledHeight = Math.ceil(img.height * scale);
+
+    const tile = document.createElement('canvas');
+    tile.width = scaledWidth;
+    tile.height = scaledHeight;
+    const tctx = tile.getContext('2d');
+    if (!tctx) return;
+    tctx.drawImage(img, 0, 0, scaledWidth, scaledHeight);
+    backgroundTileCanvasRef.current = tile;
+  }, [bgReady, canvasSize.width, canvasSize.height]);
 
   // Set responsive canvas size with safety checks
   useEffect(() => {
@@ -773,27 +800,31 @@ export const Game: React.FC = () => {
     ctx.fillStyle = 'hsl(200, 100%, 85%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw scrolling background
-    if (backgroundImageRef.current && backgroundImageRef.current.complete) {
+    // Draw scrolling background using pre-scaled tile to avoid per-frame scaling
+    const tile = backgroundTileCanvasRef.current;
+    if (tile) {
+      const scaledWidth = tile.width;
+      const scaledHeight = tile.height;
+      const offsetY = (canvas.height - scaledHeight) / 2;
+      const scrollOffset = gameState.backgroundOffset % scaledWidth;
+      for (let i = -1; i <= Math.ceil(canvas.width / scaledWidth) + 1; i++) {
+        ctx.drawImage(
+          tile,
+          i * scaledWidth - scrollOffset,
+          offsetY
+        );
+      }
+    } else if (backgroundImageRef.current && backgroundImageRef.current.complete) {
       const img = backgroundImageRef.current;
       const bgWidth = img.width;
       const bgHeight = img.height;
-      
-      // Scale background to cover entire canvas (stretch to fill)
       const scaleX = canvas.width / bgWidth;
       const scaleY = canvas.height / bgHeight;
-      const scale = Math.max(scaleX, scaleY); // Use max to ensure full coverage
-      
+      const scale = Math.max(scaleX, scaleY);
       const scaledWidth = bgWidth * scale;
       const scaledHeight = bgHeight * scale;
-      
-      // Center the image if it's larger than canvas
       const offsetY = (canvas.height - scaledHeight) / 2;
-      
-      // Calculate offset for seamless looping
       const scrollOffset = gameState.backgroundOffset % scaledWidth;
-      
-      // Draw multiple copies of the background for seamless scrolling
       for (let i = -1; i <= Math.ceil(canvas.width / scaledWidth) + 1; i++) {
         ctx.drawImage(
           img,
