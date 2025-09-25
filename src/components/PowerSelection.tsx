@@ -46,7 +46,7 @@ export const PowerSelection: React.FC<PowerSelectionProps> = ({
           </> : <>
             
             <h2 className="text-xl text-amber-500 sm:text-4xl font-extrabold">Confirm Your Choice</h2>
-            <Card className="p-4 border-2 border-primary bg-accent">
+            <Card className="p-4 border-2 border-primary bg-gray-200">
               <div className="flex items-center space-x-3 w-full">
                 <div className="text-3xl flex-shrink-0">{selectedPower.emoji}</div>
                 <div className="flex-1 min-w-0 text-left">
