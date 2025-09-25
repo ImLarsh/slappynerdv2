@@ -1241,7 +1241,7 @@ export const Game: React.FC = () => {
                   Record: {gameState.record} 👑
                 </div>}
               <div className="flex flex-col sm:flex-row space-y-2 sm:space-y-0 sm:space-x-2">
-                <Button onClick={resetGame} variant="default" size="lg" className="bg-warning text-warning-foreground shadow-glow p-4 h-14 w-14 sm:h-16 sm:w-16 py-[12px] my-0 mx-[55px]">
+                <Button onClick={resetGame} variant="default" size="lg" className="bg-warning text-warning-foreground shadow-glow h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 p-0 mx-auto sm:mx-0">
                   <RotateCcw size={24} />
                 </Button>
                 <Button onClick={() => navigate('/')} variant="outline" size="lg" className="flex-1 text-sm sm:text-base">Main Menu </Button>
