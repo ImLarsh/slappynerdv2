@@ -28,10 +28,11 @@ export const useAudio = () => {
   const [audioState, setAudioState] = useState<AudioState>(() => {
     // Load mute state from localStorage
     const savedMute = localStorage.getItem('audioMuted');
+    const savedVolume = localStorage.getItem('audioVolume');
     return {
-      volume: 0.5,
+      volume: savedVolume ? parseFloat(savedVolume) : 0.5,
       isMuted: savedMute === 'true',
-      isPlaying: false // Don't auto-play, wait for user interaction
+      isPlaying: false // Will be set to true after first interaction
     };
   });
 
@@ -60,7 +61,12 @@ export const useAudio = () => {
         setAudioState(prev => ({ ...prev, isPlaying: false }));
       });
       
-      // Don't auto-start on mobile, wait for user interaction
+      // Auto-start music after first user interaction on mobile
+      audio.addEventListener('canplaythrough', () => {
+        console.log('Background music loaded successfully');
+        // Set as playing state but don't actually play until user interaction
+        setAudioState(prev => ({ ...prev, isPlaying: true }));
+      }, { once: true });
     }
     // Point local ref to global instance
     backgroundMusicRef.current = globalBackgroundMusic;
@@ -143,7 +149,9 @@ export const useAudio = () => {
   }, [audioState.volume, audioState.isMuted]);
 
   const setVolume = useCallback((volume: number) => {
-    setAudioState(prev => ({ ...prev, volume: Math.max(0, Math.min(1, volume)) }));
+    const newVolume = Math.max(0, Math.min(1, volume));
+    localStorage.setItem('audioVolume', newVolume.toString());
+    setAudioState(prev => ({ ...prev, volume: newVolume }));
   }, []);
 
   const toggleMute = useCallback(() => {
@@ -157,8 +165,13 @@ export const useAudio = () => {
 
   const playBackgroundMusic = useCallback(async () => {
     const audio = backgroundMusicRef.current;
-    // If no audio or already playing, do nothing
-    if (!audio || !audio.paused) return;
+    // If no audio, already playing, or muted, handle appropriately
+    if (!audio) return;
+    if (!audio.paused) return;
+    if (audioState.isMuted) {
+      setAudioState(prev => ({ ...prev, isPlaying: true }));
+      return;
+    }
 
     try {
       // Load audio if not loaded yet
@@ -177,6 +190,7 @@ export const useAudio = () => {
       audio.muted = audioState.isMuted;
       audio.volume = audioState.isMuted ? 0 : audioState.volume * 0.3;
       await audio.play();
+      setAudioState(prev => ({ ...prev, isPlaying: true }));
     } catch (error: any) {
       if (error.name !== 'AbortError' && error.name !== 'NotAllowedError') {
         console.warn('Background music play failed:', error);
@@ -207,10 +221,13 @@ export const useAudio = () => {
 
   // Auto-start background music on first user interaction (mobile-friendly)
   const startMusicOnInteraction = useCallback(() => {
-    if (!audioState.isPlaying && !audioState.isMuted) {
+    if (!audioState.isMuted) {
       playBackgroundMusic();
+    } else {
+      // Even if muted, set playing state so UI shows correct status
+      setAudioState(prev => ({ ...prev, isPlaying: true }));
     }
-  }, [audioState.isPlaying, audioState.isMuted, playBackgroundMusic]);
+  }, [audioState.isMuted, playBackgroundMusic]);
 
   return {
     volume: audioState.volume,

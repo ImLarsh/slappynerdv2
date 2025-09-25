@@ -91,6 +91,24 @@ const MainMenu: React.FC = () => {
       document.body.style.overflow = prev;
     };
   }, []);
+
+  // Auto-start music on component mount for mobile
+  useEffect(() => {
+    // Add a click listener to start music on any user interaction
+    const handleFirstInteraction = () => {
+      startMusicOnInteraction();
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+
+    document.addEventListener('click', handleFirstInteraction);
+    document.addEventListener('touchstart', handleFirstInteraction);
+
+    return () => {
+      document.removeEventListener('click', handleFirstInteraction);
+      document.removeEventListener('touchstart', handleFirstInteraction);
+    };
+  }, [startMusicOnInteraction]);
   const handleStartGame = () => {
     // Start music on user interaction (mobile-friendly)
     startMusicOnInteraction();
