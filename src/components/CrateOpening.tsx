@@ -188,10 +188,10 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
 
           {/* Spinning wheel */}
           <div className="relative flex items-center justify-center">
-            <div className="relative w-96 h-96 border-4 border-primary rounded-full bg-card/80 backdrop-blur-sm overflow-hidden">
+            <div className="relative w-[500px] h-[500px] border-4 border-primary rounded-full bg-card/80 backdrop-blur-sm overflow-hidden">
               {/* Pointer/Indicator */}
-              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="w-0 h-0 border-l-4 border-r-4 border-b-8 border-l-transparent border-r-transparent border-b-yellow-400"></div>
+              <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-20">
+                <div className="w-0 h-0 border-l-6 border-r-6 border-b-12 border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
               </div>
               
               {/* Wheel segments */}
@@ -219,37 +219,39 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                     >
                       {/* Segment background */}
                       <div 
-                        className={`absolute top-0 left-1/2 w-4 origin-bottom transition-all duration-200 ${
-                          isSelected ? 'opacity-30' : 'opacity-10'
+                        className={`absolute top-0 left-1/2 origin-bottom transition-all duration-200 ${
+                          isSelected ? 'opacity-40' : 'opacity-15'
                         }`}
                         style={{
-                          height: '50%',
+                          width: `${Math.max(40, 360/rewards.length)}px`,
+                          height: '45%',
                           backgroundColor: rarityColors[reward.rarity as keyof typeof rarityColors].replace('text-', ''),
-                          transform: 'translateX(-50%) rotate(0deg)',
-                          clipPath: `polygon(40% 0%, 60% 0%, 100% 100%, 0% 100%)`
+                          transform: 'translateX(-50%)',
+                          clipPath: `polygon(20% 0%, 80% 0%, 100% 100%, 0% 100%)`
                         }}
                       />
                       
                       {/* Reward content */}
                       <div
-                        className="absolute top-8 left-1/2 transform -translate-x-1/2 flex flex-col items-center"
+                        className="absolute left-1/2 transform -translate-x-1/2 flex flex-col items-center"
                         style={{
+                          top: '60px',
                           transform: `translateX(-50%) rotate(${-angle}deg)`
                         }}
                       >
-                        <div className={`text-2xl mb-1 transition-all duration-200 ${
-                          isSelected ? 'scale-150 drop-shadow-lg' : 'scale-100'
+                        <div className={`text-3xl mb-2 transition-all duration-200 ${
+                          isSelected ? 'scale-125 drop-shadow-xl' : 'scale-100'
                         }`}>
                           {reward.emoji}
                         </div>
-                        <div className={`text-xs font-medium text-center transition-all duration-200 ${
-                          isSelected ? 'font-bold' : ''
+                        <div className={`text-sm font-medium text-center px-2 transition-all duration-200 ${
+                          isSelected ? 'font-bold text-lg' : ''
                         }`}>
                           {reward.name}
                         </div>
-                        <div className={`text-xs capitalize font-semibold transition-all duration-200 ${
+                        <div className={`text-sm capitalize font-semibold transition-all duration-200 mt-1 ${
                           rarityColors[reward.rarity as keyof typeof rarityColors]
-                        } ${isSelected ? 'text-shadow' : ''}`}>
+                        } ${isSelected ? 'drop-shadow-md' : ''}`}>
                           {reward.rarity}
                         </div>
                       </div>
@@ -259,8 +261,8 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
               </div>
               
               {/* Center decoration */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-12 h-12 bg-primary rounded-full border-4 border-background z-10 flex items-center justify-center">
-                <div className="text-xl">{crate.emoji}</div>
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-16 h-16 bg-primary rounded-full border-4 border-background z-10 flex items-center justify-center shadow-lg">
+                <div className="text-2xl">{crate.emoji}</div>
               </div>
             </div>
           </div>
