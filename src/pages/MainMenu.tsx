@@ -54,7 +54,7 @@ const MainMenu: React.FC = () => {
     stopBackgroundMusic,
     playSound
   } = useAudio();
-  const { isInstallable, installApp } = usePWA();
+  const { isInstallable, installApp, showIOSInstructions, setShowIOSInstructions, isIOS } = usePWA();
   const navigate = useNavigate();
 
   // Fetch player profile data
@@ -335,6 +335,28 @@ const MainMenu: React.FC = () => {
                 </Button>
               </div>
             </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* iOS Installation Instructions Dialog */}
+      <Dialog open={showIOSInstructions} onOpenChange={setShowIOSInstructions}>
+        <DialogContent className="max-w-md animate-scale-in">
+          <DialogHeader>
+            <DialogTitle>Add to Home Screen</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-4">
+            <p className="text-sm text-muted-foreground">
+              To install Slappy Nerds on your iOS device:
+            </p>
+            <ol className="text-sm space-y-2 list-decimal list-inside">
+              <li>Tap the <strong>Share</strong> button <span className="inline-block w-4 h-4 bg-blue-500 text-white text-xs rounded text-center leading-4">⎋</span> at the bottom of Safari</li>
+              <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
+              <li>Tap <strong>"Add"</strong> in the top right corner</li>
+            </ol>
+            <p className="text-xs text-muted-foreground mt-4">
+              The game will then appear on your home screen like a native app!
+            </p>
           </div>
         </DialogContent>
       </Dialog>
