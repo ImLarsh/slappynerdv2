@@ -40,7 +40,7 @@ export const FallingEmojis: React.FC = () => {
         // Keep only the last 12 emojis to prevent memory issues
         return [...prev.slice(-11), newEmoji];
       });
-    }, 3000); // Add new emoji every 3 seconds
+    }, 5000); // Add new emoji every 5 seconds
 
     return () => clearInterval(interval);
   }, [characters]);
