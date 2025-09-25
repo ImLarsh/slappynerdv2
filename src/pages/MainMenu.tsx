@@ -13,10 +13,11 @@ import { useCharactersContext } from '@/context/CharactersContext';
 import { useAudio } from '@/hooks/useAudio';
 import { useAdmin } from '@/hooks/useAdmin';
 import { AdminPanel } from '@/components/AdminPanel';
+import { CratesMenu } from '@/components/CratesMenu';
 import { supabase } from '@/integrations/supabase/client';
 import schoolHallwayBg from '@/assets/school-hallway-bg.png';
 import slappyNerdsTitle from '@/assets/slappy-nerds-title.png';
-import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen } from 'lucide-react';
+import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen, Package } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 const MainMenu: React.FC = () => {
   const [charactersOpen, setCharactersOpen] = useState(false);
@@ -24,6 +25,7 @@ const MainMenu: React.FC = () => {
   const [achievementsOpen, setAchievementsOpen] = useState(false);
   const [leaderboardOpen, setLeaderboardOpen] = useState(false);
   const [volumeOpen, setVolumeOpen] = useState(false);
+  const [cratesOpen, setCratesOpen] = useState(false);
   const [playerName, setPlayerName] = useState<string>('');
   const {
     books,
@@ -200,6 +202,13 @@ const MainMenu: React.FC = () => {
               <span className="font-semibold">Shop</span>
             </Button>
 
+            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className="flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-button shadow-glow" style={{
+              animationDelay: '0.35s'
+            }}>
+              <Package className="h-5 w-5 md:h-6 md:w-6" />
+              <span className="font-semibold">Crates</span>
+            </Button>
+
             <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className="flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-button shadow-glow" style={{
               animationDelay: '0.4s'
             }}>
@@ -254,6 +263,13 @@ const MainMenu: React.FC = () => {
             
           </DialogHeader>
           <Leaderboards />
+        </DialogContent>
+      </Dialog>
+
+      {/* Crates Menu Dialog */}
+      <Dialog open={cratesOpen} onOpenChange={setCratesOpen}>
+        <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden animate-scale-in p-0">
+          <CratesMenu />
         </DialogContent>
       </Dialog>
 

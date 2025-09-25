@@ -94,6 +94,92 @@ export type Database = {
         }
         Relationships: []
       }
+      crate_rewards: {
+        Row: {
+          crate_id: string
+          created_at: string
+          description: string
+          drop_rate: number
+          emoji: string
+          id: string
+          name: string
+          rarity: string
+          reward_data: Json
+          reward_type: string
+          updated_at: string
+        }
+        Insert: {
+          crate_id: string
+          created_at?: string
+          description: string
+          drop_rate: number
+          emoji?: string
+          id?: string
+          name: string
+          rarity: string
+          reward_data?: Json
+          reward_type?: string
+          updated_at?: string
+        }
+        Update: {
+          crate_id?: string
+          created_at?: string
+          description?: string
+          drop_rate?: number
+          emoji?: string
+          id?: string
+          name?: string
+          rarity?: string
+          reward_data?: Json
+          reward_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "crate_rewards_crate_id_fkey"
+            columns: ["crate_id"]
+            isOneToOne: false
+            referencedRelation: "crates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      crates: {
+        Row: {
+          created_at: string
+          description: string
+          emoji: string
+          id: string
+          is_available: boolean
+          name: string
+          price: number
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          emoji?: string
+          id?: string
+          is_available?: boolean
+          name: string
+          price: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          emoji?: string
+          id?: string
+          is_available?: boolean
+          name?: string
+          price?: number
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       leaderboards: {
         Row: {
           character_id: string | null
@@ -258,6 +344,45 @@ export type Database = {
             columns: ["character_id"]
             isOneToOne: false
             referencedRelation: "characters"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_crate_openings: {
+        Row: {
+          crate_id: string
+          id: string
+          opened_at: string
+          reward_id: string
+          user_id: string
+        }
+        Insert: {
+          crate_id: string
+          id?: string
+          opened_at?: string
+          reward_id: string
+          user_id: string
+        }
+        Update: {
+          crate_id?: string
+          id?: string
+          opened_at?: string
+          reward_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_crate_openings_crate_id_fkey"
+            columns: ["crate_id"]
+            isOneToOne: false
+            referencedRelation: "crates"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "user_crate_openings_reward_id_fkey"
+            columns: ["reward_id"]
+            isOneToOne: false
+            referencedRelation: "crate_rewards"
             referencedColumns: ["id"]
           },
         ]
