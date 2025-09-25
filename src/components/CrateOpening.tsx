@@ -118,31 +118,51 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
     // Animation parameters for exactly 5 seconds at 60fps
     const totalDuration = 5000; // 5 seconds
     const frameRate = 16.67; // ~60fps (1000ms / 60fps)
-    const startSpeed = frameRate; // Start at 60fps
-    const endSpeed = frameRate * 8; // End at ~7.5fps
     let startTime = Date.now();
     let currentIndex = 0;
+    let totalSpins = 0;
+    const targetSpins = Math.floor(totalRewards * 2.5) + finalIndex; // Ensure we land on final index
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progressValue = Math.min(elapsed / totalDuration, 1);
       
-      // Easing function for smooth deceleration (quintic ease-out)
-      const easeOut = 1 - Math.pow(1 - progressValue, 5);
+      // Calculate how close we are to the target
+      const spinsRemaining = targetSpins - totalSpins;
+      const isNearEnd = spinsRemaining <= 10;
       
-      // Calculate current speed based on progress
-      const currentSpeed = startSpeed + (endSpeed - startSpeed) * easeOut;
+      let currentSpeed;
+      
+      if (progressValue < 0.7) {
+        // First 70% - maintain fast speed
+        currentSpeed = frameRate;
+      } else if (progressValue < 0.9) {
+        // 70-90% - start slowing down
+        const slowProgress = (progressValue - 0.7) / 0.2;
+        currentSpeed = frameRate + (frameRate * 2 * slowProgress);
+      } else {
+        // Final 10% - dramatic slowdown, especially near target
+        const finalProgress = (progressValue - 0.9) / 0.1;
+        if (isNearEnd) {
+          // Extra slow when very close to target
+          const nearEndMultiplier = Math.max(1, spinsRemaining / 2);
+          currentSpeed = frameRate * 4 * finalProgress * nearEndMultiplier + frameRate * 6;
+        } else {
+          currentSpeed = frameRate * 8 * finalProgress + frameRate * 2;
+        }
+      }
       
       setCurrentIndex(currentIndex);
       
-      if (progressValue < 1) {
-        // Continue spinning with smooth frame rate
+      if (progressValue < 1 && totalSpins < targetSpins) {
+        // Continue spinning
         setTimeout(() => {
           currentIndex = (currentIndex + 1) % totalRewards;
+          totalSpins++;
           animate();
         }, currentSpeed);
       } else {
-        // Animation complete - stop at final reward
+        // Animation complete - ensure we're at the final reward
         setCurrentIndex(finalIndex);
         setPhase('revealing');
         
