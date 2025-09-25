@@ -54,7 +54,13 @@ const MainMenu: React.FC = () => {
     stopBackgroundMusic,
     playSound
   } = useAudio();
-  const { isInstallable, installApp, showIOSInstructions, setShowIOSInstructions, isIOS } = usePWA();
+  const {
+    isInstallable,
+    installApp,
+    showIOSInstructions,
+    setShowIOSInstructions,
+    isIOS
+  } = usePWA();
   const navigate = useNavigate();
 
   // Fetch player profile data
@@ -115,8 +121,7 @@ const MainMenu: React.FC = () => {
       </div>
       
       {/* User Info - Top Left (when signed in) */}
-      {user && (
-        <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
+      {user && <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
           <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30">
             <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
               Welcome back!{' '}
@@ -132,20 +137,12 @@ const MainMenu: React.FC = () => {
               </span>
             </div>
           </div>
-        </div>
-      )}
+        </div>}
 
       {/* Sign In/Up Button - Top Left (when not signed in) */}
-      {!user && (
-        <Button 
-          onClick={() => handleButtonClick(() => navigate('/auth'))} 
-          variant="default" 
-          size="sm"
-          className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20 hover-scale bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-2 sm:border-3 border-blue-300 px-2 sm:px-3 md:px-6 py-1 sm:py-2 md:py-3 text-[10px] sm:text-xs md:text-base lg:text-lg transform hover:scale-110 transition-all duration-300"
-        >
+      {!user && <Button onClick={() => handleButtonClick(() => navigate('/auth'))} variant="default" size="sm" className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20 hover-scale bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-2 sm:border-3 border-blue-300 px-2 sm:px-3 md:px-6 py-1 sm:py-2 md:py-3 text-[10px] sm:text-xs md:text-base lg:text-lg transform hover:scale-110 transition-all duration-300">
           🔐 Sign In / Sign Up
-        </Button>
-      )}
+        </Button>}
 
       {/* Volume Control Button */}
       <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(() => setVolumeOpen(true))}>
@@ -153,16 +150,9 @@ const MainMenu: React.FC = () => {
       </Button>
 
       {/* Add to Home Screen Button - Only show on mobile when installable */}
-      {isInstallable && (
-        <Button 
-          variant="outline" 
-          size="icon" 
-          className="absolute top-8 sm:top-12 md:top-16 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-green-500 hover:bg-green-600 border-green-400 text-white" 
-          onClick={() => handleButtonClick(installApp)}
-        >
+      {isInstallable && <Button variant="outline" size="icon" className="absolute top-8 sm:top-12 md:top-16 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-green-500 hover:bg-green-600 border-green-400 text-white" onClick={() => handleButtonClick(installApp)}>
           <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
-        </Button>
-      )}
+        </Button>}
       
       {/* Sign Out Button - Red Door Icon */}
       {user && <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(signOut)}>
@@ -191,9 +181,7 @@ const MainMenu: React.FC = () => {
                 {selectedCharacter ? selectedCharacter.emoji : '🤓'}
               </div>
               {/* Yellow rotating arrow indicator */}
-              <div className="absolute -top-0.5 sm:-top-1 md:-top-2 -right-0.5 sm:-right-1 md:-right-2 text-yellow-400 retro-rotate text-xs sm:text-sm md:text-base">
-                ⭐
-              </div>
+              
             </div>
           </div>
 
