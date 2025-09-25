@@ -30,6 +30,7 @@ const SOUND_SOURCES: Record<string, string> = isiOS ? {
   defeat: '/audio/defeatsound.mp3',
   click: '/audio/clicksound.mp3',
   powerup: '/audio/powerup.mp3',
+  emojipop: '/audio/emojipop.mp3',
 };
 
 export const useAudio = () => {
@@ -110,7 +111,8 @@ export const useAudio = () => {
         tapFlap: new Audio(SOUND_SOURCES.tapFlap),
         defeat: new Audio(SOUND_SOURCES.defeat),
         click: new Audio(SOUND_SOURCES.click),
-        powerup: new Audio(SOUND_SOURCES.powerup)
+        powerup: new Audio(SOUND_SOURCES.powerup),
+        emojipop: new Audio(SOUND_SOURCES.emojipop)
       };
       Object.values(globalSoundEffects).forEach(a => {
         a.volume = audioState.isMuted ? 0 : audioState.volume;

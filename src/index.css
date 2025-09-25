@@ -208,6 +208,21 @@ All colors MUST be HSL.
   }
 }
 
+@keyframes emoji-pop {
+  0% { 
+    transform: translateX(-50%) scale(1);
+    opacity: 1;
+  }
+  50% { 
+    transform: translateX(-50%) scale(1.5);
+    opacity: 0.8;
+  }
+  100% { 
+    transform: translateX(-50%) scale(0);
+    opacity: 0;
+  }
+}
+
 /* Retro 2D Game Classes */
 .retro-float {
   animation: retro-float 3s ease-in-out infinite;
@@ -252,6 +267,10 @@ All colors MUST be HSL.
 
 .animate-fall {
   animation: fall 20s ease-out infinite;
+}
+
+.animate-emoji-pop {
+  animation: emoji-pop 0.3s ease-out forwards;
 }
 
 /* 2D Retro Game Button Styles */
