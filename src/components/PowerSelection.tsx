@@ -30,7 +30,7 @@ export const PowerSelection: React.FC<PowerSelectionProps> = ({
       <div className="p-4 sm:p-6 text-center space-y-4 animate-scale-in max-w-md mx-4">
         {!selectedPower ? <>
             <h2 className="text-xl text-amber-500 font-extrabold sm:text-5xl">Modifiers</h2>
-            <p className="text-sm sm:text-base text-amber-300 py-0 my-[3px]">Select one of these nerdy modifiers</p>
+            <p className="text-sm text-amber-300 py-0 my-[3px] font-extrabold sm:text-xl">Select one of these nerdy modifiers</p>
             
             <div className="grid gap-3">
               {powers.map(power => <Button key={power.id} onClick={() => handlePowerClick(power)} variant="outline" className="h-auto p-4 text-left bg-background hover:bg-gray-200 hover:text-foreground transition-all duration-200 border-2 border-primary/50 hover:border-yellow-400 shadow-lg hover:shadow-yellow-400/50">
