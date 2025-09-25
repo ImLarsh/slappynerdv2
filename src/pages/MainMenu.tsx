@@ -216,11 +216,14 @@ const MainMenu: React.FC = () => {
               <span className="font-semibold">Achievements</span>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-button shadow-glow" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-2 h-20 md:h-28 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border-2 border-yellow-300 overflow-hidden" style={{
               animationDelay: '0.5s'
             }}>
-              <Users className="h-5 w-5 md:h-6 md:w-6" />
-              <span className="font-semibold">Leaderboard</span>
+              {/* Crown icon */}
+              <div className="text-2xl md:text-3xl">👑</div>
+              <span className="font-bold text-sm md:text-base">Leaderboard</span>
+              {/* Extended bottom decoration */}
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-yellow-600 to-yellow-700"></div>
             </Button>
           </div>
         </div>
