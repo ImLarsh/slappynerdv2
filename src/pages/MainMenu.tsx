@@ -140,7 +140,7 @@ const MainMenu: React.FC = () => {
       <div className="absolute inset-0 bg-background/60 z-1" />
       
       {/* Title at absolute top */}
-      <div className="absolute top-0.5 sm:top-1 md:top-2 lg:top-6 left-0 right-0 z-10 animate-fade-in px-[7px] py-[3px] mx-[100px] my-[185px]">
+      <div className="absolute top-0.5 sm:top-1 md:top-2 lg:top-6 left-0 right-0 z-10 animate-fade-in mx-[95px] py-0 px-0 my-[75px]">
         <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[140px] sm:max-w-[180px] md:max-w-[220px] lg:max-w-md xl:max-w-lg mx-auto hover-scale" />
       </div>
       
