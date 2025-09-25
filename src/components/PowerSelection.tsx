@@ -56,7 +56,7 @@ export const PowerSelection: React.FC<PowerSelectionProps> = ({
               </div>
             </Card>
             <div className="flex space-x-3">
-              <Button onClick={handleCancel} variant="outline" className="flex-1">
+              <Button onClick={handleCancel} variant="outline" className="flex-1 hover:bg-gray-200">
                 Cancel
               </Button>
               <Button onClick={handleConfirm} variant="default" className="flex-1 bg-green-600 hover:bg-green-700 text-white shadow-glow">
