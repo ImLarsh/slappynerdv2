@@ -199,7 +199,7 @@ const MainMenu: React.FC = () => {
             animationDelay: '0.6s'
           }}>
             <div className="relative">
-              <div className="text-8xl sm:text-9xl md:text-[12rem] lg:text-[16rem] hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px]">
+              <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px]">
                 {selectedCharacter ? selectedCharacter.emoji : '🤓'}
               </div>
               {/* Yellow rotating arrow indicator */}
