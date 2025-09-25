@@ -10,7 +10,6 @@ import { usePowers } from '@/hooks/usePowers';
 import { useShopPowers } from '@/hooks/useShopPowers';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useAudio } from '@/hooks/useAudio';
-import { useNative } from '@/hooks/useNative';
 import { PowerSelection } from './PowerSelection';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
@@ -81,7 +80,6 @@ export const Game: React.FC = () => {
   const { addBooks } = useCurrency();
   const { toast } = useToast();
   const { playSound } = useAudio();
-  const { hapticFeedback, isNative } = useNative();
   const { 
     showPowerSelection, 
     getRandomPowers, 
@@ -290,10 +288,6 @@ export const Game: React.FC = () => {
       }));
       // Play tap/flap sound
       playSound('tapFlap');
-      // Add haptic feedback for native mobile apps
-      if (isNative) {
-        hapticFeedback();
-      }
     }
   }, [gameState.gameStarted, gameState.gameOver, showPowerSelection, resetGame, waitingForContinue, pendingPower, addPower]);
 
