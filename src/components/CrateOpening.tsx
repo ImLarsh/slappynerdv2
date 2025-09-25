@@ -230,11 +230,11 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                         }}
                       />
                       
-                      {/* Icon */}
+                      {/* Icon positioned at outer edge */}
                       <div
                         className="absolute flex items-center justify-center"
                         style={{
-                          top: '26%',
+                          top: '15%',
                           left: '50%',
                           transform: `translateX(-50%) translateY(-50%) rotate(${-angle}deg)`,
                         }}
@@ -245,15 +245,6 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                           {reward.emoji}
                         </div>
                       </div>
-                      
-                      {/* Segment border */}
-                      <div 
-                        className="absolute top-0 left-1/2 w-0.5 h-1/2 origin-bottom"
-                        style={{ 
-                          transform: 'translateX(-50%)',
-                          backgroundColor: 'hsl(var(--border))'
-                        }}
-                      />
                     </div>
                   );
                 })}
