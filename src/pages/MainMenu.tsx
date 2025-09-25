@@ -17,7 +17,7 @@ import { AdminPanel } from '@/components/AdminPanel';
 import { CratesMenu } from '@/components/CratesMenu';
 import { supabase } from '@/integrations/supabase/client';
 import schoolHallwayBg from '@/assets/school-hallway-bg.png';
-import slappyNerdsTitle from '@/assets/slappy-nerds-title.png';
+import slappyNerdsTitle from '@/assets/slappy-nerds-title-new.png';
 import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen, Package, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePWA } from '@/hooks/usePWA';

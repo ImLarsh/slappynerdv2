@@ -7,7 +7,7 @@ import { Card } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useToast } from '@/hooks/use-toast';
 import schoolHallwayBg from '@/assets/school-hallway-bg.png';
-import slappyNerdsTitle from '@/assets/slappy-nerds-title.png';
+import slappyNerdsTitle from '@/assets/slappy-nerds-title-new.png';
 
 export default function AuthPage() {
   const [isLogin, setIsLogin] = useState(true);
