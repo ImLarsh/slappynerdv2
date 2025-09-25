@@ -9,14 +9,19 @@ interface AudioState {
 // Global singleton audio elements to prevent duplicate playback across components
 let globalBackgroundMusic: HTMLAudioElement | null = null;
 let globalSoundEffects: { [key: string]: HTMLAudioElement } = {};
+
+// Detect iOS for optimal audio format
+const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+              (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1);
+
 const SOUND_SOURCES: Record<string, string> = {
   gameOver: '/audio/game-over-sound.mp3',
   passLocker: '/audio/passlocker.mp3',
   collectBook: '/audio/collectbook.mp3',
-  tapFlap: '/audio/tapflapsound.mp3',
-  defeat: '/audio/defeatsound.mp3',
+  tapFlap: isiOS ? '/audio/tapflapsound.caf' : '/audio/tapflapsound.mp3',
+  defeat: isiOS ? '/audio/defeatsound.caf' : '/audio/defeatsound.mp3',
   click: '/audio/clicksound.mp3',
-  powerup: '/audio/powerup.mp3',
+  powerup: isiOS ? '/audio/powerup.caf' : '/audio/powerup.mp3',
 };
 
 export const useAudio = () => {
@@ -77,13 +82,13 @@ export const useAudio = () => {
     // Create global sound effects if needed
     if (Object.keys(globalSoundEffects).length === 0) {
       globalSoundEffects = {
-        gameOver: new Audio('/audio/game-over-sound.mp3'),
-        passLocker: new Audio('/audio/passlocker.mp3'),
-        collectBook: new Audio('/audio/collectbook.mp3'),
-        tapFlap: new Audio('/audio/tapflapsound.mp3'),
-        defeat: new Audio('/audio/defeatsound.mp3'),
-        click: new Audio('/audio/clicksound.mp3'),
-        powerup: new Audio('/audio/powerup.mp3')
+        gameOver: new Audio(SOUND_SOURCES.gameOver),
+        passLocker: new Audio(SOUND_SOURCES.passLocker),
+        collectBook: new Audio(SOUND_SOURCES.collectBook),
+        tapFlap: new Audio(SOUND_SOURCES.tapFlap),
+        defeat: new Audio(SOUND_SOURCES.defeat),
+        click: new Audio(SOUND_SOURCES.click),
+        powerup: new Audio(SOUND_SOURCES.powerup)
       };
       Object.values(globalSoundEffects).forEach(a => {
         a.volume = audioState.volume;
@@ -97,12 +102,10 @@ export const useAudio = () => {
       });
 
       // Prewarm a small pool for the tap sound on iOS to avoid seek/decode jank
-      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                    (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1);
       if (isiOS && tapPoolRef.current.length === 0) {
         const poolSize = 6;
         for (let i = 0; i < poolSize; i++) {
-          const a = new Audio('/audio/tapflapsound.mp3');
+          const a = new Audio(SOUND_SOURCES.tapFlap); // Use CAF on iOS
           a.preload = 'auto';
           a.crossOrigin = 'anonymous';
           a.autoplay = false;
@@ -192,13 +195,6 @@ export const useAudio = () => {
 
   const playSound = useCallback((soundName: string) => {
     if (audioState.isMuted) return;
-
-    // Disable all sound effects on iOS to test if they're causing stutter
-    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
-                  (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1);
-    if (isiOS) {
-      return; // Skip all sound effects on iOS
-    }
 
     const sound = soundEffectsRef.current[soundName];
     if (sound) {
