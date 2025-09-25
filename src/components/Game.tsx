@@ -54,98 +54,23 @@ interface GameState {
   temporaryInvincibility?: number; // End time for temporary invincibility
 }
 
-// iOS-specific performance optimizations
-const isIOS = () => /iPad|iPhone|iPod/.test(navigator.userAgent);
-const TARGET_FPS = 60; // Lock to 60fps for consistency
-const FRAME_TIME = 1000 / TARGET_FPS;
-
-// iOS Safari specific optimizations
-const IOS_OPTIMIZATIONS = {
-  REDUCE_PARTICLES: true,
-  BATCH_DRAW_CALLS: true,
-  HARDWARE_ACCELERATION: true,
-  MEMORY_POOLING: true,
-  AGGRESSIVE_GC_PREVENTION: true
-};
-
-// Performance monitoring
-class PerformanceMonitor {
-  private frameCount = 0;
-  private lastTime = performance.now();
-  private fps = 0;
-  private frameTimeHistory: number[] = [];
-  private maxHistory = 60; // Track last 60 frames
-  
-  update(): { fps: number; frameTime: number; isStutter: boolean } {
-    const now = performance.now();
-    const frameTime = now - this.lastTime;
-    this.frameTimeHistory.push(frameTime);
-    
-    if (this.frameTimeHistory.length > this.maxHistory) {
-      this.frameTimeHistory.shift();
-    }
-    
-    this.frameCount++;
-    if (this.frameCount >= 60) {
-      this.fps = Math.round(1000 / (this.frameTimeHistory.reduce((a, b) => a + b, 0) / this.frameTimeHistory.length));
-      this.frameCount = 0;
-    }
-    
-    // Detect frame stutter (frame time > 20ms = under 50fps)
-    const isStutter = frameTime > 20;
-    this.lastTime = now;
-    
-    return { fps: this.fps, frameTime, isStutter };
-  }
-  
-  getAverageFrameTime(): number {
-    return this.frameTimeHistory.reduce((a, b) => a + b, 0) / this.frameTimeHistory.length;
-  }
-}
-
-// Object pooling for iOS memory optimization
-class ObjectPool<T> {
-  private pool: T[] = [];
-  private createFn: () => T;
-  private resetFn: (obj: T) => void;
-  
-  constructor(createFn: () => T, resetFn: (obj: T) => void, initialSize = 10) {
-    this.createFn = createFn;
-    this.resetFn = resetFn;
-    
-    // Pre-populate pool
-    for (let i = 0; i < initialSize; i++) {
-      this.pool.push(createFn());
-    }
-  }
-  
-  get(): T {
-    const obj = this.pool.pop();
-    return obj || this.createFn();
-  }
-  
-  release(obj: T): void {
-    this.resetFn(obj);
-    this.pool.push(obj);
-  }
-}
+const TARGET_FPS_MOBILE = 60;
+const TARGET_FPS_DESKTOP = 80;
+const getTargetFPS = () => window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
+const FRAME_TIME = () => 1000 / getTargetFPS();
 const GRAVITY = 0.6;
 const JUMP_FORCE = -9.4;
 const PIPE_WIDTH = 80;
 const BASE_PIPE_GAP = 280;
-const MIN_PIPE_GAP = 180;
+const MIN_PIPE_GAP = 180; // Reduced from 200 to make it harder
 const LOCKER_WIDTH = 220;
 const PIPE_SPEED = 2.5;
-const PIPE_GAP = 220;
+const PIPE_GAP = 220; // Reduced from 240 to make it harder
 const BIRD_SIZE = 50;
-
-// iOS-optimized constants
-const IOS_RENDER_SCALE = isIOS() ? 0.8 : 1; // Reduce render complexity on iOS
 
 export const Game: React.FC = () => {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const animationRef = useRef<number>();
   const { submitScore } = useLeaderboard();
   const { stats, updateGameStats } = useUserStats();
@@ -178,32 +103,12 @@ export const Game: React.FC = () => {
     activePowers: shopActivePowers
   } = useShopPowers();
   
-  // iOS Performance monitoring
-  const performanceMonitorRef = useRef(new PerformanceMonitor());
-  const [performanceStats, setPerformanceStats] = useState({ fps: 60, frameTime: 16.67, isStutter: false });
-  
-  // Object pools for iOS memory optimization
-  const bookPoolRef = useRef(new ObjectPool<Book>(
-    () => ({ id: '', x: 0, y: 0, collected: false }),
-    (book) => { book.collected = false; book.beingPulled = false; book.pullStartTime = undefined; }
-  ));
-  
-  const pipePoolRef = useRef(new ObjectPool<Pipe>(
-    () => ({ x: 0, y: 0, width: LOCKER_WIDTH, height: 0, passed: false, lockerType: 0 }),
-    (pipe) => { pipe.passed = false; }
-  ));
-  
   // Track whether the game is currently running to avoid resize-induced jank
   const isPlayingRef = useRef(false);
   
-  // Cached image references for iOS optimization
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
   const lockerImagesRef = useRef<HTMLImageElement[]>([]);
   const nextBookIdRef = useRef(0);
-  
-  // iOS-specific rendering optimization flags
-  const shouldRenderEffectsRef = useRef(!isIOS());
-  const renderFrameCountRef = useRef(0);
   
   const [gameState, setGameState] = useState<GameState>({
     bird: { x: 100, y: 200, width: BIRD_SIZE, height: BIRD_SIZE, velocity: 0 },
@@ -221,10 +126,8 @@ export const Game: React.FC = () => {
     backgroundOffset: 0,
   });
   
-  // iOS game state ref and UI sync cadence
-  const gameRef = useRef<GameState>(gameState);
-  const lastUISyncRef = useRef(performance.now());
-  const uiSyncIntervalMsRef = useRef(150);
+  
+  
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   const [powerChoices, setPowerChoices] = useState(() => getRandomPowers(hasLuckyStart()));
   const [waitingForContinue, setWaitingForContinue] = useState(false);
@@ -232,70 +135,28 @@ export const Game: React.FC = () => {
   const [gameStartTime, setGameStartTime] = useState<number>(0);
 
   // Load background image, locker images and get user record on component mount
+
   useEffect(() => {
-    // iOS-specific DOM optimizations
-    if (isIOS()) {
-      const bodyStyle = document.body.style as any;
-      bodyStyle.WebkitTapHighlightColor = 'transparent';
-      bodyStyle.WebkitTouchCallout = 'none';
-      bodyStyle.webkitUserSelect = 'none';
-      bodyStyle.transform = 'translateZ(0)'; // Hardware acceleration
-    }
-    
     // Prevent body scrolling on mobile when game is active
     document.body.classList.add('game-active');
 
-    // Load and optimize images for iOS
+    // Load background image
     const img = new Image();
-    img.onload = () => {
-      // iOS optimization: create an offscreen canvas for better performance
-      if (isIOS() && img.complete) {
-        const offscreenCanvas = document.createElement('canvas');
-        const ctx = offscreenCanvas.getContext('2d');
-        if (ctx) {
-          offscreenCanvas.width = img.width * IOS_RENDER_SCALE;
-          offscreenCanvas.height = img.height * IOS_RENDER_SCALE;
-          ctx.drawImage(img, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
-          // Replace original image with optimized version
-          const optimizedImg = new Image();
-          optimizedImg.src = offscreenCanvas.toDataURL();
-          backgroundImageRef.current = optimizedImg;
-        }
-      } else {
-        backgroundImageRef.current = img;
-      }
-    };
+    img.onload = () => {}; // Remove debug log
     img.onerror = (e) => console.error('Background failed to load:', e);
     img.src = bgImage;
+    backgroundImageRef.current = img;
 
-    // Load and optimize locker image for iOS
+    // Load locker image (only yellow) with error handling
     const lockerImg = new Image();
-    lockerImg.onload = () => {
-      if (isIOS() && lockerImg.complete) {
-        const offscreenCanvas = document.createElement('canvas');
-        const ctx = offscreenCanvas.getContext('2d');
-        if (ctx) {
-          offscreenCanvas.width = lockerImg.width * IOS_RENDER_SCALE;
-          offscreenCanvas.height = lockerImg.height * IOS_RENDER_SCALE;
-          ctx.drawImage(lockerImg, 0, 0, offscreenCanvas.width, offscreenCanvas.height);
-          const optimizedImg = new Image();
-          optimizedImg.src = offscreenCanvas.toDataURL();
-          lockerImagesRef.current[0] = optimizedImg;
-        }
-      } else {
-        lockerImagesRef.current[0] = lockerImg;
-      }
-    };
+    lockerImg.onload = () => {}; // Remove debug log
     lockerImg.onerror = (e) => console.error('Yellow locker failed to load:', e);
     lockerImg.src = lockerYellow;
+    lockerImagesRef.current[0] = lockerImg;
 
     // Cleanup function
     return () => {
       document.body.classList.remove('game-active');
-      if (isIOS()) {
-        const bodyStyle = document.body.style as any;
-        bodyStyle.transform = '';
-      }
     };
   }, []);
 
@@ -425,12 +286,8 @@ export const Game: React.FC = () => {
         ...prev,
         bird: { ...prev.bird, velocity: JUMP_FORCE }
       }));
-      // Play tap/flap sound (defer on iOS to avoid input-frame stutter)
-      if (isIOS()) {
-        requestAnimationFrame(() => playSound('tapFlap'));
-      } else {
-        playSound('tapFlap');
-      }
+      // Play tap/flap sound
+      playSound('tapFlap');
     }
   }, [gameState.gameStarted, gameState.gameOver, showPowerSelection, resetGame, waitingForContinue, pendingPower, addPower]);
 
@@ -621,127 +478,38 @@ export const Game: React.FC = () => {
     return { updatedBooks, booksCollected };
   }, [onBookSeen, shouldAutoCollectBook, hasBookMagnet]);
 
-  // iOS-only renderer to avoid React-driven draws
-  const drawFrameIOS = useCallback((ctx: CanvasRenderingContext2D, state: GameState) => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-
-    // Clear background
-    ctx.fillStyle = 'hsl(200, 100%, 85%)';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    // Background image
-    const img = backgroundImageRef.current;
-    if (img && img.complete) {
-      const bgWidth = img.width;
-      const bgHeight = img.height;
-      const scaleX = canvas.width / bgWidth;
-      const scaleY = canvas.height / bgHeight;
-      const scale = Math.max(scaleX, scaleY);
-      const scaledWidth = bgWidth * scale;
-      const scaledHeight = bgHeight * scale;
-      const offsetY = (canvas.height - scaledHeight) / 2;
-      const scrollOffset = state.backgroundOffset % scaledWidth;
-      // Draw minimal copies
-      for (let i = -1; i <= 2; i++) {
-        ctx.drawImage(img, i * scaledWidth - scrollOffset, offsetY, scaledWidth, scaledHeight);
-      }
-    }
-
-    // Draw pipes (no shadows)
-    const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03));
-    const lockerImage = lockerImagesRef.current[0];
-    for (let i = 0; i < state.pipes.length; i++) {
-      const pipe = state.pipes[i];
-      if (lockerImage && lockerImage.complete) {
-        const targetWidth = LOCKER_WIDTH;
-        const targetHeight = pipe.height;
-        const drawX = pipe.x;
-        const drawY = pipe.y;
-        const isTopLocker = pipe.y === 0;
-        if (isTopLocker) {
-          ctx.save();
-          ctx.scale(1, -1);
-          ctx.drawImage(lockerImage, drawX, -drawY - targetHeight, targetWidth, targetHeight + EDGE_OVERDRAW);
-          ctx.restore();
-        } else {
-          ctx.drawImage(lockerImage, drawX, drawY, targetWidth, targetHeight + EDGE_OVERDRAW);
-        }
-      } else {
-        ctx.fillStyle = '#FFD700';
-        const isTopLocker = pipe.y === 0;
-        const rectY = isTopLocker ? pipe.y - EDGE_OVERDRAW : pipe.y;
-        const rectH = pipe.height + EDGE_OVERDRAW;
-        ctx.fillRect(pipe.x, rectY, pipe.width, rectH);
-      }
-    }
-
-    // Draw books (simple filled circles)
-    for (let i = 0; i < state.books.length; i++) {
-      const book = state.books[i];
-      if (book.collected) continue;
-      const bookSize = 32;
-      ctx.beginPath();
-      ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2, 0, Math.PI * 2);
-      ctx.fillStyle = '#FFD700';
-      ctx.fill();
-    }
-
-    // Draw player (emoji with minimal effects)
-    ctx.font = `${BIRD_SIZE}px Arial`;
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('🤓', state.bird.x + state.bird.width/2, state.bird.y + state.bird.height/2);
-
-    // Optional simple shield ring
-    if (hasStartShield()) {
-      ctx.beginPath();
-      ctx.strokeStyle = '#22C55E';
-      ctx.lineWidth = 3;
-      ctx.arc(state.bird.x + state.bird.width/2, state.bird.y + state.bird.height/2, BIRD_SIZE * 0.8, 0, Math.PI * 2);
-      ctx.stroke();
-    }
-  }, [canvasSize.height, hasStartShield]);
-
 
   const gameLoop = useCallback((currentTime: number) => {
     if (!canvasRef.current || !gameState.gameStarted || gameState.gameOver || showPowerSelection || waitingForContinue) return;
 
-    // iOS-specific performance monitoring
-    const perfStats = performanceMonitorRef.current.update();
-    
-    // Update performance stats every 30 frames to avoid UI thrashing
-    if (renderFrameCountRef.current % 30 === 0) {
-      setPerformanceStats(perfStats);
-    }
-    renderFrameCountRef.current++;
-
     const canvas = canvasRef.current;
-    if (!canvas) {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) {
+      console.error('Cannot get canvas context in game loop');
       return;
     }
-
 
     setGameState(prev => {
       const newState = { ...prev };
       const deltaTime = currentTime - newState.lastFrameTime;
-      // iOS: Consistent frame timing for 60fps without forcing React re-render
-      if (isIOS() && deltaTime < FRAME_TIME * 0.9) {
-        return prev; // Skip React state update on iOS to maintain cadence
+      const isMobile = window.innerWidth < 768;
+      const currentFrameTime = FRAME_TIME();
+      const baseFrameTime = isMobile ? 1000 / TARGET_FPS_MOBILE : currentFrameTime;
+
+      // Desktop: throttle to target FPS. Mobile: no cap (always update).
+      if (!isMobile && deltaTime < currentFrameTime) {
+        return newState;
       }
 
       // Clamp delta to avoid big jumps on tab switching/backgrounding
       const clampedDelta = Math.min(deltaTime, 50);
-      
+
       // Get current power modifiers
       const modifiers = getGameModifiers();
       
       // Calculate frame multiplier for consistent movement across different frame rates
-      const frameMultiplier = clampedDelta / FRAME_TIME;
+      const frameMultiplier = clampedDelta / baseFrameTime;
       newState.lastFrameTime = currentTime;
-
-      // Clone nested objects we will mutate to preserve immutability
-      newState.bird = { ...newState.bird };
 
       // Clear expired temporary invincibility
       if (newState.temporaryInvincibility && currentTime >= newState.temporaryInvincibility) {
@@ -763,11 +531,7 @@ export const Game: React.FC = () => {
         newState.gameEnded = true;
         
         // Play defeat sound
-        if (isIOS()) {
-          requestAnimationFrame(() => playSound('defeat'));
-        } else {
-          playSound('defeat');
-        }
+        playSound('defeat');
         
         // Update stats in database and get new totals
         if (user) {
@@ -786,26 +550,13 @@ export const Game: React.FC = () => {
           submitScore(newState.score, selectedCharacter?.id);
         }
 
-        // iOS: draw and throttle UI updates instead of React re-render per frame
-        if (isIOS()) {
-          const ctxIos = ctxRef.current;
-          if (ctxIos) drawFrameIOS(ctxIos, newState);
-          gameRef.current = newState;
-          const now = currentTime;
-          const needUISync = now - lastUISyncRef.current > uiSyncIntervalMsRef.current ||
-            newState.gameOver !== prev.gameOver || newState.score !== prev.score;
-          if (!needUISync) return prev;
-          lastUISyncRef.current = now;
-        }
-
         return newState;
       }
 
-      // Generate pipes (iOS-optimized spawn rates)
-      const iosSpawnMultiplier = isIOS() ? 1.3 : 1; // Slightly reduce spawn rate on iOS
-      const basePipeFrequency = (canvasSize.width < 500 ? 2200 : 1800) * iosSpawnMultiplier;
+      // Generate pipes (adjust frequency for mobile performance and locker spam power)
+      const basePipeFrequency = canvasSize.width < 500 ? 2200 : 1800; // Increased spawn rate further (reduced from 2500/2000)
       const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
-      const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency;
+      const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency; // Double spawn rate if locker spam is active
       
       // Prevent pipe spawning during power selection or right after power activation to avoid stacking
       const timeSinceLastPipe = currentTime - newState.lastPipeTime;
@@ -831,99 +582,73 @@ export const Game: React.FC = () => {
           Math.abs(existingPipe.x - lockerX) < LOCKER_WIDTH + 50
         );
         
-          if (!wouldOverlap) {
-            // Ensure immutability before push
-            newState.pipes = [...newState.pipes];
-            
-            // Use object pooling for iOS memory optimization
-            const topPipe = IOS_OPTIMIZATIONS.MEMORY_POOLING ? pipePoolRef.current.get() : {
+        if (!wouldOverlap) {
+          newState.pipes.push(
+            {
               x: lockerX,
-              y: 0,
+              y: 0, // Top locker starts from screen top
               width: LOCKER_WIDTH,
-              height: finalGapStart,
+              height: finalGapStart, // Extends down to gap start
               passed: false,
               lockerType,
-            };
-            
-            const bottomPipe = IOS_OPTIMIZATIONS.MEMORY_POOLING ? pipePoolRef.current.get() : {
+            },
+            {
               x: lockerX,
-              y: finalGapStart + finalGapSize,
+              y: finalGapStart + finalGapSize, // Bottom locker starts after gap
               width: LOCKER_WIDTH,
-              height: canvasSize.height - (finalGapStart + finalGapSize),
+              height: canvasSize.height - (finalGapStart + finalGapSize), // Extends to screen bottom
               passed: false,
               lockerType,
+            }
+          );
+          newState.lastPipeTime = currentTime;
+          
+          // 10% chance to spawn a book with the new pipe (not affected by locker spam)
+          if (Math.random() < 0.1 && !hasLockerSpam) {
+            // Use the existing gapStart calculation for safe spawn area
+            const gapMiddle = finalGapStart + finalGapSize / 2;
+            const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6); // Keep books in middle of gap
+            
+            const newBook: Book = {
+              id: `book_${nextBookIdRef.current++}`,
+              x: lockerX + LOCKER_WIDTH / 2, // Spawn at the same X position as the pipe gap
+              y: Math.max(80, Math.min(safeY, canvasSize.height - 80)), // Ensure books stay in reachable area
+              collected: false
             };
-            
-            // Set properties for pooled objects
-            if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
-              Object.assign(topPipe, {
-                x: lockerX, y: 0, width: LOCKER_WIDTH, height: finalGapStart, passed: false, lockerType
-              });
-              Object.assign(bottomPipe, {
-                x: lockerX, y: finalGapStart + finalGapSize, width: LOCKER_WIDTH, 
-                height: canvasSize.height - (finalGapStart + finalGapSize), passed: false, lockerType
-              });
-            }
-            
-            newState.pipes.push(topPipe, bottomPipe);
-            newState.lastPipeTime = currentTime;
-            
-            // 10% chance to spawn a book with the new pipe (reduced on iOS for performance)
-            const bookSpawnChance = isIOS() ? 0.08 : 0.1;
-            if (Math.random() < bookSpawnChance && !hasLockerSpam) {
-              const gapMiddle = finalGapStart + finalGapSize / 2;
-              const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6);
-              
-              // Ensure immutability before push
-              newState.books = [...newState.books];
-              
-              // Use object pooling for books on iOS
-              const newBook = IOS_OPTIMIZATIONS.MEMORY_POOLING ? bookPoolRef.current.get() : {
-                id: `book_${nextBookIdRef.current++}`,
-                x: lockerX + LOCKER_WIDTH / 2,
-                y: Math.max(80, Math.min(safeY, canvasSize.height - 80)),
-                collected: false
-              };
-              
-              if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
-                Object.assign(newBook, {
-                  id: `book_${nextBookIdRef.current++}`,
-                  x: lockerX + LOCKER_WIDTH / 2,
-                  y: Math.max(80, Math.min(safeY, canvasSize.height - 80)),
-                  collected: false
-                });
-              }
-              
-              newState.books.push(newBook);
-            }
+            newState.books.push(newBook);
           }
+        }
       }
 
-      // Update books first (before collision check) with immutable updates
-      const movedBooks: Book[] = [];
-      for (let i = 0; i < newState.books.length; i++) {
-        const b = newState.books[i];
-        if (b.collected) continue;
-        let book = { ...b };
-        if (book.beingPulled) {
-          const birdCenterX = newState.bird.x + newState.bird.width / 2;
-          const birdCenterY = newState.bird.y + newState.bird.height / 2;
-          const dx = birdCenterX - book.x;
-          const dy = birdCenterY - book.y;
-          const distance = Math.sqrt(dx * dx + dy * dy);
-          if (distance > 5) {
-            const pullSpeed = Math.min(12, 6 + distance * 0.1) * frameMultiplier;
-            const normalizedDx = dx / distance;
-            const normalizedDy = dy / distance;
-            book.x += normalizedDx * pullSpeed;
-            book.y += normalizedDy * pullSpeed;
+      // Update books first (before collision check)
+      newState.books = newState.books.filter(book => {
+        if (!book.collected) {
+          if (book.beingPulled) {
+            // Calculate pull force toward character
+            const birdCenterX = newState.bird.x + newState.bird.width / 2;
+            const birdCenterY = newState.bird.y + newState.bird.height / 2;
+            
+            const dx = birdCenterX - book.x;
+            const dy = birdCenterY - book.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            
+            if (distance > 5) { // Only pull if not too close
+              // Normalize direction and apply pull speed (faster when farther)
+              const pullSpeed = Math.min(12, 6 + distance * 0.1) * frameMultiplier;
+              const normalizedDx = dx / distance;
+              const normalizedDy = dy / distance;
+              
+              book.x += normalizedDx * pullSpeed;
+              book.y += normalizedDy * pullSpeed;
+            }
+          } else {
+            // Normal book movement (scroll with world)
+            book.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
           }
-        } else {
-          book.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
         }
-        if (book.x > -50 && !book.collected) movedBooks.push(book);
-      }
-      newState.books = movedBooks;
+        
+        return book.x > -50 && !book.collected;
+      });
 
       // Check book collisions after position updates
       const bookCollisionResult = checkBookCollisions(newState.bird, newState.books);
@@ -936,35 +661,32 @@ export const Game: React.FC = () => {
           // Apply double points power if owned
           const booksToAdd = hasDoublePoints() ? bookCollisionResult.booksCollected * 2 : bookCollisionResult.booksCollected;
           addBooks(booksToAdd);
-          if (isIOS()) {
-            requestAnimationFrame(() => playSound('collectBook'));
-          } else {
-            playSound('collectBook');
-          }
+          playSound('collectBook');
         }, 0);
       }
 
-      // Update pipes with frame rate compensation and iOS memory optimization (immutable)
-      const updatedPipes: Pipe[] = [];
-      for (let i = 0; i < newState.pipes.length; i++) {
-        const p = newState.pipes[i];
-        if ((p as any).shouldBeRemoved) {
-          if (IOS_OPTIMIZATIONS.MEMORY_POOLING) pipePoolRef.current.release(p);
-          continue;
+      // Update pipes with frame rate compensation
+      newState.pipes = newState.pipes.filter(pipe => {
+        // Remove pipes marked for demolition by Ghost Mode
+        if ((pipe as any).shouldBeRemoved) {
+          return false; // Remove this pipe completely
         }
-        const movedPipe: Pipe = { ...p, x: p.x - (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier };
-
+        
+        pipe.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
+        
         // Check scoring
-        if (!movedPipe.passed && movedPipe.x + movedPipe.width < newState.bird.x) {
-          movedPipe.passed = true;
-          if (movedPipe.y === 0) {
+        if (!pipe.passed && pipe.x + pipe.width < newState.bird.x) {
+          pipe.passed = true;
+          if (pipe.y === 0) { // Only count top pipes
             newState.score += 1;
-            if (isIOS()) {
-              requestAnimationFrame(() => playSound('passLocker'));
-            } else {
-              playSound('passLocker');
-            }
+            
+            // Play pass locker sound effect
+            playSound('passLocker');
+            
+            // Check for power selection trigger
             checkPowerSelection(newState.score);
+            
+            // Check if we need to show crown (only when beating personal best)
             const currentBest = stats.best_score;
             if (newState.score > currentBest && !newState.crownCollected) {
               newState.crownCollected = true;
@@ -972,19 +694,20 @@ export const Game: React.FC = () => {
           }
         }
 
-        // Collision
+        // Check collision (skip if invincible from powers or temporary invincibility)
         const hasTemporaryInvincibility = newState.temporaryInvincibility && currentTime < newState.temporaryInvincibility;
-        if (!modifiers.isInvincible && !hasTemporaryInvincibility && checkCollision(newState.bird, movedPipe, newState)) {
+        if (!modifiers.isInvincible && !hasTemporaryInvincibility && checkCollision(newState.bird, pipe, newState)) {
           newState.gameOver = true;
           newState.gameEnded = true;
-          if (isIOS()) {
-            requestAnimationFrame(() => playSound('defeat'));
-          } else {
-            playSound('defeat');
-          }
+          
+          // Play defeat sound
+          playSound('defeat');
+          
+          // Update stats in database and get new totals
           if (user) {
             updateGameStats(newState.score).then((updatedStats) => {
               if (updatedStats) {
+                // Check achievements with updated stats
                 checkAchievements({
                   score: newState.score,
                   gamesPlayed: updatedStats.total_games,
@@ -992,30 +715,15 @@ export const Game: React.FC = () => {
                 });
               }
             });
+
+            // Submit score to leaderboard
             submitScore(newState.score, selectedCharacter?.id);
           }
         }
 
-        const shouldRemove = movedPipe.x <= -movedPipe.width || (movedPipe as any).shouldBeRemoved;
-        if (!shouldRemove) {
-          updatedPipes.push(movedPipe);
-        } else if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
-          pipePoolRef.current.release(p);
-        }
-      }
-      newState.pipes = updatedPipes;
-
-      // iOS: draw and throttle UI updates instead of React re-render per frame
-      if (isIOS()) {
-        const ctxIos = ctxRef.current;
-        if (ctxIos) drawFrameIOS(ctxIos, newState);
-        gameRef.current = newState;
-        const now = currentTime;
-        const needUISync = now - lastUISyncRef.current > uiSyncIntervalMsRef.current ||
-          newState.gameOver !== prev.gameOver || newState.score !== prev.score;
-        if (!needUISync) return prev;
-        lastUISyncRef.current = now;
-      }
+        // Remove pipes that should be demolished or have moved off screen
+        return pipe.x > -pipe.width && !(pipe as any).shouldBeRemoved;
+      });
 
       return newState;
     });
@@ -1023,35 +731,8 @@ export const Game: React.FC = () => {
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [getGameModifiers, checkPowerSelection, checkBookCollisions, addBooks, playSound, toast]);
 
-  // Initialize and cache 2D context (iOS optimized)
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    // Ensure size before grabbing context
-    if (canvas.width !== canvasSize.width || canvas.height !== canvasSize.height) {
-      canvas.width = canvasSize.width;
-      canvas.height = canvasSize.height;
-    }
-    let ctx = ctxRef.current;
-    if (!ctx) {
-      ctx = canvas.getContext('2d', {
-        alpha: false,
-        desynchronized: isIOS(),
-        willReadFrequently: false
-      }) as CanvasRenderingContext2D | null;
-      if (!ctx) return;
-      ctxRef.current = ctx;
-    }
-    ctx.imageSmoothingEnabled = !isIOS();
-    if (isIOS() && 'imageSmoothingQuality' in ctx) {
-      (ctx as any).imageSmoothingQuality = 'low';
-    }
-  }, [canvasSize.width, canvasSize.height]);
-
   // Canvas drawing with error handling
   useEffect(() => {
-    // On iOS, drawing is handled inside the RAF game loop to avoid React re-render cost
-    if (isIOS()) return;
     const canvas = canvasRef.current;
     if (!canvas) {
       console.error('Canvas ref is null');
@@ -1071,31 +752,17 @@ export const Game: React.FC = () => {
       console.log('Canvas size set to:', canvasSize);
     }
 
-    // Use cached 2D context
-    let ctx = ctxRef.current as CanvasRenderingContext2D | null;
+    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
     if (!ctx) {
-      ctx = canvas.getContext('2d', { 
-        alpha: false, 
-        desynchronized: isIOS(),
-        willReadFrequently: false
-      }) as CanvasRenderingContext2D | null;
-      if (!ctx) {
-        console.error('Cannot get canvas context');
-        return;
-      }
-      ctxRef.current = ctx;
-      ctx.imageSmoothingEnabled = !isIOS();
-      if (isIOS() && 'imageSmoothingQuality' in ctx) {
-        (ctx as any).imageSmoothingQuality = 'low';
-      }
+      console.error('Cannot get canvas context');
+      return;
     }
-
 
     // Ensure canvas is visible - draw initial background
     ctx.fillStyle = 'hsl(200, 100%, 85%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-    // Draw scrolling background (iOS-optimized)
+    // Draw scrolling background
     if (backgroundImageRef.current && backgroundImageRef.current.complete) {
       const img = backgroundImageRef.current;
       const bgWidth = img.width;
@@ -1104,7 +771,7 @@ export const Game: React.FC = () => {
       // Scale background to cover entire canvas (stretch to fill)
       const scaleX = canvas.width / bgWidth;
       const scaleY = canvas.height / bgHeight;
-      const scale = Math.max(scaleX, scaleY);
+      const scale = Math.max(scaleX, scaleY); // Use max to ensure full coverage
       
       const scaledWidth = bgWidth * scale;
       const scaledHeight = bgHeight * scale;
@@ -1115,11 +782,8 @@ export const Game: React.FC = () => {
       // Calculate offset for seamless looping
       const scrollOffset = gameState.backgroundOffset % scaledWidth;
       
-      // iOS optimization: reduce background complexity
-      const maxCopies = isIOS() ? 2 : Math.ceil(canvas.width / scaledWidth) + 1;
-      
-      // Draw background copies
-      for (let i = -1; i <= maxCopies; i++) {
+      // Draw multiple copies of the background for seamless scrolling
+      for (let i = -1; i <= Math.ceil(canvas.width / scaledWidth) + 1; i++) {
         ctx.drawImage(
           img,
           i * scaledWidth - scrollOffset,
@@ -1137,19 +801,10 @@ export const Game: React.FC = () => {
       ctx.fillRect(0, 0, canvas.width, canvas.height);
     }
 
-    // Draw lockers instead of pipes (iOS-optimized)
-    const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03));
-    
-    // iOS optimization: reduce shadow effects
-    if (!isIOS()) {
-      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-      ctx.shadowBlur = 5;
-      ctx.shadowOffsetX = 3;
-      ctx.shadowOffsetY = 3;
-    }
-    
+    // Draw lockers instead of pipes
+    const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03)); // extend offscreen to avoid top/bottom gaps
     gameState.pipes.forEach(pipe => {
-      const lockerImage = lockerImagesRef.current[0];
+      const lockerImage = lockerImagesRef.current[0]; // Always use yellow locker (index 0)
       
       if (lockerImage && lockerImage.complete) {
         const targetWidth = LOCKER_WIDTH;
@@ -1184,7 +839,11 @@ export const Game: React.FC = () => {
           );
         }
         
-        // Skip shadow on iOS for performance
+        // Add a subtle shadow for depth
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 5;
+        ctx.shadowOffsetX = 3;
+        ctx.shadowOffsetY = 3;
       } else {
         // Fallback: draw yellow rectangle if image not loaded
         ctx.fillStyle = '#FFD700'; // Yellow
@@ -1199,54 +858,54 @@ export const Game: React.FC = () => {
         ctx.strokeRect(pipe.x, rectY, pipe.width, rectH);
       }
       
-      // Reset shadow (if not iOS)
-      if (!isIOS()) {
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-      }
+      // Reset shadow
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
     });
 
-    // Draw books (simplified on iOS)
+    // Draw books with bright yellow ring
     gameState.books.forEach(book => {
       if (!book.collected) {
-        const bookSize = 32;
+        const bookSize = 32; // Increased from 24px
+        
+        // Draw bright yellow ring around book
         ctx.save();
-
-        if (isIOS()) {
-          // Ultra-lightweight draw on iOS: simple filled circle
-          ctx.beginPath();
-          ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2, 0, 2 * Math.PI);
-          ctx.fillStyle = '#FFD700';
-          ctx.fill();
+        
+        // Add extra glow effect for books being pulled
+        if (book.beingPulled) {
+          ctx.strokeStyle = '#00FF00'; // Green for being pulled
+          ctx.lineWidth = 6;
+          ctx.shadowColor = '#00FF00';
+          ctx.shadowBlur = 12;
+          
+          // Draw pulsing effect
+          const pulseIntensity = 0.8 + 0.2 * Math.sin(Date.now() * 0.01);
+          ctx.globalAlpha = pulseIntensity;
         } else {
-          // Non-iOS: ring + emoji
-          if (book.beingPulled) {
-            ctx.strokeStyle = '#00FF00';
-            ctx.lineWidth = 6;
-            ctx.shadowColor = '#00FF00';
-            ctx.shadowBlur = 12;
-            const pulseIntensity = 0.8 + 0.2 * Math.sin(Date.now() * 0.01);
-            ctx.globalAlpha = pulseIntensity;
-          } else {
-            ctx.strokeStyle = '#FFD700';
-            ctx.lineWidth = 4;
-            ctx.shadowColor = '#FFD700';
-            ctx.shadowBlur = 8;
-          }
-          ctx.beginPath();
-          ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2 + 6, 0, 2 * Math.PI);
-          ctx.stroke();
-          ctx.shadowBlur = 0;
-          ctx.shadowColor = 'transparent';
-          ctx.globalAlpha = 1;
-          ctx.font = `${bookSize}px Arial`;
-          ctx.textAlign = 'center';
-          ctx.textBaseline = 'middle';
-          ctx.fillText('📚', book.x + bookSize/2, book.y - bookSize/2);
+          ctx.strokeStyle = '#FFD700';
+          ctx.lineWidth = 4;
+          ctx.shadowColor = '#FFD700';
+          ctx.shadowBlur = 8;
         }
-
+        
+        // Draw the glowing ring
+        ctx.beginPath();
+        ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2 + 6, 0, 2 * Math.PI);
+        ctx.stroke();
+        
+        // Reset shadow for the emoji
+        ctx.shadowBlur = 0;
+        ctx.shadowColor = 'transparent';
+        ctx.globalAlpha = 1;
+        
+        // Draw the book emoji larger
+        ctx.font = `${bookSize}px Arial`;
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText('📚', book.x + bookSize/2, book.y - bookSize/2);
+        
         ctx.restore();
       }
     });
@@ -1259,13 +918,13 @@ export const Game: React.FC = () => {
     const hasActiveShield = hasStartShield();
     const hasActiveMagnet = hasBookMagnet();
     
-    // Draw simplified power effects for iOS performance
-    if (hasActiveGhostMode && !isIOS()) {
+    // Draw light blue circle for ghost mode (behind character)
+    if (hasActiveGhostMode) {
       ctx.save();
-      ctx.strokeStyle = '#87CEEB';
+      ctx.strokeStyle = '#87CEEB'; // Light blue
       ctx.lineWidth = 6;
       ctx.globalAlpha = 0.7;
-      ctx.setLineDash([10, 10]);
+      ctx.setLineDash([10, 10]); // Dotted line for ghost effect
       ctx.beginPath();
       ctx.arc(
         gameState.bird.x + gameState.bird.width / 2,
@@ -1278,12 +937,12 @@ export const Game: React.FC = () => {
       ctx.restore();
     }
     
-    // Simplified shield effect for iOS
+    // Draw green outline for shield mode
     if (hasActiveShield) {
       ctx.save();
-      ctx.strokeStyle = '#22C55E';
-      ctx.lineWidth = isIOS() ? 3 : 5;
-      ctx.globalAlpha = isIOS() ? 0.6 : 0.8;
+      ctx.strokeStyle = '#22C55E'; // Green
+      ctx.lineWidth = 5;
+      ctx.globalAlpha = 0.8;
       ctx.beginPath();
       ctx.arc(
         gameState.bird.x + gameState.bird.width / 2,
@@ -1296,8 +955,8 @@ export const Game: React.FC = () => {
       ctx.restore();
     }
     
-    // Simplified magnet effect for iOS
-    if (hasActiveMagnet && !isIOS()) {
+    // Draw yellow glow for book magnet (behind character)
+    if (hasActiveMagnet) {
       ctx.save();
       ctx.shadowColor = '#FFD700';
       ctx.shadowBlur = 20;
@@ -1415,38 +1074,13 @@ export const Game: React.FC = () => {
   }, [jump, waitingForContinue]);
 
   return (
-    <div 
-      className="fixed inset-0 bg-gradient-to-b from-sky-start to-sky-end overflow-hidden"
-      style={{
-        // iOS-specific hardware acceleration
-        ...(isIOS() && {
-          WebkitTransform: 'translateZ(0)',
-          WebkitBackfaceVisibility: 'hidden',
-          WebkitPerspective: '1000px'
-        })
-      }}
-    >
-      {/* Performance Monitor (iOS only) */}
-      {isIOS() && (
-        <div className="absolute top-4 left-4 z-50 bg-black/80 text-white p-2 rounded text-xs">
-          <div>FPS: {performanceStats.fps}</div>
-          <div>Frame: {performanceStats.frameTime.toFixed(1)}ms</div>
-          {performanceStats.isStutter && <div className="text-red-400">STUTTER</div>}
-        </div>
-      )}
-      
+    <div className="fixed inset-0 bg-gradient-to-b from-sky-start to-sky-end overflow-hidden">
       {/* Game Canvas Container */}
       <div 
         className="absolute inset-0 flex items-center justify-center touch-none"
         style={{ 
           width: '100vw',
-          height: '100dvh',
-          // iOS hardware acceleration
-          ...(isIOS() && {
-            WebkitTransform: 'translateZ(0)',
-            transform: 'translateZ(0)',
-            willChange: 'transform'
-          })
+          height: '100dvh'
         }}
       >
         <div
@@ -1455,14 +1089,7 @@ export const Game: React.FC = () => {
             width: canvasSize.width, 
             height: canvasSize.height,
             maxWidth: '100vw',
-            maxHeight: '100svh',
-            // iOS hardware acceleration
-            ...(isIOS() && {
-              WebkitTransform: 'translateZ(0)',
-              transform: 'translateZ(0)',
-              WebkitBackfaceVisibility: 'hidden',
-              willChange: 'transform'
-            })
+            maxHeight: '100svh'
           }}
         >
         <canvas
@@ -1473,18 +1100,9 @@ export const Game: React.FC = () => {
           style={{ 
             touchAction: 'none', 
             WebkitTapHighlightColor: 'transparent', 
-            imageRendering: isIOS() ? 'auto' : 'pixelated', // Smooth rendering on iOS
+            imageRendering: 'pixelated',
             width: canvasSize.width + 'px',
-            height: canvasSize.height + 'px',
-            // iOS-specific hardware acceleration optimizations
-            ...(isIOS() && {
-              WebkitTransform: 'translateZ(0)',
-              transform: 'translateZ(0)',
-              WebkitBackfaceVisibility: 'hidden',
-              WebkitPerspective: '1000px',
-              WebkitUserSelect: 'none',
-              WebkitTouchCallout: 'none'
-            })
+            height: canvasSize.height + 'px'
           }}
         />
 
