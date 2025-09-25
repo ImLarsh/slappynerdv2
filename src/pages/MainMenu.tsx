@@ -188,32 +188,40 @@ const MainMenu: React.FC = () => {
 
           {/* Game Feature Buttons */}
           <div className="grid grid-cols-2 gap-3 md:gap-4">
-            <Button variant="default" onClick={() => handleButtonClick(() => setCharactersOpen(true))} disabled={!user} className="flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-button shadow-glow" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setCharactersOpen(true))} disabled={!user} className="relative flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-green-400 via-green-500 to-green-600 text-green-900 font-bold shadow-xl border-2 border-green-300 overflow-hidden" style={{
               animationDelay: '0.2s'
             }}>
               <Gamepad2 className="h-5 w-5 md:h-6 md:w-6" />
               <span className="font-semibold">Characters</span>
+              {/* 3D bottom decoration */}
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-green-600 to-green-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setShopOpen(true))} disabled={!user} className="flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-button shadow-glow" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setShopOpen(true))} disabled={!user} className="relative flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 text-purple-900 font-bold shadow-xl border-2 border-purple-300 overflow-hidden" style={{
               animationDelay: '0.3s'
             }}>
               <ShoppingCart className="h-5 w-5 md:h-6 md:w-6" />
               <span className="font-semibold">Shop</span>
+              {/* 3D bottom decoration */}
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-purple-600 to-purple-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className="flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-button shadow-glow" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className="relative flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 text-orange-900 font-bold shadow-xl border-2 border-orange-300 overflow-hidden" style={{
               animationDelay: '0.35s'
             }}>
               <Package className="h-5 w-5 md:h-6 md:w-6" />
               <span className="font-semibold">Crates</span>
+              {/* 3D bottom decoration */}
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-orange-600 to-orange-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className="flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-button shadow-glow" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className="relative flex flex-col gap-2 h-16 md:h-24 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-amber-900 font-bold shadow-xl border-2 border-amber-300 overflow-hidden" style={{
               animationDelay: '0.4s'
             }}>
               <Trophy className="h-5 w-5 md:h-6 md:w-6" />
               <span className="font-semibold">Achievements</span>
+              {/* 3D bottom decoration */}
+              <div className="absolute bottom-0 left-0 right-0 h-2 bg-gradient-to-r from-amber-600 to-amber-700"></div>
             </Button>
 
             <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-2 h-20 md:h-28 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border-2 border-yellow-300 overflow-hidden col-span-2" style={{
