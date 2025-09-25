@@ -83,6 +83,8 @@ const MainMenu: React.FC = () => {
     };
   }, []);
   const handleStartGame = () => {
+    // Play click sound for play button
+    playSound('click');
     navigate('/game');
   };
   const handleButtonClick = (action: () => void) => {

@@ -79,7 +79,7 @@ export const Game: React.FC = () => {
   const { user } = useAuth();
   const { addBooks } = useCurrency();
   const { toast } = useToast();
-  const { playSound, stopBackgroundMusic } = useAudio();
+  const { playSound } = useAudio();
   const { 
     showPowerSelection, 
     getRandomPowers, 
@@ -137,9 +137,6 @@ export const Game: React.FC = () => {
   // Load background image, locker images and get user record on component mount
 
   useEffect(() => {
-    // Stop main menu music when game starts
-    stopBackgroundMusic();
-
     // Prevent body scrolling on mobile when game is active
     document.body.classList.add('game-active');
 
@@ -161,7 +158,7 @@ export const Game: React.FC = () => {
     return () => {
       document.body.classList.remove('game-active');
     };
-  }, [stopBackgroundMusic]);
+  }, []);
 
   // Set responsive canvas size with safety checks
   useEffect(() => {
