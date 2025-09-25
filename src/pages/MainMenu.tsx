@@ -145,8 +145,8 @@ const MainMenu: React.FC = () => {
       </div>
       
       {/* Pop Counter - Top Left */}
-      <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20">
-        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl py-px my-[44px] mx-[18px]">
+      <div className="absolute top-2 sm:top-3 md:top-4 left-2 sm:left-3 md:left-4 z-20">
+        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl">
           <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
             <span className="text-xs sm:text-sm md:text-lg">💥</span>
             <span className="font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">
@@ -157,15 +157,15 @@ const MainMenu: React.FC = () => {
       </div>
 
       {/* User Info - Top Left (when signed in) - moved down */}
-      {user && <div className="absolute top-12 sm:top-16 md:top-20 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30 my-[32px] mx-[16px]">
+      {user && <div className="absolute top-12 sm:top-16 md:top-20 left-2 sm:left-3 md:left-4 z-20 space-y-1 sm:space-y-2">
+          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 border border-primary/30">
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-black font-bold">
               {playerName || 'Player'}
             </p>
             {/* Currency Display */}
             <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 mt-0.5">
               <span className="text-xs sm:text-sm md:text-lg">📚</span>
-              <span className="sm:text-xs md:text-sm font-extrabold lg:text-2xl text-base">
+              <span className="text-xs sm:text-sm md:text-base lg:text-lg font-extrabold">
                 {booksLoading ? '...' : books} Books
               </span>
             </div>
@@ -173,18 +173,18 @@ const MainMenu: React.FC = () => {
         </div>}
 
       {/* Volume Control Button */}
-      <Button variant="outline" size="icon" onClick={() => handleButtonClick(() => setVolumeOpen(true))} className="absolute top-1 sm:top-2 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 my-[68px] mx-0 px-[16px] py-[15px]">
-        {isMuted ? <VolumeX className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" /> : <Volume2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />}
+      <Button variant="outline" size="icon" onClick={() => handleButtonClick(() => setVolumeOpen(true))} className="absolute top-16 sm:top-20 md:top-24 right-2 sm:right-3 md:right-4 z-20 hover-scale w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12">
+        {isMuted ? <VolumeX className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" /> : <Volume2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />}
       </Button>
 
       {/* Add to Home Screen Button - Only show on mobile when installable */}
-      {isInstallable && <Button variant="outline" size="icon" className="absolute top-8 sm:top-12 md:top-16 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-green-500 hover:bg-green-600 border-green-400 text-white" onClick={() => handleButtonClick(installApp)}>
-          <Plus className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
+      {isInstallable && <Button variant="outline" size="icon" className="absolute top-28 sm:top-36 md:top-40 right-2 sm:right-3 md:right-4 z-20 hover-scale w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 bg-green-500 hover:bg-green-600 border-green-400 text-white" onClick={() => handleButtonClick(installApp)}>
+          <Plus className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
         </Button>}
       
       {/* Sign Out Button - Red Door Icon */}
-      {user && <Button variant="outline" size="icon" onClick={() => handleButtonClick(signOut)} className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 my-[70px] mx-[70px] py-[13px] px-[21px]">
-          <DoorOpen className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
+      {user && <Button variant="outline" size="icon" onClick={() => handleButtonClick(signOut)} className="absolute top-2 sm:top-3 md:top-4 right-2 sm:right-3 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12">
+          <DoorOpen className="h-3 w-3 sm:h-4 sm:w-4 md:h-5 md:w-5" />
         </Button>}
       
       {/* Centered Content */}
