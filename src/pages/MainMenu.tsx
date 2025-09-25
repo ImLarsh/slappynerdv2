@@ -228,7 +228,7 @@ const MainMenu: React.FC = () => {
               animationDelay: '0.2s'
             }}>
               <Gamepad2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="text-[9px] sm:text-[10px] font-extrabold md:text-xl">Characters</span>
+              <span className="text-[8px] sm:text-[9px] md:text-xs lg:text-lg font-extrabold">Characters</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-green-600 to-green-700"></div>
             </Button>
@@ -237,7 +237,7 @@ const MainMenu: React.FC = () => {
               animationDelay: '0.3s'
             }}>
               <ShoppingCart className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="text-[9px] sm:text-[10px] font-extrabold md:text-xl">Shop</span>
+              <span className="text-[8px] sm:text-[9px] md:text-xs lg:text-lg font-extrabold">Shop</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-purple-600 to-purple-700"></div>
             </Button>
@@ -246,7 +246,7 @@ const MainMenu: React.FC = () => {
               animationDelay: '0.35s'
             }}>
               <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="text-[9px] sm:text-[10px] font-extrabold md:text-xl">Crates</span>
+              <span className="text-[8px] sm:text-[9px] md:text-xs lg:text-lg font-extrabold">Crates</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-orange-600 to-orange-700"></div>
             </Button>
@@ -255,7 +255,7 @@ const MainMenu: React.FC = () => {
               animationDelay: '0.4s'
             }}>
               <Trophy className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="text-[9px] sm:text-[10px] font-extrabold md:text-xl">Achievements</span>
+              <span className="text-[7px] sm:text-[8px] md:text-xs lg:text-lg font-extrabold">Achievements</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-amber-600 to-amber-700"></div>
             </Button>
