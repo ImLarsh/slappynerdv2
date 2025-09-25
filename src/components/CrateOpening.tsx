@@ -159,6 +159,17 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
     return `${rarityColors[rarity as keyof typeof rarityColors]} ${rarityGlows[rarity as keyof typeof rarityGlows]}`;
   };
 
+  const getRarityGradient = (rarity: string) => {
+    const gradients = {
+      common: 'linear-gradient(to top, hsl(120 60% 50% / 0.4), hsl(120 60% 60% / 0.6))',
+      uncommon: 'linear-gradient(to top, hsl(200 60% 50% / 0.4), hsl(200 60% 60% / 0.6))',
+      rare: 'linear-gradient(to top, hsl(270 60% 50% / 0.4), hsl(270 60% 60% / 0.6))',
+      epic: 'linear-gradient(to top, hsl(25 90% 55% / 0.4), hsl(25 90% 65% / 0.6))',
+      legendary: 'linear-gradient(to top, hsl(45 95% 55% / 0.4), hsl(45 95% 65% / 0.6))'
+    };
+    return gradients[rarity as keyof typeof gradients] || gradients.common;
+  };
+
   if (phase === 'opening') {
     return (
       <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/10 flex items-center justify-center">
@@ -179,10 +190,15 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
             <h2 className="text-3xl font-bold mb-2">🎰 Opening {crate.name}</h2>
           </div>
 
-              <div className="relative w-[600px] h-[600px] rounded-full bg-gradient-to-br from-card via-card/90 to-card/80 backdrop-blur-sm shadow-2xl border-4 border-primary/30 overflow-hidden">
+          {/* Spinning wheel */}
+          <div className="relative flex items-center justify-center">
+            <div className="relative w-[600px] h-[600px] rounded-full bg-gradient-to-br from-card via-card/90 to-card/80 backdrop-blur-sm shadow-2xl border-4 border-primary/30 overflow-hidden">
               {/* Pointer/Indicator */}
               <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30">
-                <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-xl filter brightness-110"></div>
+                <div
+                  className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent drop-shadow-xl filter brightness-110"
+                  style={{ borderBottomColor: 'hsl(var(--warning))' }}
+                ></div>
               </div>
               
               {/* Wheel segments */}
@@ -193,27 +209,17 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                   willChange: 'transform'
                 }}
               >
-                {rewards.slice(0, 8).map((reward, index) => {
-                  const angle = (360 / 8) * index; // 8 segments for clean divisions
-                  const isSelected = Math.floor(((currentRotation + 22.5) % 360) / 45) === index;
-                  
-                  // Rarity-based colors
-                  const rarityColors = {
-                    common: 'from-green-500/40 to-green-600/60',
-                    uncommon: 'from-blue-500/40 to-blue-600/60', 
-                    rare: 'from-purple-500/40 to-purple-600/60',
-                    epic: 'from-orange-500/40 to-orange-600/60',
-                    legendary: 'from-yellow-400/40 to-yellow-500/60'
-                  };
-                  
-                  const segmentColor = rarityColors[reward.rarity as keyof typeof rarityColors] || rarityColors.common;
+                {rewards.map((reward, index) => {
+                  const segmentCount = Math.max(rewards.length, 1);
+                  const degreesPer = 360 / segmentCount;
+                  const angle = degreesPer * index;
+                  const selectedIndex = Math.round((currentRotation % 360) / degreesPer) % segmentCount;
+                  const isSelected = selectedIndex === index;
                   
                   return (
                     <div
                       key={`${reward.id}-${index}`}
-                      className={`absolute w-full h-full transition-all duration-200 ${
-                        isSelected ? 'scale-105 z-20' : 'z-10'
-                      }`}
+                      className={`absolute w-full h-full transition-all duration-200 ${isSelected ? 'scale-[1.02] z-20' : 'z-10'}`}
                       style={{
                         transform: `rotate(${angle}deg)`,
                         transformOrigin: 'center'
@@ -221,14 +227,13 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                     >
                       {/* Segment slice */}
                       <div 
-                        className={`absolute top-0 left-1/2 w-1 h-1/2 origin-bottom transition-all duration-200 bg-gradient-to-t ${segmentColor} ${
-                          isSelected ? 'brightness-125 shadow-lg' : 'brightness-100'
-                        }`}
+                        className="absolute top-0 left-1/2 w-1 h-1/2 origin-bottom transition-all duration-200"
                         style={{
                           transform: 'translateX(-50%)',
                           clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
-                          width: '70px',
-                          filter: isSelected ? 'drop-shadow(0 0 15px currentColor)' : 'none'
+                          width: `${Math.max(60, 360/segmentCount)}px`,
+                          background: getRarityGradient(reward.rarity),
+                          filter: isSelected ? 'drop-shadow(0 0 18px hsl(var(--primary-glow) / 0.6))' : 'none',
                         }}
                       />
                       
@@ -236,13 +241,13 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                       <div
                         className="absolute flex items-center justify-center"
                         style={{
-                          top: '28%',
+                          top: '26%',
                           left: '50%',
                           transform: `translateX(-50%) translateY(-50%) rotate(${-angle}deg)`,
                         }}
                       >
                         <div className={`transition-all duration-200 ${
-                          isSelected ? 'text-6xl drop-shadow-2xl animate-pulse' : 'text-5xl drop-shadow-lg'
+                          isSelected ? 'text-6xl drop-shadow-2xl' : 'text-5xl drop-shadow-lg'
                         }`}>
                           {reward.emoji}
                         </div>
@@ -250,19 +255,19 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                       
                       {/* Segment border */}
                       <div 
-                        className="absolute top-0 left-1/2 w-0.5 h-1/2 bg-background/30 origin-bottom"
-                        style={{ transform: 'translateX(-50%)' }}
+                        className="absolute top-0 left-1/2 w-0.5 h-1/2 origin-bottom"
+                        style={{ 
+                          transform: 'translateX(-50%)',
+                          backgroundColor: 'hsl(var(--border))'
+                        }}
                       />
-                      </div>
-                    );
-                  })}
-                </div>
-                
-                {/* Inner mask ring */}
-                <div className="absolute inset-[22%] rounded-full bg-card border-4 border-border z-20 pointer-events-none"></div>
-                
-                {/* Center hub */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-primary to-primary/80 rounded-full border-4 border-background z-30 flex items-center justify-center shadow-xl">
+                    </div>
+                  );
+                })}
+              </div>
+              
+              {/* Center hub */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-primary to-primary-glow rounded-full border-4 border-background z-30 flex items-center justify-center shadow-xl">
                 <div className="text-3xl drop-shadow-lg">{crate.emoji}</div>
               </div>
               
