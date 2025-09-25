@@ -115,55 +115,69 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
     // Replace the middle reward with our actual reward
     allRewards[finalIndex] = finalReward;
 
-    // Animation parameters for smooth progressive slowdown
-    const totalDuration = 5000; // 5 seconds
-    const startSpeed = 20; // Start very fast
-    const endSpeed = 300; // End very slow
-    let startTime = Date.now();
-    let currentIndex = 0;
+    // CSGO-style animation parameters
+    const totalDuration = 4500; // 4.5 seconds for smoother feel
+    const minRotations = 4; // Minimum full rotations
+    const extraSpins = 3; // Extra spins to land on target
+    const targetSpins = (minRotations * totalRewards) + finalIndex + extraSpins;
     
-    // Calculate total spins needed to land on target
-    const minSpins = totalRewards * 3; // At least 3 full rotations
-    const targetTotalSpins = minSpins + finalIndex;
     let currentSpins = 0;
+    let currentIndex = 0;
+    let startTime = Date.now();
+    let lastFrameTime = startTime;
 
     const animate = () => {
-      const elapsed = Date.now() - startTime;
+      const now = Date.now();
+      const elapsed = now - startTime;
+      const deltaTime = now - lastFrameTime;
+      lastFrameTime = now;
+      
+      // Calculate progress (0 to 1)
       const timeProgress = Math.min(elapsed / totalDuration, 1);
-      const spinProgress = currentSpins / targetTotalSpins;
+      const spinProgress = currentSpins / targetSpins;
       
-      // Use the furthest progress to determine speed
-      const overallProgress = Math.max(timeProgress, spinProgress);
+      // Use a combination of time and spin progress for smooth ending
+      const combinedProgress = Math.max(timeProgress * 0.7, spinProgress * 0.3);
       
-      // Smooth exponential deceleration curve
-      const easingFactor = 1 - Math.pow(1 - overallProgress, 3);
-      const currentSpeed = startSpeed + (endSpeed - startSpeed) * easingFactor;
+      // CSGO-style easing: starts fast, gradually slows down with smooth curve
+      // Using a custom easing function that mimics CSGO's feel
+      const easeOutQuart = 1 - Math.pow(1 - combinedProgress, 4);
+      const easeOutExpo = combinedProgress === 1 ? 1 : 1 - Math.pow(2, -10 * combinedProgress);
+      
+      // Blend both easing functions for perfect CSGO feel
+      const easingValue = easeOutQuart * 0.7 + easeOutExpo * 0.3;
+      
+      // Calculate delay between frames (starts at ~16ms, ends at ~200ms)
+      const minDelay = 16; // 60fps start
+      const maxDelay = 200; // Very slow end
+      const currentDelay = minDelay + (maxDelay - minDelay) * easingValue;
       
       setCurrentIndex(currentIndex);
       
-      // Continue until we've completed the target spins or time is up
-      if (currentSpins < targetTotalSpins && timeProgress < 1) {
+      // Continue spinning until we reach our target
+      if (currentSpins < targetSpins && timeProgress < 0.98) {
         setTimeout(() => {
           currentIndex = (currentIndex + 1) % totalRewards;
           currentSpins++;
           animate();
-        }, currentSpeed);
+        }, currentDelay);
       } else {
-        // Ensure we land exactly on the final index
+        // Final positioning - ensure we land exactly on the reward
         setCurrentIndex(finalIndex);
         setPhase('revealing');
         
-        // Show the final result after a brief pause
+        // Brief pause before showing result
         setTimeout(() => {
           setPhase('complete');
           toast({
             title: "Congratulations!",
             description: `You won: ${finalReward.emoji} ${finalReward.name}`,
           });
-        }, 500);
+        }, 800);
       }
     };
 
+    // Start the animation
     animate();
   };
 
@@ -198,35 +212,52 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
             </div>
             
             <div 
-              className="flex py-8 transition-transform duration-[16ms] ease-out"
+              className="flex py-8"
               style={{
-                transform: `translateX(${-currentIndex * 128 + 200}px)`,
+                transform: `translateX(${-currentIndex * 128 + 256}px)`,
+                transition: 'transform 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94)',
                 willChange: 'transform'
               }}
             >
               {rewards.map((reward, index) => {
                 const isCenter = index === currentIndex;
                 const distance = Math.abs(index - currentIndex);
-                const opacity = distance === 0 ? 1 : distance === 1 ? 0.9 : distance === 2 ? 0.7 : distance === 3 ? 0.4 : 0.2;
-                const scale = distance === 0 ? 1.5 : distance === 1 ? 1.2 : distance === 2 ? 1.0 : distance === 3 ? 0.8 : 0.6;
-                const blur = distance === 0 ? 'blur(0px)' : distance === 1 ? 'blur(1px)' : distance === 2 ? 'blur(2px)' : distance === 3 ? 'blur(3px)' : 'blur(4px)';
+                
+                // Enhanced visual effects for CSGO-like feel
+                const opacity = distance === 0 ? 1 : 
+                              distance === 1 ? 0.95 : 
+                              distance === 2 ? 0.8 : 
+                              distance === 3 ? 0.5 : 
+                              distance === 4 ? 0.3 : 0.15;
+                              
+                const scale = distance === 0 ? 1.6 : 
+                             distance === 1 ? 1.25 : 
+                             distance === 2 ? 1.05 : 
+                             distance === 3 ? 0.9 : 
+                             distance === 4 ? 0.75 : 0.6;
+                             
+                const blur = distance === 0 ? 'blur(0px)' : 
+                            distance === 1 ? 'blur(0.5px)' : 
+                            distance === 2 ? 'blur(1.5px)' : 
+                            distance === 3 ? 'blur(3px)' : 
+                            distance === 4 ? 'blur(4px)' : 'blur(6px)';
                 
                 return (
                   <div
                     key={`${reward.id}-${index}`}
-                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-[16ms] ease-out ${
-                      isCenter ? `${getRarityStyle(reward.rarity)} animate-pulse` : ''
+                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-100 ease-out ${
+                      isCenter ? `${getRarityStyle(reward.rarity)}` : ''
                     }`}
                     style={{
                       opacity,
                       transform: `scale(${scale})`,
-                      filter: `${blur} ${isCenter ? 'brightness(1.4) saturate(1.3)' : distance <= 2 ? 'brightness(0.9)' : 'brightness(0.6)'}`,
+                      filter: `${blur} ${isCenter ? 'brightness(1.5) saturate(1.4) drop-shadow(0 0 20px currentColor)' : distance <= 2 ? 'brightness(0.9)' : 'brightness(0.6)'}`,
                       willChange: 'transform, opacity, filter'
                     }}
                   >
-                    <div className="text-4xl mb-1 transition-all duration-[16ms]">{reward.emoji}</div>
-                    <div className="text-xs font-medium text-center px-1 transition-all duration-[16ms]">{reward.name}</div>
-                    <div className={`text-xs capitalize transition-all duration-[16ms] ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
+                    <div className="text-4xl mb-1">{reward.emoji}</div>
+                    <div className="text-xs font-medium text-center px-1">{reward.name}</div>
+                    <div className={`text-xs capitalize font-semibold ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
                       {reward.rarity}
                     </div>
                   </div>
