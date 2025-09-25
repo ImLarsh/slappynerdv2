@@ -1100,17 +1100,53 @@ export const Game: React.FC = () => {
         <div className="absolute bottom-32 left-16 text-2xl opacity-20">∫ f(x)dx</div>
         <div className="absolute top-60 left-32 text-3xl opacity-15 animate-bounce">√(x² + y²)</div>
         <div className="absolute bottom-20 right-32 text-2xl opacity-20">Σ(n=1 to ∞)</div>
+        <div className="absolute top-80 left-80 text-2xl opacity-15 animate-float">(a + b)² = a² + 2ab + b²</div>
+        <div className="absolute bottom-80 right-80 text-3xl opacity-20">∂f/∂x</div>
         
         {/* Retro Computer Elements */}
         <div className="absolute top-32 right-10 text-6xl opacity-10 animate-pulse">💾</div>
         <div className="absolute bottom-40 left-8 text-5xl opacity-15">🖥️</div>
         <div className="absolute top-80 right-40 text-4xl opacity-10 animate-bounce">⌨️</div>
         <div className="absolute bottom-60 right-8 text-3xl opacity-20">🖱️</div>
+        <div className="absolute top-16 left-80 text-4xl opacity-15 animate-pulse">💿</div>
+        <div className="absolute bottom-16 right-16 text-5xl opacity-10">📼</div>
+        <div className="absolute top-96 right-20 text-3xl opacity-20 animate-float">📟</div>
+        
+        {/* Programming & Code Elements */}
+        <div className="absolute top-48 left-20 text-2xl opacity-15 font-mono transform rotate-6">
+          {"if (nerd) { study(); }"}
+        </div>
+        <div className="absolute bottom-48 right-40 text-xl opacity-10 font-mono transform -rotate-12">
+          {"function solve() { return 42; }"}
+        </div>
+        <div className="absolute top-72 right-60 text-lg opacity-20 font-mono">
+          {"<html><brain></brain></html>"}
+        </div>
+        <div className="absolute bottom-72 left-60 text-xl opacity-15 font-mono transform rotate-3">
+          {"while(learning) { grow++; }"}
+        </div>
         
         {/* Nerd Culture Icons */}
         <div className="absolute top-16 right-60 text-5xl opacity-15 animate-pulse">🚀</div>
         <div className="absolute bottom-16 left-40 text-4xl opacity-10">🧬</div>
         <div className="absolute top-96 left-8 text-3xl opacity-20 animate-bounce">⚗️</div>
+        <div className="absolute top-120 right-80 text-4xl opacity-15">🔬</div>
+        <div className="absolute bottom-96 left-80 text-3xl opacity-10 animate-float">🧪</div>
+        <div className="absolute top-40 left-60 text-4xl opacity-20">⚡</div>
+        <div className="absolute bottom-40 right-60 text-3xl opacity-15 animate-pulse">🔭</div>
+        
+        {/* Retro Gaming Elements */}
+        <div className="absolute top-64 left-12 text-3xl opacity-10 animate-bounce">🎮</div>
+        <div className="absolute bottom-64 right-12 text-4xl opacity-15">👾</div>
+        <div className="absolute top-88 right-12 text-2xl opacity-20 animate-pulse">8-BIT</div>
+        
+        {/* Circuit & Tech Patterns */}
+        <div className="absolute top-24 right-32 text-xl opacity-10 font-mono transform rotate-45">
+          ┌─┐ ┌─┐ ┌─┐
+        </div>
+        <div className="absolute bottom-24 left-32 text-xl opacity-15 font-mono transform -rotate-45">
+          ═══╬═══╬═══
+        </div>
         
         {/* Binary Code Background */}
         <div className="absolute top-24 left-60 text-sm opacity-10 font-mono transform rotate-12">
@@ -1119,6 +1155,23 @@ export const Game: React.FC = () => {
         <div className="absolute bottom-24 right-60 text-sm opacity-10 font-mono transform -rotate-12">
           01010111 01101111 01110010 01101100 01100100
         </div>
+        <div className="absolute top-56 left-4 text-xs opacity-15 font-mono transform rotate-90">
+          11001010 11010101 10101010
+        </div>
+        <div className="absolute bottom-56 right-4 text-xs opacity-10 font-mono transform -rotate-90">
+          01010101 10101010 01101001
+        </div>
+        
+        {/* Scientific Symbols */}
+        <div className="absolute top-104 left-20 text-3xl opacity-15">∆</div>
+        <div className="absolute bottom-104 right-20 text-2xl opacity-20">Ω</div>
+        <div className="absolute top-112 right-40 text-4xl opacity-10">∑</div>
+        <div className="absolute bottom-112 left-40 text-3xl opacity-15">∏</div>
+        
+        {/* Chemistry Elements */}
+        <div className="absolute top-52 right-24 text-2xl opacity-20">H₂O</div>
+        <div className="absolute bottom-52 left-24 text-xl opacity-15">CO₂</div>
+        <div className="absolute top-76 left-44 text-2xl opacity-10">NaCl</div>
       </div>
       
       {/* Game Canvas Container */}
