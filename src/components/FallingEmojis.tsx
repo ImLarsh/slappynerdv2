@@ -12,7 +12,11 @@ interface FallingEmoji {
   popTop?: number;
 }
 
-export const FallingEmojis: React.FC = () => {
+interface FallingEmojisProps {
+  onEmojiPop?: () => void;
+}
+
+export const FallingEmojis: React.FC<FallingEmojisProps> = ({ onEmojiPop }) => {
   const [emojis, setEmojis] = useState<FallingEmoji[]>([]);
   const { characters } = useCharactersContext();
   const { playSound } = useAudio();
@@ -59,8 +63,9 @@ export const FallingEmojis: React.FC = () => {
     emojiId: number,
     e: React.MouseEvent<HTMLDivElement> | React.TouchEvent<HTMLDivElement>
   ) => {
-    // Play pop sound
+    // Play pop sound and call callback
     playSound('emojipop');
+    onEmojiPop?.();
 
     // Capture current screen position to avoid teleporting
     const target = e.currentTarget as HTMLDivElement;

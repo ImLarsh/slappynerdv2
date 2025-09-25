@@ -29,6 +29,7 @@ const MainMenu: React.FC = () => {
   const [volumeOpen, setVolumeOpen] = useState(false);
   const [cratesOpen, setCratesOpen] = useState(false);
   const [playerName, setPlayerName] = useState<string>('');
+  const [popCounter, setPopCounter] = useState(0);
   const {
     books,
     loading: booksLoading
@@ -135,7 +136,7 @@ const MainMenu: React.FC = () => {
       backgroundImage: `url(${schoolHallwayBg})`
     }}>
       {/* Falling Emojis Background */}
-      <FallingEmojis />
+      <FallingEmojis onEmojiPop={() => setPopCounter(prev => prev + 1)} />
       
       {/* Background overlay - no blur to avoid affecting emojis */}
       <div className="absolute inset-0 bg-background/60 z-1" />
@@ -145,8 +146,20 @@ const MainMenu: React.FC = () => {
         <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[140px] sm:max-w-[180px] md:max-w-[220px] lg:max-w-md xl:max-w-lg mx-auto hover-scale" />
       </div>
       
-      {/* User Info - Top Left (when signed in) */}
-      {user && <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
+      {/* Pop Counter - Top Left */}
+      <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20">
+        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl">
+          <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
+            <span className="text-xs sm:text-sm md:text-lg">💥</span>
+            <span className="font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">
+              {popCounter} Pops
+            </span>
+          </div>
+        </div>
+      </div>
+
+      {/* User Info - Top Left (when signed in) - moved down */}
+      {user && <div className="absolute top-12 sm:top-16 md:top-20 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
           <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30">
             <p className="text-[10px] sm:text-xs md:text-sm lg:text-base text-muted-foreground">
               Welcome back!{' '}
@@ -163,11 +176,6 @@ const MainMenu: React.FC = () => {
             </div>
           </div>
         </div>}
-
-      {/* Sign In/Up Button - Top Left (when not signed in) */}
-      {!user && <Button onClick={() => handleButtonClick(() => navigate('/auth'))} variant="default" size="sm" className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20 hover-scale bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-2 sm:border-3 border-blue-300 px-2 sm:px-3 md:px-6 py-1 sm:py-2 md:py-3 text-[10px] sm:text-xs md:text-base lg:text-lg transform hover:scale-110 transition-all duration-300">
-          🔐 Sign In / Sign Up
-        </Button>}
 
       {/* Volume Control Button */}
       <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(() => setVolumeOpen(true))}>
@@ -267,6 +275,19 @@ const MainMenu: React.FC = () => {
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-yellow-600 to-yellow-700"></div>
             </Button>
           </div>
+
+          {/* Sign In/Up Button - Below play button (when not signed in) */}
+          {!user && (
+            <Button 
+              onClick={() => handleButtonClick(() => navigate('/auth'))} 
+              variant="default" 
+              size="lg" 
+              className="w-full text-sm sm:text-base md:text-lg py-2 sm:py-3 md:py-4 hover-scale animate-scale-in bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-2 sm:border-3 border-blue-300 transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3"
+              style={{ animationDelay: '0.15s' }}
+            >
+              🔐 Sign In / Sign Up
+            </Button>
+          )}
         </div>
         </div>
       </div>
