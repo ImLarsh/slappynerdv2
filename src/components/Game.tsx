@@ -1228,7 +1228,7 @@ export const Game: React.FC = () => {
 
         {/* Game Over Screen */}
         {gameState.gameOver && <div className="absolute inset-0 flex items-center justify-center bg-foreground/50 rounded-lg">
-            <Card className="p-3 sm:p-4 md:p-8 text-center space-y-2 sm:space-y-3 md:space-y-4 animate-bounce-in shadow-game max-w-sm mx-2 sm:mx-4">
+            <Card className="p-3 sm:p-4 md:p-8 text-center space-y-2 sm:space-y-3 md:space-y-4 animate-bounce-in shadow-game max-w-sm mx-2 sm:mx-4 bg-background/80 backdrop-blur-sm">
               <div className="text-3xl sm:text-4xl">💥</div>
               {gameState.isNewRecord ? <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-warning">New Record! 👑</h2> : <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-danger">Game Over!</h2>}
               <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
