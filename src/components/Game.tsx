@@ -1327,7 +1327,7 @@ export const Game: React.FC = () => {
                 <Button onClick={resetGame} variant="default" size="lg" className="bg-warning text-warning-foreground shadow-glow h-12 w-12 sm:h-14 sm:w-14 md:h-16 md:w-16 p-0 mx-auto sm:mx-0">
                   <RotateCcw size={24} />
                 </Button>
-                <Button onClick={() => navigate('/')} variant="outline" size="lg" className="flex-1 text-sm sm:text-base">Main Menu </Button>
+                <Button onClick={() => navigate('/')} variant="outline" size="lg" className="flex-1 text-sm sm:text-base font-extrabold">Main Menu </Button>
               </div>
             </Card>
           </div>}
