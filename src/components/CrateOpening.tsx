@@ -160,14 +160,7 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
   };
 
   const getRarityGradient = (rarity: string) => {
-    const gradients = {
-      common: 'linear-gradient(to top, hsl(120 60% 50% / 0.4), hsl(120 60% 60% / 0.6))',
-      uncommon: 'linear-gradient(to top, hsl(200 60% 50% / 0.4), hsl(200 60% 60% / 0.6))',
-      rare: 'linear-gradient(to top, hsl(270 60% 50% / 0.4), hsl(270 60% 60% / 0.6))',
-      epic: 'linear-gradient(to top, hsl(25 90% 55% / 0.4), hsl(25 90% 65% / 0.6))',
-      legendary: 'linear-gradient(to top, hsl(45 95% 55% / 0.4), hsl(45 95% 65% / 0.6))'
-    };
-    return gradients[rarity as keyof typeof gradients] || gradients.common;
+    return 'linear-gradient(to top, hsl(var(--muted) / 0.3), hsl(var(--muted) / 0.5))';
   };
 
   if (phase === 'opening') {
