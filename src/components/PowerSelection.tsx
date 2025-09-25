@@ -29,10 +29,8 @@ export const PowerSelection: React.FC<PowerSelectionProps> = ({
   return <div className="absolute inset-0 flex items-center justify-center bg-foreground/70 z-50 rounded-lg">
       <div className="p-4 sm:p-6 text-center space-y-4 animate-scale-in max-w-md mx-4">
         {!selectedPower ? <>
-            <h2 className="text-xl sm:text-2xl font-bold text-amber-500">Select Your Power</h2>
-            <p className="text-sm sm:text-base text-muted-foreground">
-              Select one of these nerdy abilities to help you soar!
-            </p>
+            <h2 className="text-xl sm:text-2xl font-bold text-amber-500">Modifiers</h2>
+            <p className="text-sm sm:text-base text-amber-300">Select one of these nerdy abilities</p>
             
             <div className="grid gap-3">
               {powers.map(power => <Button key={power.id} onClick={() => handlePowerClick(power)} variant="outline" className="h-auto p-4 text-left bg-background/90 hover:bg-primary/20 transition-all duration-200 border-2 border-primary/50 hover:border-primary shadow-lg hover:shadow-glow hover:scale-105 hover:-translate-y-1">
