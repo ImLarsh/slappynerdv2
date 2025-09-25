@@ -146,7 +146,7 @@ const MainMenu: React.FC = () => {
       
       {/* Pop Counter - Top Left */}
       <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20">
-        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl">
+        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl py-px my-[44px] mx-[18px]">
           <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
             <span className="text-xs sm:text-sm md:text-lg">💥</span>
             <span className="font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">
@@ -158,7 +158,7 @@ const MainMenu: React.FC = () => {
 
       {/* User Info - Top Left (when signed in) - moved down */}
       {user && <div className="absolute top-12 sm:top-16 md:top-20 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30 mx-[15px] my-[35px]">
+          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30">
             <p className="text-xs sm:text-sm md:text-base lg:text-lg text-black font-bold">
               {playerName || 'Player'}
             </p>
@@ -183,7 +183,7 @@ const MainMenu: React.FC = () => {
         </Button>}
       
       {/* Sign Out Button - Red Door Icon */}
-      {user && <Button variant="outline" size="icon" onClick={() => handleButtonClick(signOut)} className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 mx-0 my-[96px]">
+      {user && <Button variant="outline" size="icon" className="absolute top-1 sm:top-2 md:top-4 right-1 sm:right-2 md:right-4 z-20 hover-scale text-danger border-danger hover:bg-danger hover:text-danger-foreground w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10" onClick={() => handleButtonClick(signOut)}>
           <DoorOpen className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />
         </Button>}
       
