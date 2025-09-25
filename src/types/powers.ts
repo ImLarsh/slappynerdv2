@@ -29,7 +29,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '⚡',
     type: 'speed',
     beneficial: false,
-    weight: 12,
+    weight: 15,
     effect: { speedMultiplier: 1.5 }
   },
   {
@@ -39,7 +39,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🔒',
     type: 'gap',
     beneficial: false,
-    weight: 12,
+    weight: 15,
     effect: { gapMultiplier: 0.75 }
   },
   {
@@ -49,7 +49,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🌪️',
     type: 'temporary',
     beneficial: false,
-    weight: 10,
+    weight: 13,
     effect: { speedMultiplier: 1.8, duration: 6000 }
   },
   {
@@ -59,7 +59,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🎯',
     type: 'temporary',
     beneficial: false,
-    weight: 10,
+    weight: 13,
     effect: { gapMultiplier: 0.6, duration: 8000 }
   },
   {
@@ -69,7 +69,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '👹',
     type: 'speed',
     beneficial: false,
-    weight: 9,
+    weight: 12,
     effect: { speedMultiplier: 2.0 }
   },
   {
@@ -79,7 +79,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '💀',
     type: 'temporary',
     beneficial: false,
-    weight: 8,
+    weight: 11,
     effect: { speedMultiplier: 1.6, gapMultiplier: 0.7, duration: 5000 }
   },
   {
@@ -89,7 +89,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '😈',
     type: 'temporary',
     beneficial: false,
-    weight: 7,
+    weight: 10,
     effect: { speedMultiplier: 2.2, gapMultiplier: 0.5, duration: 4000 }
   },
   {
@@ -99,7 +99,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🚪',
     type: 'special',
     beneficial: false,
-    weight: 11,
+    weight: 5, // 10% chance (reduced from 11)
     effect: { speedMultiplier: 1.0 } // This will be handled specially in game logic
   },
 
@@ -121,7 +121,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '📏',
     type: 'temporary',
     beneficial: true,
-    weight: 1,
+    weight: 2.5, // 5% chance (increased from 1)
     effect: { gapMultiplier: 1.4, duration: 8000 }
   },
   {
@@ -151,7 +151,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🚪',
     type: 'temporary',
     beneficial: true,
-    weight: 1,
+    weight: 2.5, // 5% chance (increased from 1)
     effect: { gapMultiplier: 2.0, duration: 10000 }
   },
   {
