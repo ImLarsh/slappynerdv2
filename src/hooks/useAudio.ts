@@ -15,14 +15,21 @@ let needsUnmuteAfterAutoplay = false;
 const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1);
 
-const SOUND_SOURCES: Record<string, string> = {
+const SOUND_SOURCES: Record<string, string> = isiOS ? {
+  // iOS: Only use CAF files for optimization
+  passLocker: '/audio/passlocker.caf',
+  collectBook: '/audio/collectbook-2.caf',
+  defeat: '/audio/defeatsound.caf',
+  powerup: '/audio/powerup.caf',
+} : {
+  // Non-iOS: Use MP3 files
   gameOver: '/audio/game-over-sound.mp3',
-  passLocker: isiOS ? '/audio/passlocker.caf' : '/audio/passlocker.mp3',
-  collectBook: isiOS ? '/audio/collectbook-2.caf' : '/audio/collectbook.mp3',
+  passLocker: '/audio/passlocker.mp3',
+  collectBook: '/audio/collectbook.mp3',
   tapFlap: '/audio/tapsound.mp3',
-  defeat: isiOS ? '/audio/defeatsound.caf' : '/audio/defeatsound.mp3',
+  defeat: '/audio/defeatsound.mp3',
   click: '/audio/clicksound.mp3',
-  powerup: isiOS ? '/audio/powerup.caf' : '/audio/powerup.mp3',
+  powerup: '/audio/powerup.mp3',
 };
 
 export const useAudio = () => {
@@ -232,6 +239,9 @@ export const useAudio = () => {
 
   const playSound = useCallback((soundName: string) => {
     if (audioState.isMuted) return;
+    
+    // Skip sounds not available on iOS for optimization
+    if (isiOS && !SOUND_SOURCES[soundName]) return;
 
     const sound = soundEffectsRef.current[soundName];
     if (sound) {
