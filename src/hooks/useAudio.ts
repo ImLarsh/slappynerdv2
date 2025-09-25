@@ -32,7 +32,7 @@ export const useAudio = () => {
     return {
       volume: savedVolume ? parseFloat(savedVolume) : 0.5,
       isMuted: savedMute === 'true',
-      isPlaying: false // Will be set to true after first interaction
+      isPlaying: true // Always show as playing initially for UI consistency
     };
   });
 
@@ -48,10 +48,11 @@ export const useAudio = () => {
       const audio = new Audio();
       audio.src = `/audio/main-menu-music.mp3?v=${Date.now()}`;
       audio.loop = true;
-      audio.preload = 'metadata'; // Changed from 'auto' to prevent autoload
+      audio.preload = 'metadata';
       audio.crossOrigin = 'anonymous';
-      audio.volume = 0.5 * 0.3; // initial volume, will sync below
-      audio.autoplay = false; // Explicitly disable autoplay
+      audio.volume = (audioState.isMuted ? 0 : audioState.volume) * 0.3;
+      audio.muted = audioState.isMuted;
+      audio.autoplay = false;
       globalBackgroundMusic = audio;
       audio.addEventListener('canplaythrough', () => {
         console.log('Background music loaded successfully');
@@ -91,14 +92,14 @@ export const useAudio = () => {
         powerup: new Audio(SOUND_SOURCES.powerup)
       };
       Object.values(globalSoundEffects).forEach(a => {
-        a.volume = audioState.volume;
-        a.preload = 'metadata'; // Changed from 'auto' to prevent autoload
+        a.volume = audioState.isMuted ? 0 : audioState.volume;
+        a.muted = audioState.isMuted;
+        a.preload = 'metadata';
         a.crossOrigin = 'anonymous';
-        a.autoplay = false; // Explicitly disable autoplay
+        a.autoplay = false;
         a.addEventListener('error', (e) => {
           console.warn('Sound effect failed to load:', e);
         });
-        // Don't auto-load sound effects
       });
 
       // Prewarm a small pool for the tap sound on iOS to avoid seek/decode jank
@@ -125,7 +126,7 @@ export const useAudio = () => {
       backgroundMusicRef.current?.removeEventListener('pause', onPause);
       backgroundMusicRef.current?.removeEventListener('ended', onEnded);
     };
-  }, []);
+  }, [audioState.isMuted, audioState.volume]); // Re-run when mute/volume changes
 
   // Update volume when state changes
   useEffect(() => {
