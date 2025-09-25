@@ -351,9 +351,6 @@ All colors MUST be HSL.
     touch-action: none;
     overscroll-behavior: none;
     -webkit-overflow-scrolling: auto;
-    contain: layout paint;
-    backface-visibility: hidden;
-    transform: translateZ(0);
   }
 }
 
