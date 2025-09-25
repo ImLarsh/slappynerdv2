@@ -113,6 +113,9 @@ export const Game: React.FC = () => {
   const pendingJumpsRef = useRef(0);
   // Pre-scaled background tile canvas to avoid per-frame scaling cost (iOS jank)
   const backgroundTileCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  // iOS detection and delta smoothing to eliminate per-tap micro-jank
+  const isiOSRef = useRef<boolean>(/iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent)));
+  const smoothedDeltaRef = useRef<number>(1000 / TARGET_FPS_MOBILE);
   
   const [gameState, setGameState] = useState<GameState>({
     bird: { x: 100, y: 200, width: BIRD_SIZE, height: BIRD_SIZE, velocity: 0 },
@@ -540,8 +543,16 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
       // Get current power modifiers
       const modifiers = getGameModifiers();
       
-      // Calculate frame multiplier for consistent movement across different frame rates
-      const frameMultiplier = clampedDelta / baseFrameTime;
+      // Calculate frame multiplier with iOS-smoothed delta to avoid tap spikes
+      let usedDelta = clampedDelta;
+      if (isiOSRef.current) {
+        const alpha = 0.15; // smoothing factor
+        const prev = smoothedDeltaRef.current ?? (1000 / TARGET_FPS_MOBILE);
+        const smoothed = prev + alpha * (clampedDelta - prev);
+        smoothedDeltaRef.current = smoothed;
+        usedDelta = smoothed;
+      }
+      const frameMultiplier = usedDelta / baseFrameTime;
       newState.lastFrameTime = currentTime;
 
       // Clear expired temporary invincibility
