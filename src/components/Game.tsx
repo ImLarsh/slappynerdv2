@@ -286,8 +286,11 @@ export const Game: React.FC = () => {
     if (!gameState.gameOver) {
       // Queue the jump; the game loop will apply it at the next frame
       pendingJumpsRef.current++;
-      // Play tap/flap sound asynchronously to avoid blocking iOS main thread
-      requestAnimationFrame(() => playSound('tapFlap'));
+      // Play tap/flap sound asynchronously (skip on iOS to avoid any tap jank)
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
+      if (!isiOS) {
+        requestAnimationFrame(() => playSound('tapFlap'));
+      }
     }
   }, [gameState.gameStarted, gameState.gameOver, showPowerSelection, resetGame, waitingForContinue, pendingPower, addPower]);
 
@@ -320,10 +323,13 @@ export const Game: React.FC = () => {
     // If there's a collision and player has shield mode available, demolish the obstacle
     if (isColliding && hasStartShield()) {
       removeShieldMode(); // Remove shield mode permanently after use
-      toast({
-        title: "Shield Mode Activated! 🛡️",
-        description: "You demolished the obstacle!",
-      });
+      // Defer toast to avoid render-phase updates (prevents React warning and jank)
+      setTimeout(() => {
+        toast({
+          title: "Shield Mode Activated! 🛡️",
+          description: "You demolished the obstacle!",
+        });
+      }, 0);
       
       // Mark this pipe for removal by setting a special flag
       (pipe as any).shouldBeRemoved = true;
@@ -1038,10 +1044,15 @@ export const Game: React.FC = () => {
 
   // Handle input using Pointer Events to avoid duplicate touch/click on mobile
   useEffect(() => {
+    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
     const handlePointerDown = (e: PointerEvent) => {
-      // Use CSS touch-action to prevent gestures; keep handler passive to avoid jank on iOS
+      if (!e.isPrimary) return;
+      if (isiOS) {
+        // Prevent click synthesis and any native gesture side-effects on iOS
+        e.preventDefault();
+      }
       if (waitingForContinue || e.target === canvasRef.current) {
-        requestAnimationFrame(() => jump());
+        requestAnimationFrame(jump);
       }
     };
 
@@ -1055,12 +1066,12 @@ export const Game: React.FC = () => {
     window.addEventListener('keydown', handleKeyPress);
     const canvas = canvasRef.current;
     if (canvas) {
-      canvas.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      canvas.addEventListener('pointerdown', handlePointerDown, { passive: !isiOS });
     }
 
     // Also add global event listener for waiting for continue
     if (waitingForContinue) {
-      document.addEventListener('pointerdown', handlePointerDown, { passive: true });
+      document.addEventListener('pointerdown', handlePointerDown, { passive: !isiOS });
     }
 
     return () => {
@@ -1101,6 +1112,8 @@ export const Game: React.FC = () => {
           style={{ 
             touchAction: 'none', 
             WebkitTapHighlightColor: 'transparent', 
+            WebkitTouchCallout: 'none',
+            WebkitUserSelect: 'none',
             imageRendering: 'pixelated',
             width: canvasSize.width + 'px',
             height: canvasSize.height + 'px'

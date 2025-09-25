@@ -398,3 +398,18 @@ canvas {
   will-change: transform;
   transform: translateZ(0);
 }
+
+/* iOS-specific performance tweaks */
+@supports (-webkit-touch-callout: none) {
+  html, body {
+    -webkit-touch-callout: none;
+  }
+  body.game-active, canvas {
+    touch-action: none;
+    -webkit-user-select: none;
+    user-select: none;
+    -webkit-user-drag: none;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+  }
+}
