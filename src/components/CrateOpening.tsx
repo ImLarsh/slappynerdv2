@@ -115,54 +115,41 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
     // Replace the middle reward with our actual reward
     allRewards[finalIndex] = finalReward;
 
-    // Animation parameters for exactly 5 seconds at 60fps
+    // Animation parameters for smooth progressive slowdown
     const totalDuration = 5000; // 5 seconds
-    const frameRate = 16.67; // ~60fps (1000ms / 60fps)
+    const startSpeed = 20; // Start very fast
+    const endSpeed = 300; // End very slow
     let startTime = Date.now();
     let currentIndex = 0;
-    let totalSpins = 0;
-    const targetSpins = Math.floor(totalRewards * 2.5) + finalIndex; // Ensure we land on final index
+    
+    // Calculate total spins needed to land on target
+    const minSpins = totalRewards * 3; // At least 3 full rotations
+    const targetTotalSpins = minSpins + finalIndex;
+    let currentSpins = 0;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
-      const progressValue = Math.min(elapsed / totalDuration, 1);
+      const timeProgress = Math.min(elapsed / totalDuration, 1);
+      const spinProgress = currentSpins / targetTotalSpins;
       
-      // Calculate how close we are to the target
-      const spinsRemaining = targetSpins - totalSpins;
-      const isNearEnd = spinsRemaining <= 10;
+      // Use the furthest progress to determine speed
+      const overallProgress = Math.max(timeProgress, spinProgress);
       
-      let currentSpeed;
-      
-      if (progressValue < 0.7) {
-        // First 70% - maintain fast speed
-        currentSpeed = frameRate;
-      } else if (progressValue < 0.9) {
-        // 70-90% - start slowing down
-        const slowProgress = (progressValue - 0.7) / 0.2;
-        currentSpeed = frameRate + (frameRate * 2 * slowProgress);
-      } else {
-        // Final 10% - dramatic slowdown, especially near target
-        const finalProgress = (progressValue - 0.9) / 0.1;
-        if (isNearEnd) {
-          // Extra slow when very close to target
-          const nearEndMultiplier = Math.max(1, spinsRemaining / 2);
-          currentSpeed = frameRate * 4 * finalProgress * nearEndMultiplier + frameRate * 6;
-        } else {
-          currentSpeed = frameRate * 8 * finalProgress + frameRate * 2;
-        }
-      }
+      // Smooth exponential deceleration curve
+      const easingFactor = 1 - Math.pow(1 - overallProgress, 3);
+      const currentSpeed = startSpeed + (endSpeed - startSpeed) * easingFactor;
       
       setCurrentIndex(currentIndex);
       
-      if (progressValue < 1 && totalSpins < targetSpins) {
-        // Continue spinning
+      // Continue until we've completed the target spins or time is up
+      if (currentSpins < targetTotalSpins && timeProgress < 1) {
         setTimeout(() => {
           currentIndex = (currentIndex + 1) % totalRewards;
-          totalSpins++;
+          currentSpins++;
           animate();
         }, currentSpeed);
       } else {
-        // Animation complete - ensure we're at the final reward
+        // Ensure we land exactly on the final index
         setCurrentIndex(finalIndex);
         setPhase('revealing');
         
