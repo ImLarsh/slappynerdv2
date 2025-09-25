@@ -35,7 +35,7 @@ export const PowerSelection: React.FC<PowerSelectionProps> = ({
             </p>
             
             <div className="grid gap-3">
-              {powers.map(power => <Button key={power.id} onClick={() => handlePowerClick(power)} variant="outline" className="h-auto p-4 text-left hover:bg-accent transition-all duration-200 border-2 hover:border-primary">
+              {powers.map(power => <Button key={power.id} onClick={() => handlePowerClick(power)} variant="outline" className="h-auto p-4 text-left bg-background/90 hover:bg-primary/20 transition-all duration-200 border-2 border-primary/50 hover:border-primary shadow-lg hover:shadow-glow hover:scale-105 hover:-translate-y-1">
                   <div className="flex items-center space-x-3 w-full">
                     <div className="text-2xl flex-shrink-0">{power.emoji}</div>
                     <div className="flex-1 min-w-0">
