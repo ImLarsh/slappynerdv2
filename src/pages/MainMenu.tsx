@@ -208,10 +208,10 @@ const MainMenu: React.FC = () => {
           </div>
 
           <div className="relative">
-            <Button onClick={handleStartGame} size="lg" className="relative w-full text-sm sm:text-base md:text-lg lg:text-2xl py-2 sm:py-3 md:py-4 lg:py-8 hover-scale animate-scale-in bg-gradient-to-b from-red-400 via-red-500 to-red-600 text-red-900 font-black shadow-2xl border sm:border-2 md:border-4 border-red-300 overflow-hidden transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
+            <Button onClick={handleStartGame} size="lg" className="relative w-full text-base sm:text-lg md:text-xl lg:text-3xl py-2 sm:py-3 md:py-4 lg:py-8 hover-scale animate-scale-in bg-gradient-to-b from-red-400 via-red-500 to-red-600 text-red-900 font-black shadow-2xl border sm:border-2 md:border-4 border-red-300 overflow-hidden transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
               animationDelay: '0.1s'
             }}>
-              <Play className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:h-8 lg:w-8" />
+              <Play className="h-4 w-4 sm:h-5 sm:w-5 md:h-7 md:w-7 lg:h-9 lg:w-9 font-bold stroke-[3]" />
               Play!
               {/* Enhanced 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-1 sm:h-2 md:h-3 bg-gradient-to-r from-red-600 to-red-700"></div>
@@ -225,55 +225,55 @@ const MainMenu: React.FC = () => {
 
           {/* Game Feature Buttons */}
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
-            <Button variant="default" onClick={() => handleButtonClick(() => setCharactersOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-green-400 via-green-500 to-green-600 text-green-900 font-bold shadow-xl border sm:border-2 border-green-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setCharactersOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-xs sm:text-sm md:text-base lg:text-lg bg-gradient-to-b from-green-400 via-green-500 to-green-600 text-green-900 font-bold shadow-xl border sm:border-2 border-green-300 overflow-hidden" style={{
               animationDelay: '0.2s'
             }}>
-              <Gamepad2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="font-semibold text-[9px] sm:text-[10px] md:text-xs">Characters</span>
+              <Gamepad2 className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:h-7 lg:w-7 font-bold stroke-[3]" />
+              <span className="font-black text-xs sm:text-sm md:text-base lg:text-lg">Characters</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-green-600 to-green-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setShopOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 text-purple-900 font-bold shadow-xl border sm:border-2 border-purple-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setShopOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-xs sm:text-sm md:text-base lg:text-lg bg-gradient-to-b from-purple-400 via-purple-500 to-purple-600 text-purple-900 font-bold shadow-xl border sm:border-2 border-purple-300 overflow-hidden" style={{
               animationDelay: '0.3s'
             }}>
-              <ShoppingCart className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="font-semibold text-[9px] sm:text-[10px] md:text-xs">Shop</span>
+              <ShoppingCart className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:h-7 lg:w-7 font-bold stroke-[3]" />
+              <span className="font-black text-xs sm:text-sm md:text-base lg:text-lg">Shop</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-purple-600 to-purple-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 text-orange-900 font-bold shadow-xl border sm:border-2 border-orange-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setCratesOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-xs sm:text-sm md:text-base lg:text-lg bg-gradient-to-b from-orange-400 via-orange-500 to-orange-600 text-orange-900 font-bold shadow-xl border sm:border-2 border-orange-300 overflow-hidden" style={{
               animationDelay: '0.35s'
             }}>
-              <Package className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="font-semibold text-[9px] sm:text-[10px] md:text-xs">Crates</span>
+              <Package className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:h-7 lg:w-7 font-bold stroke-[3]" />
+              <span className="font-black text-xs sm:text-sm md:text-base lg:text-lg">Crates</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-orange-600 to-orange-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-amber-900 font-bold shadow-xl border sm:border-2 border-amber-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setAchievementsOpen(true))} disabled={!user} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-10 sm:h-12 md:h-16 lg:h-24 hover-scale animate-scale-in text-xs sm:text-sm md:text-base lg:text-lg bg-gradient-to-b from-amber-400 via-amber-500 to-amber-600 text-amber-900 font-bold shadow-xl border sm:border-2 border-amber-300 overflow-hidden" style={{
               animationDelay: '0.4s'
             }}>
-              <Trophy className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-5 md:w-5 lg:h-6 lg:w-6" />
-              <span className="font-semibold text-[9px] sm:text-[10px] md:text-xs">Achievements</span>
+              <Trophy className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:h-7 lg:w-7 font-bold stroke-[3]" />
+              <span className="font-black text-xs sm:text-sm md:text-base lg:text-lg">Achievements</span>
               {/* 3D bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-amber-600 to-amber-700"></div>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-11 sm:h-14 md:h-20 lg:h-28 hover-scale animate-scale-in text-[10px] sm:text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border sm:border-2 border-yellow-300 overflow-hidden col-span-2" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-0.5 sm:gap-1 md:gap-2 h-11 sm:h-14 md:h-20 lg:h-28 hover-scale animate-scale-in text-xs sm:text-sm md:text-base lg:text-lg bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border sm:border-2 border-yellow-300 overflow-hidden col-span-2" style={{
               animationDelay: '0.5s'
             }}>
               {/* Crown icon */}
-              <div className="text-sm sm:text-lg md:text-2xl lg:text-3xl">👑</div>
-              <span className="font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">Leaderboard</span>
+              <div className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-black">👑</div>
+              <span className="font-black text-xs sm:text-sm md:text-base lg:text-lg">Leaderboard</span>
               {/* Extended bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-yellow-600 to-yellow-700"></div>
             </Button>
           </div>
 
           {/* Sign In/Up Button - Below play button (when not signed in) */}
-          {!user && <Button onClick={() => handleButtonClick(() => navigate('/auth'))} variant="default" size="lg" className="w-full text-sm sm:text-base md:text-lg py-2 sm:py-3 md:py-4 hover-scale animate-scale-in bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-2 sm:border-3 border-blue-300 transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
+          {!user && <Button onClick={() => handleButtonClick(() => navigate('/auth'))} variant="default" size="lg" className="w-full text-base sm:text-lg md:text-xl lg:text-2xl py-2 sm:py-3 md:py-4 hover-scale animate-scale-in bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-2 sm:border-3 border-blue-300 transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
             animationDelay: '0.15s'
           }}>
               🔐 Sign In / Sign Up
@@ -281,10 +281,10 @@ const MainMenu: React.FC = () => {
 
           {/* Logout Button - Below leaderboard (when signed in) */}
           {user && <div className="mt-2 sm:mt-3 md:mt-4">
-            <Button onClick={() => handleButtonClick(signOut)} variant="outline" size="lg" className="w-full text-sm sm:text-base md:text-lg py-2 sm:py-3 md:py-4 hover-scale animate-scale-in text-red-600 border-red-500 hover:bg-red-500 hover:text-white font-bold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
+            <Button onClick={() => handleButtonClick(signOut)} variant="outline" size="lg" className="w-full text-base sm:text-lg md:text-xl lg:text-2xl py-2 sm:py-3 md:py-4 hover-scale animate-scale-in text-red-600 border-red-500 hover:bg-red-500 hover:text-white font-black shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
               animationDelay: '0.6s'
             }}>
-                <DoorOpen className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+                <DoorOpen className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8 font-bold stroke-[3]" />
                 Sign Out
               </Button>
             </div>}
