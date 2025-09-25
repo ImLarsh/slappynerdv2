@@ -226,9 +226,9 @@ export const Game: React.FC = () => {
         width = Math.min(vw - 16, 500); // Account for padding
         height = Math.min(vh - 100, 820); // Account for UI elements
       } else {
-        // Desktop
-        width = 800;
-        height = 600;
+        // Desktop - larger game canvas
+        width = 1000;
+        height = 700;
       }
 
       // Ensure minimum sizes for playability
@@ -1092,6 +1092,35 @@ export const Game: React.FC = () => {
     };
   }, [jump, waitingForContinue]);
   return <div className="fixed inset-0 bg-gradient-to-b from-sky-start to-sky-end overflow-hidden">
+      {/* Retro Nerdy Background Elements - Desktop Only */}
+      <div className="hidden lg:block absolute inset-0 pointer-events-none">
+        {/* Floating Math Equations */}
+        <div className="absolute top-20 left-10 text-4xl opacity-20 animate-float">π = 3.14159...</div>
+        <div className="absolute top-40 right-20 text-3xl opacity-15 animate-pulse">E = mc²</div>
+        <div className="absolute bottom-32 left-16 text-2xl opacity-20">∫ f(x)dx</div>
+        <div className="absolute top-60 left-32 text-3xl opacity-15 animate-bounce">√(x² + y²)</div>
+        <div className="absolute bottom-20 right-32 text-2xl opacity-20">Σ(n=1 to ∞)</div>
+        
+        {/* Retro Computer Elements */}
+        <div className="absolute top-32 right-10 text-6xl opacity-10 animate-pulse">💾</div>
+        <div className="absolute bottom-40 left-8 text-5xl opacity-15">🖥️</div>
+        <div className="absolute top-80 right-40 text-4xl opacity-10 animate-bounce">⌨️</div>
+        <div className="absolute bottom-60 right-8 text-3xl opacity-20">🖱️</div>
+        
+        {/* Nerd Culture Icons */}
+        <div className="absolute top-16 right-60 text-5xl opacity-15 animate-pulse">🚀</div>
+        <div className="absolute bottom-16 left-40 text-4xl opacity-10">🧬</div>
+        <div className="absolute top-96 left-8 text-3xl opacity-20 animate-bounce">⚗️</div>
+        
+        {/* Binary Code Background */}
+        <div className="absolute top-24 left-60 text-sm opacity-10 font-mono transform rotate-12">
+          01001000 01100101 01101100 01101100 01101111
+        </div>
+        <div className="absolute bottom-24 right-60 text-sm opacity-10 font-mono transform -rotate-12">
+          01010111 01101111 01110010 01101100 01100100
+        </div>
+      </div>
+      
       {/* Game Canvas Container */}
       <div className="absolute inset-0 flex items-center justify-center touch-none" style={{
       width: '100vw',
