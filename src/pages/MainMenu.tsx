@@ -168,7 +168,7 @@ const MainMenu: React.FC = () => {
             {/* Currency Display */}
             <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 mt-0.5">
               <span className="text-xs sm:text-sm md:text-lg">📚</span>
-              <span className="text-[10px] sm:text-xs md:text-sm font-extrabold lg:text-2xl">
+              <span className="sm:text-xs md:text-sm font-extrabold lg:text-2xl text-base">
                 {booksLoading ? '...' : books} Books
               </span>
             </div>
