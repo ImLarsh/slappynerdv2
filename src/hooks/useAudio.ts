@@ -9,7 +9,8 @@ interface AudioState {
 // Global singleton audio elements to prevent duplicate playback across components
 let globalBackgroundMusic: HTMLAudioElement | null = null;
 let globalSoundEffects: { [key: string]: HTMLAudioElement } = {};
-
+// Flag to indicate autoplay started muted and needs unmute on first interaction
+let needsUnmuteAfterAutoplay = false;
 // Detect iOS for optimal audio format
 const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
               (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1);
@@ -32,7 +33,7 @@ export const useAudio = () => {
     return {
       volume: savedVolume ? parseFloat(savedVolume) : 0.5,
       isMuted: savedMute === 'true',
-      isPlaying: true // Always show as playing initially for UI consistency
+      isPlaying: false
     };
   });
 
@@ -62,12 +63,25 @@ export const useAudio = () => {
         setAudioState(prev => ({ ...prev, isPlaying: false }));
       });
       
-      // Auto-start music after first user interaction on mobile
-      audio.addEventListener('canplaythrough', () => {
-        console.log('Background music loaded successfully');
-        // Set as playing state but don't actually play until user interaction
-        setAudioState(prev => ({ ...prev, isPlaying: true }));
-      }, { once: true });
+      // Try to autoplay; if blocked, try muted autoplay and unmute on first interaction
+      setTimeout(async () => {
+        if (!globalBackgroundMusic) return;
+        try {
+          globalBackgroundMusic.muted = audioState.isMuted;
+          globalBackgroundMusic.volume = audioState.isMuted ? 0 : audioState.volume * 0.3;
+          await globalBackgroundMusic.play();
+        } catch (err: any) {
+          if (err.name === 'NotAllowedError') {
+            try {
+              globalBackgroundMusic.muted = true;
+              await globalBackgroundMusic.play();
+              if (!audioState.isMuted) {
+                needsUnmuteAfterAutoplay = true;
+              }
+            } catch {}
+          }
+        }
+      }, 0);
     }
     // Point local ref to global instance
     backgroundMusicRef.current = globalBackgroundMusic;
@@ -160,6 +174,15 @@ export const useAudio = () => {
       const newMuted = !prev.isMuted;
       // Save mute state to localStorage
       localStorage.setItem('audioMuted', newMuted.toString());
+      // Apply immediately to all audio elements
+      if (backgroundMusicRef.current) {
+        backgroundMusicRef.current.muted = newMuted;
+        if (newMuted) backgroundMusicRef.current.pause();
+      }
+      Object.values(soundEffectsRef.current).forEach(a => {
+        a.muted = newMuted;
+        if (newMuted) a.pause();
+      });
       return { ...prev, isMuted: newMuted };
     });
   }, []);
@@ -222,13 +245,22 @@ export const useAudio = () => {
 
   // Auto-start background music on first user interaction (mobile-friendly)
   const startMusicOnInteraction = useCallback(() => {
+    const audio = backgroundMusicRef.current;
+    if (!audio) return;
+
+    if (needsUnmuteAfterAutoplay && !audioState.isMuted) {
+      audio.muted = false;
+      audio.volume = audioState.volume * 0.3;
+      needsUnmuteAfterAutoplay = false;
+    }
+
     if (!audioState.isMuted) {
       playBackgroundMusic();
     } else {
-      // Even if muted, set playing state so UI shows correct status
-      setAudioState(prev => ({ ...prev, isPlaying: true }));
+      // Ensure UI reflects playing state when muted autoplay is active
+      if (!audio.paused) setAudioState(prev => ({ ...prev, isPlaying: true }));
     }
-  }, [audioState.isMuted, playBackgroundMusic]);
+  }, [audioState.isMuted, audioState.volume, playBackgroundMusic]);
 
   return {
     volume: audioState.volume,
