@@ -145,6 +145,7 @@ const IOS_RENDER_SCALE = isIOS() ? 0.8 : 1; // Reduce render complexity on iOS
 export const Game: React.FC = () => {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const ctxRef = useRef<CanvasRenderingContext2D | null>(null);
   const animationRef = useRef<number>();
   const { submitScore } = useLeaderboard();
   const { stats, updateGameStats } = useUserStats();
@@ -422,8 +423,12 @@ export const Game: React.FC = () => {
         ...prev,
         bird: { ...prev.bird, velocity: JUMP_FORCE }
       }));
-      // Play tap/flap sound
-      playSound('tapFlap');
+      // Play tap/flap sound (defer on iOS to avoid input-frame stutter)
+      if (isIOS()) {
+        requestAnimationFrame(() => playSound('tapFlap'));
+      } else {
+        playSound('tapFlap');
+      }
     }
   }, [gameState.gameStarted, gameState.gameOver, showPowerSelection, resetGame, waitingForContinue, pendingPower, addPower]);
 
@@ -628,16 +633,10 @@ export const Game: React.FC = () => {
     renderFrameCountRef.current++;
 
     const canvas = canvasRef.current;
-    // iOS-optimized canvas context with performance hints
-    const ctx = canvas.getContext('2d', { 
-      alpha: false, 
-      desynchronized: isIOS(), // Enable for iOS only
-      willReadFrequently: false 
-    }) as CanvasRenderingContext2D;
-    if (!ctx) {
-      console.error('Cannot get canvas context in game loop');
+    if (!canvas) {
       return;
     }
+
 
     setGameState(prev => {
       const newState = { ...prev };
@@ -678,7 +677,11 @@ export const Game: React.FC = () => {
         newState.gameEnded = true;
         
         // Play defeat sound
-        playSound('defeat');
+        if (isIOS()) {
+          requestAnimationFrame(() => playSound('defeat'));
+        } else {
+          playSound('defeat');
+        }
         
         // Update stats in database and get new totals
         if (user) {
@@ -833,7 +836,11 @@ export const Game: React.FC = () => {
           // Apply double points power if owned
           const booksToAdd = hasDoublePoints() ? bookCollisionResult.booksCollected * 2 : bookCollisionResult.booksCollected;
           addBooks(booksToAdd);
-          playSound('collectBook');
+          if (isIOS()) {
+            requestAnimationFrame(() => playSound('collectBook'));
+          } else {
+            playSound('collectBook');
+          }
         }, 0);
       }
 
@@ -857,7 +864,11 @@ export const Game: React.FC = () => {
             newState.score += 1;
             
             // Play pass locker sound effect
-            playSound('passLocker');
+            if (isIOS()) {
+              requestAnimationFrame(() => playSound('passLocker'));
+            } else {
+              playSound('passLocker');
+            }
             
             // Check for power selection trigger
             checkPowerSelection(newState.score);
@@ -877,7 +888,11 @@ export const Game: React.FC = () => {
           newState.gameEnded = true;
           
           // Play defeat sound
-          playSound('defeat');
+          if (isIOS()) {
+            requestAnimationFrame(() => playSound('defeat'));
+          } else {
+            playSound('defeat');
+          }
           
           // Update stats in database and get new totals
           if (user) {
@@ -911,6 +926,31 @@ export const Game: React.FC = () => {
     animationRef.current = requestAnimationFrame(gameLoop);
   }, [getGameModifiers, checkPowerSelection, checkBookCollisions, addBooks, playSound, toast]);
 
+  // Initialize and cache 2D context (iOS optimized)
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    // Ensure size before grabbing context
+    if (canvas.width !== canvasSize.width || canvas.height !== canvasSize.height) {
+      canvas.width = canvasSize.width;
+      canvas.height = canvasSize.height;
+    }
+    let ctx = ctxRef.current;
+    if (!ctx) {
+      ctx = canvas.getContext('2d', {
+        alpha: false,
+        desynchronized: isIOS(),
+        willReadFrequently: false
+      }) as CanvasRenderingContext2D | null;
+      if (!ctx) return;
+      ctxRef.current = ctx;
+    }
+    ctx.imageSmoothingEnabled = !isIOS();
+    if (isIOS() && 'imageSmoothingQuality' in ctx) {
+      (ctx as any).imageSmoothingQuality = 'low';
+    }
+  }, [canvasSize.width, canvasSize.height]);
+
   // Canvas drawing with error handling
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -932,22 +972,25 @@ export const Game: React.FC = () => {
       console.log('Canvas size set to:', canvasSize);
     }
 
-    // iOS-optimized canvas context
-    const ctx = canvas.getContext('2d', { 
-      alpha: false, 
-      desynchronized: isIOS(),
-      willReadFrequently: false
-    }) as CanvasRenderingContext2D;
+    // Use cached 2D context
+    let ctx = ctxRef.current as CanvasRenderingContext2D | null;
     if (!ctx) {
-      console.error('Cannot get canvas context');
-      return;
+      ctx = canvas.getContext('2d', { 
+        alpha: false, 
+        desynchronized: isIOS(),
+        willReadFrequently: false
+      }) as CanvasRenderingContext2D | null;
+      if (!ctx) {
+        console.error('Cannot get canvas context');
+        return;
+      }
+      ctxRef.current = ctx;
+      ctx.imageSmoothingEnabled = !isIOS();
+      if (isIOS() && 'imageSmoothingQuality' in ctx) {
+        (ctx as any).imageSmoothingQuality = 'low';
+      }
     }
-    
-    // iOS-specific optimizations
-    ctx.imageSmoothingEnabled = !isIOS();
-    if (isIOS() && 'imageSmoothingQuality' in ctx) {
-      (ctx as any).imageSmoothingQuality = 'low';
-    }
+
 
     // Ensure canvas is visible - draw initial background
     ctx.fillStyle = 'hsl(200, 100%, 85%)';
@@ -1066,50 +1109,45 @@ export const Game: React.FC = () => {
       }
     });
 
-    // Draw books with optimized effects for iOS
+    // Draw books (simplified on iOS)
     gameState.books.forEach(book => {
       if (!book.collected) {
         const bookSize = 32;
-        
         ctx.save();
-        
-        // Simplified effects for iOS performance
-        if (book.beingPulled) {
-          ctx.strokeStyle = '#00FF00';
-          ctx.lineWidth = isIOS() ? 3 : 6; // Thinner on iOS
-          if (!isIOS()) {
+
+        if (isIOS()) {
+          // Ultra-lightweight draw on iOS: simple filled circle
+          ctx.beginPath();
+          ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2, 0, 2 * Math.PI);
+          ctx.fillStyle = '#FFD700';
+          ctx.fill();
+        } else {
+          // Non-iOS: ring + emoji
+          if (book.beingPulled) {
+            ctx.strokeStyle = '#00FF00';
+            ctx.lineWidth = 6;
             ctx.shadowColor = '#00FF00';
             ctx.shadowBlur = 12;
             const pulseIntensity = 0.8 + 0.2 * Math.sin(Date.now() * 0.01);
             ctx.globalAlpha = pulseIntensity;
-          }
-        } else {
-          ctx.strokeStyle = '#FFD700';
-          ctx.lineWidth = isIOS() ? 2 : 4; // Thinner on iOS
-          if (!isIOS()) {
+          } else {
+            ctx.strokeStyle = '#FFD700';
+            ctx.lineWidth = 4;
             ctx.shadowColor = '#FFD700';
             ctx.shadowBlur = 8;
           }
-        }
-        
-        // Draw the glowing ring
-        ctx.beginPath();
-        ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2 + 6, 0, 2 * Math.PI);
-        ctx.stroke();
-        
-        // Reset effects
-        if (!isIOS()) {
+          ctx.beginPath();
+          ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2 + 6, 0, 2 * Math.PI);
+          ctx.stroke();
           ctx.shadowBlur = 0;
           ctx.shadowColor = 'transparent';
+          ctx.globalAlpha = 1;
+          ctx.font = `${bookSize}px Arial`;
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText('📚', book.x + bookSize/2, book.y - bookSize/2);
         }
-        ctx.globalAlpha = 1;
-        
-        // Draw the book emoji larger
-        ctx.font = `${bookSize}px Arial`;
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('📚', book.x + bookSize/2, book.y - bookSize/2);
-        
+
         ctx.restore();
       }
     });
@@ -1307,7 +1345,8 @@ export const Game: React.FC = () => {
           // iOS hardware acceleration
           ...(isIOS() && {
             WebkitTransform: 'translateZ(0)',
-            transform: 'translateZ(0)'
+            transform: 'translateZ(0)',
+            willChange: 'transform'
           })
         }}
       >
@@ -1322,7 +1361,8 @@ export const Game: React.FC = () => {
             ...(isIOS() && {
               WebkitTransform: 'translateZ(0)',
               transform: 'translateZ(0)',
-              WebkitBackfaceVisibility: 'hidden'
+              WebkitBackfaceVisibility: 'hidden',
+              willChange: 'transform'
             })
           }}
         >
