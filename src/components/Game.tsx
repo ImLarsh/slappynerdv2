@@ -286,8 +286,8 @@ export const Game: React.FC = () => {
         ...prev,
         bird: { ...prev.bird, velocity: JUMP_FORCE }
       }));
-      // Play tap/flap sound
-      playSound('tapFlap');
+      // Play tap/flap sound asynchronously to avoid blocking iOS main thread
+      requestAnimationFrame(() => playSound('tapFlap'));
     }
   }, [gameState.gameStarted, gameState.gameOver, showPowerSelection, resetGame, waitingForContinue, pendingPower, addPower]);
 
@@ -1034,10 +1034,7 @@ export const Game: React.FC = () => {
   // Handle input using Pointer Events to avoid duplicate touch/click on mobile
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
-      // Prevent native gestures and default behaviors to avoid stutter
-      e.preventDefault();
-      e.stopPropagation();
-      
+      // Use CSS touch-action to prevent gestures; keep handler passive to avoid jank on iOS
       // Allow taps anywhere when waiting for continue, otherwise only on canvas
       if (waitingForContinue || e.target === canvasRef.current) {
         jump();
@@ -1054,12 +1051,12 @@ export const Game: React.FC = () => {
     window.addEventListener('keydown', handleKeyPress);
     const canvas = canvasRef.current;
     if (canvas) {
-      canvas.addEventListener('pointerdown', handlePointerDown, { passive: false });
+      canvas.addEventListener('pointerdown', handlePointerDown, { passive: true });
     }
 
     // Also add global event listener for waiting for continue
     if (waitingForContinue) {
-      document.addEventListener('pointerdown', handlePointerDown, { passive: false });
+      document.addEventListener('pointerdown', handlePointerDown, { passive: true });
     }
 
     return () => {
