@@ -183,7 +183,6 @@ const MainMenu: React.FC = () => {
         </Button>}
       
       {/* Sign Out Button - Red Door Icon */}
-      {user}
       
       {/* Centered Content */}
       <div className="relative z-10 max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md w-full space-y-1.5 sm:space-y-2 md:space-y-3 lg:space-y-6 text-center mt-12 sm:mt-16 md:mt-20 lg:mt-16 px-1 sm:px-2">{/* Character and Description */}
@@ -315,6 +314,19 @@ const MainMenu: React.FC = () => {
             
           </DialogHeader>
           <Leaderboards />
+          {/* Logout Button - positioned under leaderboard */}
+          {user && (
+            <div className="mt-4 flex justify-center">
+              <Button 
+                variant="outline" 
+                onClick={() => handleButtonClick(signOut)}
+                className="bg-red-500 hover:bg-red-600 text-white border-red-400 flex items-center gap-2"
+              >
+                <DoorOpen className="h-4 w-4" />
+                Sign Out
+              </Button>
+            </div>
+          )}
         </DialogContent>
       </Dialog>
 
