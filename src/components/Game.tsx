@@ -316,8 +316,7 @@ const [gameStartTime, setGameStartTime] = useState<number>(0);
     if (!gameState.gameOver) {
       // Queue the jump; the game loop will apply it at the next frame
       pendingJumpsRef.current++;
-      // Play tap/flap sound asynchronously on all platforms
-      requestAnimationFrame(() => playSound('tapFlap'));
+      // Tap sound removed per user request
     }
   }, [gameState.gameStarted, gameState.gameOver, showPowerSelection, resetGame, waitingForContinue, pendingPower, addPower]);
 
