@@ -47,7 +47,7 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
   const [rewards, setRewards] = useState<Reward[]>([]);
   const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
   const [currentIndex, setCurrentIndex] = useState(0);
-  const [animationSpeed, setAnimationSpeed] = useState(100);
+  const [progress, setProgress] = useState(0);
   const { toast } = useToast();
   const { playSound } = useAudio();
 
@@ -118,32 +118,43 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
 
     // Animation parameters for exactly 5 seconds
     const totalDuration = 5000; // 5 seconds
-    const startSpeed = 50; // Start fast
-    const endSpeed = 300; // End slow
+    const startSpeed = 30; // Start faster
+    const endSpeed = 200; // End slower
     let startTime = Date.now();
     let currentIndex = 0;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
-      const progress = Math.min(elapsed / totalDuration, 1);
+      const progressValue = Math.min(elapsed / totalDuration, 1);
       
-      // Easing function for smooth deceleration
-      const easeOut = 1 - Math.pow(1 - progress, 3);
+      // Update progress bar smoothly
+      setProgress(progressValue * 100);
+      
+      // Easing function for smooth deceleration (cubic ease-out)
+      const easeOut = 1 - Math.pow(1 - progressValue, 4);
       
       // Calculate current speed based on progress
       const currentSpeed = startSpeed + (endSpeed - startSpeed) * easeOut;
       
       setCurrentIndex(currentIndex);
       
-      if (progress < 1) {
-        // Continue spinning
-        setTimeout(() => {
+      if (progressValue < 1) {
+        // Continue spinning with requestAnimationFrame for smoother animation
+        const nextFrame = () => {
           currentIndex = (currentIndex + 1) % totalRewards;
           animate();
-        }, currentSpeed);
+        };
+        
+        if (progressValue > 0.8) {
+          // Slow down more in the last 20%
+          setTimeout(nextFrame, currentSpeed * 1.5);
+        } else {
+          setTimeout(nextFrame, currentSpeed);
+        }
       } else {
         // Animation complete - stop at final reward
         setCurrentIndex(finalIndex);
+        setProgress(100);
         setPhase('revealing');
         
         // Show the final result after a brief pause
@@ -182,12 +193,16 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
         <div className="w-full max-w-4xl mx-auto p-4">
           <div className="text-center mb-8">
             <h2 className="text-3xl font-bold mb-2">🎰 Opening {crate.name}</h2>
-            <div className="w-full h-2 bg-border rounded-full overflow-hidden">
+            <div className="w-full h-3 bg-border rounded-full overflow-hidden shadow-inner">
               <div 
-                className="h-full bg-primary transition-all duration-1000"
-                style={{ width: phase === 'spinning' ? '60%' : '100%' }}
+                className="h-full bg-gradient-to-r from-primary to-primary-glow rounded-full transition-all duration-100 ease-out shadow-lg"
+                style={{ 
+                  width: `${progress}%`,
+                  boxShadow: '0 0 10px hsl(var(--primary) / 0.5)'
+                }}
               />
             </div>
+            <p className="text-sm text-muted-foreground mt-2">{Math.round(progress)}% Complete</p>
           </div>
 
           {/* Spinning reel */}
@@ -197,32 +212,35 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
             </div>
             
             <div 
-              className="flex py-8 transition-transform duration-100 ease-linear"
+              className="flex py-8 transition-transform duration-75 ease-out"
               style={{
-                transform: `translateX(${-currentIndex * 128 + 200}px)`
+                transform: `translateX(${-currentIndex * 128 + 200}px)`,
+                willChange: 'transform'
               }}
             >
               {rewards.map((reward, index) => {
                 const isCenter = index === currentIndex;
                 const distance = Math.abs(index - currentIndex);
-                const opacity = distance === 0 ? 1 : distance === 1 ? 0.8 : distance === 2 ? 0.5 : 0.2;
-                const scale = distance === 0 ? 1.3 : distance === 1 ? 1.1 : distance === 2 ? 0.9 : 0.7;
+                const opacity = distance === 0 ? 1 : distance === 1 ? 0.9 : distance === 2 ? 0.6 : 0.3;
+                const scale = distance === 0 ? 1.4 : distance === 1 ? 1.15 : distance === 2 ? 0.95 : 0.75;
+                const blur = distance === 0 ? 'blur(0px)' : distance === 1 ? 'blur(0.5px)' : distance === 2 ? 'blur(1px)' : 'blur(2px)';
                 
                 return (
                   <div
                     key={`${reward.id}-${index}`}
-                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-300 ease-out ${
-                      isCenter ? getRarityStyle(reward.rarity) : ''
+                    className={`flex-shrink-0 w-32 h-32 flex flex-col items-center justify-center transition-all duration-150 ease-out ${
+                      isCenter ? `${getRarityStyle(reward.rarity)} animate-pulse` : ''
                     }`}
                     style={{
                       opacity,
                       transform: `scale(${scale})`,
-                      filter: isCenter ? 'brightness(1.2)' : distance <= 2 ? 'brightness(0.8)' : 'brightness(0.5)'
+                      filter: `${blur} ${isCenter ? 'brightness(1.3) saturate(1.2)' : distance <= 2 ? 'brightness(0.8)' : 'brightness(0.5)'}`,
+                      willChange: 'transform, opacity, filter'
                     }}
                   >
-                    <div className="text-4xl mb-1 transition-all duration-200">{reward.emoji}</div>
-                    <div className="text-xs font-medium text-center px-1 transition-all duration-200">{reward.name}</div>
-                    <div className={`text-xs capitalize transition-all duration-200 ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
+                    <div className="text-4xl mb-1 transition-all duration-150">{reward.emoji}</div>
+                    <div className="text-xs font-medium text-center px-1 transition-all duration-150">{reward.name}</div>
+                    <div className={`text-xs capitalize transition-all duration-150 ${rarityColors[reward.rarity as keyof typeof rarityColors]}`}>
                       {reward.rarity}
                     </div>
                   </div>
