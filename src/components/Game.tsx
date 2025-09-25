@@ -221,8 +221,10 @@ export const Game: React.FC = () => {
     backgroundOffset: 0,
   });
   
-  
-  
+  // iOS game state ref and UI sync cadence
+  const gameRef = useRef<GameState>(gameState);
+  const lastUISyncRef = useRef(performance.now());
+  const uiSyncIntervalMsRef = useRef(150);
   const [canvasSize, setCanvasSize] = useState({ width: 800, height: 600 });
   const [powerChoices, setPowerChoices] = useState(() => getRandomPowers(hasLuckyStart()));
   const [waitingForContinue, setWaitingForContinue] = useState(false);
@@ -619,6 +621,88 @@ export const Game: React.FC = () => {
     return { updatedBooks, booksCollected };
   }, [onBookSeen, shouldAutoCollectBook, hasBookMagnet]);
 
+  // iOS-only renderer to avoid React-driven draws
+  const drawFrameIOS = useCallback((ctx: CanvasRenderingContext2D, state: GameState) => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    // Clear background
+    ctx.fillStyle = 'hsl(200, 100%, 85%)';
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    // Background image
+    const img = backgroundImageRef.current;
+    if (img && img.complete) {
+      const bgWidth = img.width;
+      const bgHeight = img.height;
+      const scaleX = canvas.width / bgWidth;
+      const scaleY = canvas.height / bgHeight;
+      const scale = Math.max(scaleX, scaleY);
+      const scaledWidth = bgWidth * scale;
+      const scaledHeight = bgHeight * scale;
+      const offsetY = (canvas.height - scaledHeight) / 2;
+      const scrollOffset = state.backgroundOffset % scaledWidth;
+      // Draw minimal copies
+      for (let i = -1; i <= 2; i++) {
+        ctx.drawImage(img, i * scaledWidth - scrollOffset, offsetY, scaledWidth, scaledHeight);
+      }
+    }
+
+    // Draw pipes (no shadows)
+    const EDGE_OVERDRAW = Math.max(24, Math.round(canvasSize.height * 0.03));
+    const lockerImage = lockerImagesRef.current[0];
+    for (let i = 0; i < state.pipes.length; i++) {
+      const pipe = state.pipes[i];
+      if (lockerImage && lockerImage.complete) {
+        const targetWidth = LOCKER_WIDTH;
+        const targetHeight = pipe.height;
+        const drawX = pipe.x;
+        const drawY = pipe.y;
+        const isTopLocker = pipe.y === 0;
+        if (isTopLocker) {
+          ctx.save();
+          ctx.scale(1, -1);
+          ctx.drawImage(lockerImage, drawX, -drawY - targetHeight, targetWidth, targetHeight + EDGE_OVERDRAW);
+          ctx.restore();
+        } else {
+          ctx.drawImage(lockerImage, drawX, drawY, targetWidth, targetHeight + EDGE_OVERDRAW);
+        }
+      } else {
+        ctx.fillStyle = '#FFD700';
+        const isTopLocker = pipe.y === 0;
+        const rectY = isTopLocker ? pipe.y - EDGE_OVERDRAW : pipe.y;
+        const rectH = pipe.height + EDGE_OVERDRAW;
+        ctx.fillRect(pipe.x, rectY, pipe.width, rectH);
+      }
+    }
+
+    // Draw books (simple filled circles)
+    for (let i = 0; i < state.books.length; i++) {
+      const book = state.books[i];
+      if (book.collected) continue;
+      const bookSize = 32;
+      ctx.beginPath();
+      ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2, 0, Math.PI * 2);
+      ctx.fillStyle = '#FFD700';
+      ctx.fill();
+    }
+
+    // Draw player (emoji with minimal effects)
+    ctx.font = `${BIRD_SIZE}px Arial`;
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText('🤓', state.bird.x + state.bird.width/2, state.bird.y + state.bird.height/2);
+
+    // Optional simple shield ring
+    if (hasStartShield()) {
+      ctx.beginPath();
+      ctx.strokeStyle = '#22C55E';
+      ctx.lineWidth = 3;
+      ctx.arc(state.bird.x + state.bird.width/2, state.bird.y + state.bird.height/2, BIRD_SIZE * 0.8, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  }, [canvasSize.height, hasStartShield]);
+
 
   const gameLoop = useCallback((currentTime: number) => {
     if (!canvasRef.current || !gameState.gameStarted || gameState.gameOver || showPowerSelection || waitingForContinue) return;
@@ -641,10 +725,9 @@ export const Game: React.FC = () => {
     setGameState(prev => {
       const newState = { ...prev };
       const deltaTime = currentTime - newState.lastFrameTime;
-      
-      // iOS: Consistent frame timing for 60fps
+      // iOS: Consistent frame timing for 60fps without forcing React re-render
       if (isIOS() && deltaTime < FRAME_TIME * 0.9) {
-        return newState; // Skip frame to maintain consistent timing
+        return prev; // Skip React state update on iOS to maintain cadence
       }
 
       // Clamp delta to avoid big jumps on tab switching/backgrounding
@@ -698,6 +781,18 @@ export const Game: React.FC = () => {
 
           // Submit score to leaderboard
           submitScore(newState.score, selectedCharacter?.id);
+        }
+
+        // iOS: draw and throttle UI updates instead of React re-render per frame
+        if (isIOS()) {
+          const ctxIos = ctxRef.current;
+          if (ctxIos) drawFrameIOS(ctxIos, newState);
+          gameRef.current = newState;
+          const now = currentTime;
+          const needUISync = now - lastUISyncRef.current > uiSyncIntervalMsRef.current ||
+            newState.gameOver !== prev.gameOver || newState.score !== prev.score;
+          if (!needUISync) return prev;
+          lastUISyncRef.current = now;
         }
 
         return newState;
@@ -919,6 +1014,17 @@ export const Game: React.FC = () => {
         }
         return !shouldRemove;
       });
+      // iOS: draw and throttle UI updates instead of React re-render per frame
+      if (isIOS()) {
+        const ctxIos = ctxRef.current;
+        if (ctxIos) drawFrameIOS(ctxIos, newState);
+        gameRef.current = newState;
+        const now = currentTime;
+        const needUISync = now - lastUISyncRef.current > uiSyncIntervalMsRef.current ||
+          newState.gameOver !== prev.gameOver || newState.score !== prev.score;
+        if (!needUISync) return prev;
+        lastUISyncRef.current = now;
+      }
 
       return newState;
     });
@@ -953,6 +1059,8 @@ export const Game: React.FC = () => {
 
   // Canvas drawing with error handling
   useEffect(() => {
+    // On iOS, drawing is handled inside the RAF game loop to avoid React re-render cost
+    if (isIOS()) return;
     const canvas = canvasRef.current;
     if (!canvas) {
       console.error('Canvas ref is null');
