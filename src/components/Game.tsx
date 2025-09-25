@@ -336,11 +336,91 @@ export const Game: React.FC = () => {
     return isColliding;
   }, [hasGhostMode, updateActivePowers, gameStartTime, hasStartShield, removeShieldMode, toast]);
 
-  const spawnBook = useCallback(() => {
+  const spawnBook = useCallback((pipes: Pipe[] = []) => {
+    // Find safe Y positions by checking where pipes are NOT
+    const safeAreas: {start: number, end: number}[] = [];
+    
+    // Start with the full canvas height as one big safe area
+    let occupiedRanges: {start: number, end: number}[] = [];
+    
+    // Check nearby pipes that could interfere with book spawning
+    const nearbyPipes = pipes.filter(pipe => 
+      pipe.x > canvasSize.width - 300 && pipe.x < canvasSize.width + 400
+    );
+    
+    // For each pipe, add its occupied Y range to the list
+    for (const pipe of nearbyPipes) {
+      occupiedRanges.push({
+        start: pipe.y,
+        end: pipe.y + pipe.height
+      });
+    }
+    
+    // Sort occupied ranges by start position
+    occupiedRanges.sort((a, b) => a.start - b.start);
+    
+    // Merge overlapping ranges
+    const mergedRanges: {start: number, end: number}[] = [];
+    for (const range of occupiedRanges) {
+      if (mergedRanges.length === 0 || mergedRanges[mergedRanges.length - 1].end < range.start) {
+        mergedRanges.push(range);
+      } else {
+        mergedRanges[mergedRanges.length - 1].end = Math.max(mergedRanges[mergedRanges.length - 1].end, range.end);
+      }
+    }
+    
+    // Find gaps between occupied ranges as safe areas
+    let currentY = 80; // Start with some padding from top
+    const maxY = canvasSize.height - 80; // End with some padding from bottom
+    
+    for (const occupiedRange of mergedRanges) {
+      // Add safe area before this occupied range (with padding)
+      if (currentY < occupiedRange.start - 40) {
+        safeAreas.push({ 
+          start: currentY, 
+          end: occupiedRange.start - 40 
+        });
+      }
+      // Move past this occupied range (with padding)
+      currentY = Math.max(currentY, occupiedRange.end + 40);
+    }
+    
+    // Add remaining safe area after all occupied ranges
+    if (currentY < maxY) {
+      safeAreas.push({ start: currentY, end: maxY });
+    }
+    
+    // If no safe areas found (very unlikely), try to spawn in the largest gap
+    if (safeAreas.length === 0) {
+      // Find the largest gap between pipes and use it anyway
+      let largestGap = { start: 80, end: canvasSize.height - 80, size: canvasSize.height - 160 };
+      
+      for (let i = 0; i < mergedRanges.length - 1; i++) {
+        const gapStart = mergedRanges[i].end;
+        const gapEnd = mergedRanges[i + 1].start;
+        const gapSize = gapEnd - gapStart;
+        
+        if (gapSize > largestGap.size && gapSize > 60) {
+          largestGap = { start: gapStart + 20, end: gapEnd - 20, size: gapSize - 40 };
+        }
+      }
+      
+      if (largestGap.size > 40) {
+        safeAreas.push({ start: largestGap.start, end: largestGap.end });
+      } else {
+        // Don't spawn book if no safe space
+        return;
+      }
+    }
+    
+    // Pick a random safe area and position within it
+    const randomArea = safeAreas[Math.floor(Math.random() * safeAreas.length)];
+    const safeY = randomArea.start + Math.random() * (randomArea.end - randomArea.start);
+    
     const newBook: Book = {
       id: `book_${nextBookIdRef.current++}`,
       x: canvasSize.width + Math.random() * 200, // Spawn ahead of the player
-      y: Math.random() * (canvasSize.height - 100) + 50, // Random Y position
+      y: safeY,
       collected: false
     };
     
@@ -533,7 +613,7 @@ export const Game: React.FC = () => {
             
             const newBook: Book = {
               id: `book_${nextBookIdRef.current++}`,
-              x: canvasSize.width + Math.random() * 150,
+              x: lockerX + LOCKER_WIDTH / 2, // Spawn at the same X position as the pipe gap
               y: Math.max(80, Math.min(safeY, canvasSize.height - 80)), // Ensure books stay in reachable area
               collected: false
             };
