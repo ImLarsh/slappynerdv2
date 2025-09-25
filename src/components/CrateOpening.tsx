@@ -90,13 +90,16 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
         return;
       }
 
-      // Set up the spinning animation with all rewards
-      const allRewards = [...data.animation_rewards, data.reward, ...data.animation_rewards];
-      setRewards(allRewards);
+      // Build a fixed-size wheel with the final reward in a known target segment
+      const segmentCount = 8;
+      const targetIndex = 0; // land under the top pointer
+      const wheel = Array.from({ length: segmentCount }, (_, i) => data.animation_rewards[i % data.animation_rewards.length]);
+      wheel[targetIndex] = data.reward;
+      setRewards(wheel);
       setSelectedReward(data.reward);
 
-      // Start spinning animation
-      startSpinAnimation(allRewards, data.reward);
+      // Start wheel animation toward targetIndex
+      startSpinAnimation(wheel, data.reward, targetIndex);
 
     } catch (error) {
       console.error('Error in openCrate:', error);
@@ -109,62 +112,46 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
     }
   };
 
-  const startSpinAnimation = (allRewards: Reward[], finalReward: Reward) => {
-    const totalRewards = allRewards.length;
-    const finalIndex = Math.floor(totalRewards / 2); // Place the final reward in the middle
-    
-    // Replace the middle reward with our actual reward
-    allRewards[finalIndex] = finalReward;
+  const startSpinAnimation = (wheel: Reward[], finalReward: Reward, targetIndex: number) => {
+    const segmentCount = wheel.length;
+    const degreesPerSegment = 360 / segmentCount;
 
-    // Wheel rotation animation parameters for 8 segments  
-    const totalDuration = 4000; // 4 seconds
-    const minRotations = 3; // Minimum full rotations
-    const degreesPerSegment = 45; // 8 segments = 45 degrees each
-    
-    // Determine which segment the final reward should be in (0-7)
-    const targetSegment = Math.floor(Math.random() * 8);
-    
-    // Calculate target rotation to land on the selected segment
-    const finalRotation = (minRotations * 360) + (targetSegment * degreesPerSegment) + 22.5; // +22.5 to center on segment
-    
+    // Animation parameters
+    const totalDuration = 4500; // 4.5 seconds for a smoother feel
+    const minRotations = 4; // full rotations before landing
+
+    // Calculate the exact rotation needed to center the target segment under the pointer
+    const finalRotation = (minRotations * 360) + (targetIndex * degreesPerSegment);
+
     let startTime = Date.now();
-    let currentRotation = 0;
 
     const animate = () => {
       const elapsed = Date.now() - startTime;
       const progress = Math.min(elapsed / totalDuration, 1);
-      
-      // Smooth easing function for wheel rotation
+
+      // Progressive slowdown (ease-out cubic)
       const easeOutCubic = 1 - Math.pow(1 - progress, 3);
-      
-      // Calculate current rotation
-      currentRotation = finalRotation * easeOutCubic;
-      
-      // Update rotation state and determine current quadrant
-      setCurrentRotation(currentRotation);
-      const normalizedRotation = currentRotation % 360;
-      const currentQuadrant = Math.floor(normalizedRotation / 90);
-      setCurrentIndex(currentQuadrant);
-      
+
+      const rotation = finalRotation * easeOutCubic;
+      setCurrentRotation(rotation);
+
       if (progress < 1) {
         requestAnimationFrame(animate);
       } else {
-        // Animation complete - ensure we're at the final reward
-        setCurrentIndex(finalIndex);
+        // Snap to final index and reveal
+        setCurrentRotation(finalRotation);
+        setCurrentIndex(targetIndex);
         setPhase('revealing');
-        
-        // Show the final result after a brief pause
         setTimeout(() => {
           setPhase('complete');
           toast({
             title: "Congratulations!",
             description: `You won: ${finalReward.emoji} ${finalReward.name}`,
           });
-        }, 800);
+        }, 600);
       }
     };
 
-    // Start the animation
     animate();
   };
 
@@ -192,9 +179,7 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
             <h2 className="text-3xl font-bold mb-2">🎰 Opening {crate.name}</h2>
           </div>
 
-          {/* Spinning wheel */}
-          <div className="relative flex items-center justify-center">
-            <div className="relative w-[500px] h-[500px] rounded-full bg-gradient-to-br from-card via-card/90 to-card/80 backdrop-blur-sm shadow-2xl border-4 border-primary/30 overflow-hidden">
+              <div className="relative w-[600px] h-[600px] rounded-full bg-gradient-to-br from-card via-card/90 to-card/80 backdrop-blur-sm shadow-2xl border-4 border-primary/30 overflow-hidden">
               {/* Pointer/Indicator */}
               <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30">
                 <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-xl filter brightness-110"></div>
@@ -242,7 +227,7 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                         style={{
                           transform: 'translateX(-50%)',
                           clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
-                          width: '90px',
+                          width: '70px',
                           filter: isSelected ? 'drop-shadow(0 0 15px currentColor)' : 'none'
                         }}
                       />
@@ -251,7 +236,7 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                       <div
                         className="absolute flex items-center justify-center"
                         style={{
-                          top: '25%',
+                          top: '28%',
                           left: '50%',
                           transform: `translateX(-50%) translateY(-50%) rotate(${-angle}deg)`,
                         }}
@@ -268,12 +253,15 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                         className="absolute top-0 left-1/2 w-0.5 h-1/2 bg-background/30 origin-bottom"
                         style={{ transform: 'translateX(-50%)' }}
                       />
-                    </div>
-                  );
-                })}
-              </div>
-              
-              {/* Center hub */}
+                      </div>
+                    );
+                  })}
+                </div>
+                
+                {/* Inner mask ring */}
+                <div className="absolute inset-[22%] rounded-full bg-card border-4 border-border z-20 pointer-events-none"></div>
+                
+                {/* Center hub */}
               <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-primary to-primary/80 rounded-full border-4 border-background z-30 flex items-center justify-center shadow-xl">
                 <div className="text-3xl drop-shadow-lg">{crate.emoji}</div>
               </div>
