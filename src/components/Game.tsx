@@ -1257,7 +1257,7 @@ export const Game: React.FC = () => {
               <h1 className="text-2xl sm:text-3xl text-green-400 font-extrabold md:text-6xl">Ready Nerd?</h1>
               
               <div className="space-y-1 sm:space-y-2 text-xs md:text-sm text-muted-foreground">
-                <p>Tap anywhere to flap</p>
+                <p>Tap anywhere to get through the gap!</p>
                 
                 <p>📚 Avoid The Lockers, While Collecting The Books! 📚</p>
               </div>
