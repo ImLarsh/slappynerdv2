@@ -191,6 +191,23 @@ All colors MUST be HSL.
   100% { transform: rotate(360deg); }
 }
 
+@keyframes fall {
+  0% { 
+    transform: translateY(-100vh) translateX(-50%);
+    opacity: 0;
+  }
+  10% {
+    opacity: 0.3;
+  }
+  90% {
+    opacity: 0.3;
+  }
+  100% { 
+    transform: translateY(100vh) translateX(-50%);
+    opacity: 0;
+  }
+}
+
 /* Retro 2D Game Classes */
 .retro-float {
   animation: retro-float 3s ease-in-out infinite;
@@ -231,6 +248,10 @@ All colors MUST be HSL.
 
 .retro-rotate {
   animation: retro-rotate 2s linear infinite;
+}
+
+.animate-fall {
+  animation: fall 20s linear infinite;
 }
 
 /* 2D Retro Game Button Styles */

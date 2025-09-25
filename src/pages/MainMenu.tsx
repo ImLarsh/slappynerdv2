@@ -5,6 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Slider } from '@/components/ui/slider';
 import { CharactersTab } from '@/components/CharactersTab';
 import { AchievementsTab } from '@/components/AchievementsTab';
+import { FallingEmojis } from '@/components/FallingEmojis';
 import { Leaderboards } from '@/components/Leaderboards';
 import { Shop } from '@/components/Shop';
 import { useCurrency } from '@/hooks/useCurrency';
@@ -133,6 +134,9 @@ const MainMenu: React.FC = () => {
     <div className="min-h-screen h-screen overflow-hidden bg-cover bg-center bg-no-repeat relative flex flex-col items-center justify-center p-1 sm:p-2 md:p-4" style={{
       backgroundImage: `url(${schoolHallwayBg})`
     }}>
+      {/* Falling Emojis Background */}
+      <FallingEmojis />
+      
       {/* Background overlay - reduced blur for mobile performance */}
       <div className="absolute inset-0 bg-background/60 md:backdrop-blur-sm" />
       
