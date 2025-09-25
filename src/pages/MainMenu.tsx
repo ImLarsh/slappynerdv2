@@ -216,7 +216,7 @@ const MainMenu: React.FC = () => {
               <span className="font-semibold">Achievements</span>
             </Button>
 
-            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-2 h-20 md:h-28 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border-2 border-yellow-300 overflow-hidden" style={{
+            <Button variant="default" onClick={() => handleButtonClick(() => setLeaderboardOpen(true))} className="relative flex flex-col gap-2 h-20 md:h-28 hover-scale animate-scale-in text-xs md:text-sm bg-gradient-to-b from-yellow-400 via-yellow-500 to-yellow-600 text-yellow-900 font-bold shadow-xl border-2 border-yellow-300 overflow-hidden col-span-2" style={{
               animationDelay: '0.5s'
             }}>
               {/* Crown icon */}
