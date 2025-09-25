@@ -172,10 +172,6 @@ const MainMenu: React.FC = () => {
           </div>
         </div>}
 
-      {/* Volume Control Button */}
-      <Button variant="outline" size="icon" onClick={() => handleButtonClick(() => setVolumeOpen(true))} className="absolute top-1 sm:top-2 md:top-4 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 my-[68px] mx-0 px-[16px] py-[15px]">
-        {isMuted ? <VolumeX className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" /> : <Volume2 className="h-2.5 w-2.5 sm:h-3 sm:w-3 md:h-4 md:w-4" />}
-      </Button>
 
       {/* Add to Home Screen Button - Only show on mobile when installable */}
       {isInstallable && <Button variant="outline" size="icon" className="absolute top-8 sm:top-12 md:top-16 right-8 sm:right-12 md:right-16 z-20 hover-scale w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 bg-green-500 hover:bg-green-600 border-green-400 text-white" onClick={() => handleButtonClick(installApp)}>
@@ -211,14 +207,29 @@ const MainMenu: React.FC = () => {
             </div>
           </div>
 
-          <Button onClick={handleStartGame} size="lg" className="relative w-full text-sm sm:text-base md:text-lg lg:text-2xl py-2 sm:py-3 md:py-4 lg:py-8 hover-scale animate-scale-in bg-gradient-to-b from-red-400 via-red-500 to-red-600 text-red-900 font-black shadow-2xl border sm:border-2 md:border-4 border-red-300 overflow-hidden transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
-            animationDelay: '0.1s'
-          }}>
-            <Play className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:h-8 lg:w-8" />
-            Play!
-            {/* Enhanced 3D bottom decoration */}
-            <div className="absolute bottom-0 left-0 right-0 h-1 sm:h-2 md:h-3 bg-gradient-to-r from-red-600 to-red-700"></div>
-          </Button>
+          <div className="relative">
+            <Button onClick={handleStartGame} size="lg" className="relative w-full text-sm sm:text-base md:text-lg lg:text-2xl py-2 sm:py-3 md:py-4 lg:py-8 hover-scale animate-scale-in bg-gradient-to-b from-red-400 via-red-500 to-red-600 text-red-900 font-black shadow-2xl border sm:border-2 md:border-4 border-red-300 overflow-hidden transform hover:scale-105 transition-all duration-200 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
+              animationDelay: '0.1s'
+            }}>
+              <Play className="h-3 w-3 sm:h-4 sm:w-4 md:h-6 md:w-6 lg:h-8 lg:w-8" />
+              Play!
+              {/* Enhanced 3D bottom decoration */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 sm:h-2 md:h-3 bg-gradient-to-r from-red-600 to-red-700"></div>
+            </Button>
+            
+            {/* Volume Control Button - Top Right of Play Button */}
+            <Button 
+              variant="outline" 
+              size="icon" 
+              onClick={() => handleButtonClick(() => setVolumeOpen(true))} 
+              className="absolute -top-2 -right-2 sm:-top-3 sm:-right-3 md:-top-4 md:-right-4 z-30 hover-scale w-8 h-8 sm:w-10 sm:h-10 md:w-12 md:h-12 lg:w-14 lg:h-14 bg-primary text-primary-foreground border-2 border-primary-foreground shadow-xl"
+            >
+              {isMuted ? 
+                <VolumeX className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" /> : 
+                <Volume2 className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6 lg:h-7 lg:w-7" />
+              }
+            </Button>
+          </div>
 
           {/* Game Feature Buttons */}
           <div className="grid grid-cols-2 gap-1.5 sm:gap-2 md:gap-3 lg:gap-4">
