@@ -51,7 +51,6 @@ const MainMenu: React.FC = () => {
     toggleMute,
     playBackgroundMusic,
     stopBackgroundMusic,
-    pauseBackgroundMusic,
     playSound
   } = useAudio();
   const navigate = useNavigate();
@@ -73,49 +72,7 @@ const MainMenu: React.FC = () => {
     };
     fetchPlayerProfile();
   }, [user]);
-  
-  // Auto-play background music when the app fully loads
-  useEffect(() => {
-    if (!authLoading && !booksLoading && !adminLoading) {
-      // Try to start music immediately when loading is complete
-      const startMusic = async () => {
-        try {
-          await playBackgroundMusic();
-          console.log('Auto-play music started successfully');
-        } catch (error) {
-          console.log('Auto-play failed, user interaction may be required:', error);
-        }
-      };
-      
-      // Small delay to ensure everything is stable, then start music
-      const timer = setTimeout(startMusic, 300);
-      return () => clearTimeout(timer);
-    }
-  }, [authLoading, booksLoading, adminLoading, playBackgroundMusic]);
-
-  // Additional effect to ensure music starts playing even if user interacts with page
-  useEffect(() => {
-    const handleFirstInteraction = async () => {
-      if (!isPlaying && !authLoading && !booksLoading && !adminLoading) {
-        try {
-          await playBackgroundMusic();
-        } catch (error) {
-          console.log('Could not start music on first interaction:', error);
-        }
-      }
-    };
-
-    const events = ['click', 'touchstart', 'keydown'];
-    events.forEach(event => {
-      document.addEventListener(event, handleFirstInteraction, { once: true });
-    });
-
-    return () => {
-      events.forEach(event => {
-        document.removeEventListener(event, handleFirstInteraction);
-      });
-    };
-  }, [isPlaying, authLoading, booksLoading, adminLoading, playBackgroundMusic]);
+  // No automatic music - only controlled via player controls
 
   // Lock body scroll on Main Menu
   useEffect(() => {
@@ -355,7 +312,7 @@ const MainMenu: React.FC = () => {
                 <span className="text-sm text-muted-foreground">
                   {isPlaying ? 'Playing' : 'Stopped'}
                 </span>
-                <Button variant="outline" size="sm" onClick={isPlaying ? pauseBackgroundMusic : playBackgroundMusic}>
+                <Button variant="outline" size="sm" onClick={isPlaying ? stopBackgroundMusic : playBackgroundMusic}>
                   {isPlaying ? "⏸️" : "▶️"}
                 </Button>
               </div>

@@ -138,21 +138,12 @@ export const useAudio = () => {
   }, [audioState.volume, audioState.isMuted]);
 
   const stopBackgroundMusic = useCallback(() => {
-    const audio = backgroundMusicRef.current;
-    if (audio && !audio.paused) {
-      audio.pause();
-      audio.currentTime = 0;
+    if (backgroundMusicRef.current && audioState.isPlaying) {
+      backgroundMusicRef.current.pause();
+      backgroundMusicRef.current.currentTime = 0;
       setAudioState(prev => ({ ...prev, isPlaying: false }));
     }
-  }, []);
-
-  const pauseBackgroundMusic = useCallback(() => {
-    const audio = backgroundMusicRef.current;
-    if (audio && !audio.paused) {
-      audio.pause();
-      setAudioState(prev => ({ ...prev, isPlaying: false }));
-    }
-  }, []);
+  }, [audioState.isPlaying]);
 
   const playSound = useCallback((soundName: string) => {
     if (audioState.isMuted) return;
@@ -174,7 +165,6 @@ export const useAudio = () => {
     toggleMute,
     playBackgroundMusic,
     stopBackgroundMusic,
-    pauseBackgroundMusic,
     playSound
   };
 };
