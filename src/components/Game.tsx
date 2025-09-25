@@ -68,6 +68,11 @@ const PIPE_SPEED = 2.5;
 const PIPE_GAP = 220; // Reduced from 240 to make it harder
 const BIRD_SIZE = 50;
 
+// iOS detection for performance tweaks
+const IS_IOS = /iP(ad|hone|od)/.test(navigator.platform) ||
+  (navigator.userAgent.includes('Mac') && 'ontouchend' in document);
+
+
 export const Game: React.FC = () => {
   const navigate = useNavigate();
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -496,9 +501,9 @@ export const Game: React.FC = () => {
       const currentFrameTime = FRAME_TIME();
       const baseFrameTime = isMobile ? 1000 / TARGET_FPS_MOBILE : currentFrameTime;
 
-      // Desktop: throttle to target FPS. Mobile: no cap (always update).
-      if (!isMobile && deltaTime < currentFrameTime) {
-        return newState;
+      // Throttle updates to target FPS on all devices to reduce React renders
+      if (deltaTime < currentFrameTime) {
+        return prev;
       }
 
       // Clamp delta to avoid big jumps on tab switching/backgrounding
@@ -728,7 +733,7 @@ export const Game: React.FC = () => {
       return newState;
     });
 
-    animationRef.current = requestAnimationFrame(gameLoop);
+    // Next frame scheduled in effect-based loop
   }, [getGameModifiers, checkPowerSelection, checkBookCollisions, addBooks, playSound, toast]);
 
   // Canvas drawing with error handling
@@ -745,25 +750,34 @@ export const Game: React.FC = () => {
       return;
     }
 
-    // Force canvas size update on mobile
-    if (canvas.width !== canvasSize.width || canvas.height !== canvasSize.height) {
-      canvas.width = canvasSize.width;
-      canvas.height = canvasSize.height;
-      console.log('Canvas size set to:', canvasSize);
+    // Handle high-DPR displays with a cap on iOS to reduce fill-rate cost
+    const dpr = Math.min(window.devicePixelRatio || 1, IS_IOS ? 1.5 : 2);
+    canvas.style.width = canvasSize.width + 'px';
+    canvas.style.height = canvasSize.height + 'px';
+    const targetW = Math.round(canvasSize.width * dpr);
+    const targetH = Math.round(canvasSize.height * dpr);
+    if (canvas.width !== targetW || canvas.height !== targetH) {
+      canvas.width = targetW;
+      canvas.height = targetH;
     }
 
-    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true });
+    const ctx = canvas.getContext('2d', { alpha: false, desynchronized: true, willReadFrequently: true });
     if (!ctx) {
       console.error('Cannot get canvas context');
       return;
     }
+
+    // Scale for DPR and disable smoothing for crisper pixel art
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    // @ts-ignore - Safari may not have this typed
+    ctx.imageSmoothingEnabled = false;
 
     // Ensure canvas is visible - draw initial background
     ctx.fillStyle = 'hsl(200, 100%, 85%)';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
 
     // Draw scrolling background
-    if (backgroundImageRef.current && backgroundImageRef.current.complete) {
+    if (!IS_IOS && backgroundImageRef.current && backgroundImageRef.current.complete) {
       const img = backgroundImageRef.current;
       const bgWidth = img.width;
       const bgHeight = img.height;
@@ -839,11 +853,13 @@ export const Game: React.FC = () => {
           );
         }
         
-        // Add a subtle shadow for depth
-        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-        ctx.shadowBlur = 5;
-        ctx.shadowOffsetX = 3;
-        ctx.shadowOffsetY = 3;
+        if (!IS_IOS) {
+          // Add a subtle shadow for depth
+          ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+          ctx.shadowBlur = 5;
+          ctx.shadowOffsetX = 3;
+          ctx.shadowOffsetY = 3;
+        }
       } else {
         // Fallback: draw yellow rectangle if image not loaded
         ctx.fillStyle = '#FFD700'; // Yellow
@@ -869,6 +885,17 @@ export const Game: React.FC = () => {
     gameState.books.forEach(book => {
       if (!book.collected) {
         const bookSize = 32; // Increased from 24px
+
+        // Fast path on iOS: simple filled circle, no glow/shadow
+        if (IS_IOS) {
+          ctx.beginPath();
+          ctx.arc(book.x + bookSize/2, book.y - bookSize/2, bookSize/2, 0, 2 * Math.PI);
+          ctx.fillStyle = '#FFD700';
+          ctx.globalAlpha = 0.9;
+          ctx.fill();
+          ctx.globalAlpha = 1;
+          return;
+        }
         
         // Draw bright yellow ring around book
         ctx.save();
@@ -978,11 +1005,13 @@ export const Game: React.FC = () => {
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
-    // Add subtle shadow for character
-    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-    ctx.shadowBlur = 3;
-    ctx.shadowOffsetX = 2;
-    ctx.shadowOffsetY = 2;
+    // Add subtle shadow for character (skip on iOS)
+    if (!IS_IOS) {
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+      ctx.shadowBlur = 3;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+    }
     
     const character = selectedCharacter ? selectedCharacter.emoji : '🤓';
     ctx.fillText(
@@ -1015,14 +1044,14 @@ export const Game: React.FC = () => {
     setPendingPower(power);
   }, [getRandomPowers, setShowPowerSelection, hasLuckyStart]);
 
-  // Game loop with optimized performance
+  // Game loop with optimized performance (single scheduler)
   useEffect(() => {
-    // Remove debug logging for better performance
     if (gameState.gameStarted && !gameState.gameOver && !showPowerSelection && !waitingForContinue) {
-      const startGameLoop = (timestamp: number) => {
+      const loop = (timestamp: number) => {
         gameLoop(timestamp);
+        animationRef.current = requestAnimationFrame(loop);
       };
-      animationRef.current = requestAnimationFrame(startGameLoop);
+      animationRef.current = requestAnimationFrame(loop);
     }
     return () => {
       if (animationRef.current) {
