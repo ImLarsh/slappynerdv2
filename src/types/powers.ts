@@ -111,7 +111,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🐌',
     type: 'speed',
     beneficial: true,
-    weight: 1,
+    weight: 2.5, // 5% chance (increased from 1)
     effect: { speedMultiplier: 0.7 }
   },
   {
@@ -141,7 +141,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '⏰',
     type: 'temporary',
     beneficial: true,
-    weight: 1,
+    weight: 2.5, // 5% chance (increased from 1)
     effect: { speedMultiplier: 0.4, duration: 8000 }
   },
   {
