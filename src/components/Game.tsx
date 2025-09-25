@@ -1044,13 +1044,9 @@ export const Game: React.FC = () => {
 
   // Handle input using Pointer Events to avoid duplicate touch/click on mobile
   useEffect(() => {
-    const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.maxTouchPoints > 1 && /Macintosh/.test(navigator.userAgent));
     const handlePointerDown = (e: PointerEvent) => {
       if (!e.isPrimary) return;
-      if (isiOS) {
-        // Prevent click synthesis and any native gesture side-effects on iOS
-        e.preventDefault();
-      }
+      // Schedule all logic on next frame to avoid main-thread work during input
       if (waitingForContinue || e.target === canvasRef.current) {
         requestAnimationFrame(jump);
       }
@@ -1066,12 +1062,12 @@ export const Game: React.FC = () => {
     window.addEventListener('keydown', handleKeyPress);
     const canvas = canvasRef.current;
     if (canvas) {
-      canvas.addEventListener('pointerdown', handlePointerDown, { passive: !isiOS });
+      canvas.addEventListener('pointerdown', handlePointerDown, { passive: true });
     }
 
     // Also add global event listener for waiting for continue
     if (waitingForContinue) {
-      document.addEventListener('pointerdown', handlePointerDown, { passive: !isiOS });
+      document.addEventListener('pointerdown', handlePointerDown, { passive: true });
     }
 
     return () => {
