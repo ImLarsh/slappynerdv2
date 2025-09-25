@@ -1356,17 +1356,14 @@ export const Game: React.FC = () => {
         {waitingForContinue && pendingPower && <div className="absolute inset-0 flex items-center justify-center bg-foreground/50 z-50 rounded-lg">
             <Card className="p-6 sm:p-8 text-center space-y-4 animate-scale-in shadow-game max-w-sm mx-4 bg-background/60 backdrop-blur-sm">
               <div className="text-4xl sm:text-5xl">{pendingPower.emoji}</div>
-              <h2 className="text-xl sm:text-2xl font-bold text-green-500">
+              <h2 className="text-xl sm:text-2xl font-bold text-black">
                 {pendingPower.name} Ready!
               </h2>
-              <p className="text-sm sm:text-base text-muted-foreground">
+              <p className="text-sm sm:text-base font-bold text-black">
                 {pendingPower.description}
               </p>
-              <div className="text-lg sm:text-xl font-semibold text-accent-foreground animate-pulse">
+              <div className="text-lg sm:text-xl font-bold text-black animate-pulse">
                 Tap to Continue
-              </div>
-              <div className="text-sm text-muted-foreground">
-                Tap anywhere or press SPACE
               </div>
             </Card>
           </div>}
