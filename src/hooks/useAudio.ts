@@ -28,6 +28,8 @@ export const useAudio = () => {
 
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   const soundEffectsRef = useRef<{ [key: string]: HTMLAudioElement }>({});
+  const tapPoolRef = useRef<HTMLAudioElement[]>([]);
+  const tapPoolIndexRef = useRef(0);
 
   // Initialize audio elements (singleton across app)
   useEffect(() => {
@@ -93,6 +95,23 @@ export const useAudio = () => {
         });
         // Don't auto-load sound effects
       });
+
+      // Prewarm a small pool for the tap sound on iOS to avoid seek/decode jank
+      const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+                    (navigator.platform === 'MacIntel' && (navigator as any).maxTouchPoints > 1);
+      if (isiOS && tapPoolRef.current.length === 0) {
+        const poolSize = 6;
+        for (let i = 0; i < poolSize; i++) {
+          const a = new Audio('/audio/tapflapsound.mp3');
+          a.preload = 'auto';
+          a.crossOrigin = 'anonymous';
+          a.autoplay = false;
+          a.volume = audioState.isMuted ? 0 : audioState.volume;
+          // Kick off loading early
+          try { a.load(); } catch {}
+          tapPoolRef.current.push(a);
+        }
+      }
     }
     // Point local ref to global effects
     soundEffectsRef.current = globalSoundEffects;
@@ -117,6 +136,13 @@ export const useAudio = () => {
       audio.volume = audioState.isMuted ? 0 : audioState.volume;
       audio.muted = audioState.isMuted;
     });
+    // Sync pool volumes too
+    if (tapPoolRef.current.length) {
+      for (const a of tapPoolRef.current) {
+        a.volume = audioState.isMuted ? 0 : audioState.volume;
+        a.muted = audioState.isMuted;
+      }
+    }
   }, [audioState.volume, audioState.isMuted]);
 
   const setVolume = useCallback((volume: number) => {
@@ -166,13 +192,26 @@ export const useAudio = () => {
 
   const playSound = useCallback((soundName: string) => {
     if (audioState.isMuted) return;
-    
+
+    // Optimized tap sound on iOS using a small prewarmed pool
+    if (soundName === 'tapFlap' && tapPoolRef.current.length) {
+      const a = tapPoolRef.current[tapPoolIndexRef.current];
+      tapPoolIndexRef.current = (tapPoolIndexRef.current + 1) % tapPoolRef.current.length;
+      try {
+        a.currentTime = 0;
+        a.volume = audioState.volume;
+        a.muted = audioState.isMuted;
+        a.play().catch(() => {});
+      } catch {}
+      return;
+    }
+
     const sound = soundEffectsRef.current[soundName];
     if (sound) {
       // Reset to beginning for instant playback
       sound.currentTime = 0;
       sound.volume = audioState.volume;
-      sound.play().catch(console.error);
+      sound.play().catch(() => {});
     }
   }, [audioState.isMuted, audioState.volume]);
 

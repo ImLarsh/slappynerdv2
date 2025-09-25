@@ -1035,9 +1035,8 @@ export const Game: React.FC = () => {
   useEffect(() => {
     const handlePointerDown = (e: PointerEvent) => {
       // Use CSS touch-action to prevent gestures; keep handler passive to avoid jank on iOS
-      // Allow taps anywhere when waiting for continue, otherwise only on canvas
       if (waitingForContinue || e.target === canvasRef.current) {
-        jump();
+        requestAnimationFrame(() => jump());
       }
     };
 
