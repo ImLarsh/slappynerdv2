@@ -277,6 +277,16 @@ const MainMenu: React.FC = () => {
           }}>
               🔐 Sign In / Sign Up
             </Button>}
+
+          {/* Logout Button - Below leaderboard (when signed in) */}
+          {user && <div className="mt-2 sm:mt-3 md:mt-4">
+            <Button onClick={() => handleButtonClick(signOut)} variant="outline" size="lg" className="w-full text-sm sm:text-base md:text-lg py-2 sm:py-3 md:py-4 hover-scale animate-scale-in text-red-600 border-red-500 hover:bg-red-500 hover:text-white font-bold shadow-xl transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
+              animationDelay: '0.6s'
+            }}>
+                <DoorOpen className="h-4 w-4 sm:h-5 sm:w-5 md:h-6 md:w-6" />
+                Sign Out
+              </Button>
+            </div>}
         </div>
         </div>
       </div>
