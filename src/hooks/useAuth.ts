@@ -12,9 +12,9 @@ export const useAuth = () => {
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
       (event, session) => {
         // If user is signing out, clear localStorage data for the previous user
-        if (event === 'SIGNED_OUT' && user) {
+        if (event === 'SIGNED_OUT' && session?.user) {
           // Clear user-specific localStorage data (keeping minimal cleanup)
-          localStorage.removeItem(`slappy-nerds-player-name-${user.id}`);
+          localStorage.removeItem(`slappy-nerds-player-name-${session.user.id}`);
         }
         
         setSession(session);
