@@ -66,6 +66,7 @@ All colors MUST be HSL.
     --gradient-sky: linear-gradient(180deg, hsl(var(--sky-start)), hsl(var(--sky-end)));
     --gradient-ground: linear-gradient(180deg, hsl(120 30% 45%), hsl(120 25% 35%));
     --gradient-button: linear-gradient(135deg, hsl(var(--primary)), hsl(var(--primary-glow)));
+    --gradient-button-green: linear-gradient(135deg, hsl(var(--success)), hsl(120 65% 55%));
     --gradient-score: linear-gradient(135deg, hsl(var(--collectible-gold)), hsl(var(--collectible-glow)));
 
     /* Shadows & Effects */
