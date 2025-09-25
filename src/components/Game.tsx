@@ -13,8 +13,8 @@ import { useAudio } from '@/hooks/useAudio';
 import { PowerSelection } from './PowerSelection';
 import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
-import bgImage from '@/assets/school-hallway-bg.png';
-import lockerYellow from '@/assets/locker-yellow.png';
+import bgImage from '@/assets/school-hallway-bg.webp';
+import lockerYellow from '@/assets/locker-yellow.webp';
 
 interface GameObject {
   x: number;
