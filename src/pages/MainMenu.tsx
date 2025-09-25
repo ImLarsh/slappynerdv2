@@ -179,11 +179,15 @@ const MainMenu: React.FC = () => {
             </div>
           </div>
 
-          <Button onClick={handleStartGame} size="lg" className="w-full text-base md:text-xl py-3 md:py-6 hover-scale animate-scale-in bg-warning text-warning-foreground hover:bg-warning/90 font-bold" style={{
+          <Button onClick={handleStartGame} size="lg" className="relative w-full text-lg md:text-2xl py-4 md:py-8 hover-scale animate-scale-in bg-gradient-to-b from-red-400 via-red-500 to-red-600 text-red-900 font-black shadow-2xl border-4 border-red-300 overflow-hidden transform hover:scale-105 transition-all duration-200" style={{
             animationDelay: '0.1s'
           }}>
-            <Play className="h-5 w-5 md:h-6 md:w-6 mr-2 md:mr-3" />
-            🚀 Start Flying!
+            <Play className="h-6 w-6 md:h-8 md:w-8 mr-3 md:mr-4" />
+            🚀 Play!
+            {/* Enhanced 3D bottom decoration */}
+            <div className="absolute bottom-0 left-0 right-0 h-3 bg-gradient-to-r from-red-600 to-red-700"></div>
+            {/* Glow effect */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent opacity-30"></div>
           </Button>
 
           {/* Game Feature Buttons */}
