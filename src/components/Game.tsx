@@ -1314,7 +1314,7 @@ export const Game: React.FC = () => {
             <Card className="p-3 sm:p-4 md:p-8 text-center space-y-2 sm:space-y-3 md:space-y-4 animate-bounce-in shadow-game max-w-sm mx-2 sm:mx-4 bg-background/80 backdrop-blur-sm">
               <div className="text-3xl sm:text-4xl">💥</div>
               {gameState.isNewRecord ? <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-warning">New Record! 👑</h2> : <h2 className="text-xl sm:text-2xl md:text-3xl font-bold text-danger">Game Over!</h2>}
-              <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
+              <p className="text-sm sm:text-base md:text-lg text-muted-foreground font-extrabold">
                 {gameState.isNewRecord ? '"I\'m the smartest nerd ever!"' : '"I should\'ve studied more!"'}
               </p>
               <div className="text-base sm:text-lg md:text-xl font-semibold">
