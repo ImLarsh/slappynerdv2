@@ -102,10 +102,8 @@ const MainMenu: React.FC = () => {
       document.removeEventListener('click', handleFirstInteraction);
       document.removeEventListener('touchstart', handleFirstInteraction);
     };
-
     document.addEventListener('click', handleFirstInteraction);
     document.addEventListener('touchstart', handleFirstInteraction);
-
     return () => {
       document.removeEventListener('click', handleFirstInteraction);
       document.removeEventListener('touchstart', handleFirstInteraction);
@@ -170,7 +168,7 @@ const MainMenu: React.FC = () => {
             {/* Currency Display */}
             <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 mt-0.5">
               <span className="text-xs sm:text-sm md:text-lg">📚</span>
-              <span className="font-semibold text-[10px] sm:text-xs md:text-sm lg:text-base">
+              <span className="text-[10px] sm:text-xs md:text-sm font-extrabold lg:text-2xl">
                 {booksLoading ? '...' : books} Books
               </span>
             </div>
@@ -277,17 +275,11 @@ const MainMenu: React.FC = () => {
           </div>
 
           {/* Sign In/Up Button - Below play button (when not signed in) */}
-          {!user && (
-            <Button 
-              onClick={() => handleButtonClick(() => navigate('/auth'))} 
-              variant="default" 
-              size="lg" 
-              className="w-full text-sm sm:text-base md:text-lg py-2 sm:py-3 md:py-4 hover-scale animate-scale-in bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-2 sm:border-3 border-blue-300 transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3"
-              style={{ animationDelay: '0.15s' }}
-            >
+          {!user && <Button onClick={() => handleButtonClick(() => navigate('/auth'))} variant="default" size="lg" className="w-full text-sm sm:text-base md:text-lg py-2 sm:py-3 md:py-4 hover-scale animate-scale-in bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 text-white font-black shadow-2xl border-2 sm:border-3 border-blue-300 transform hover:scale-105 transition-all duration-300 flex items-center justify-center gap-1.5 sm:gap-2 md:gap-3" style={{
+            animationDelay: '0.15s'
+          }}>
               🔐 Sign In / Sign Up
-            </Button>
-          )}
+            </Button>}
         </div>
         </div>
       </div>
