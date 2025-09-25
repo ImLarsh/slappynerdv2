@@ -116,16 +116,16 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
     // Replace the middle reward with our actual reward
     allRewards[finalIndex] = finalReward;
 
-    // Wheel rotation animation parameters for 4 quadrants
+    // Wheel rotation animation parameters for 8 segments  
     const totalDuration = 4000; // 4 seconds
     const minRotations = 3; // Minimum full rotations
-    const degreesPerQuadrant = 90; // 4 quadrants = 90 degrees each
+    const degreesPerSegment = 45; // 8 segments = 45 degrees each
     
-    // Determine which quadrant the final reward should be in (0-3)
-    const targetQuadrant = Math.floor(Math.random() * 4);
+    // Determine which segment the final reward should be in (0-7)
+    const targetSegment = Math.floor(Math.random() * 8);
     
-    // Calculate target rotation to land on the selected quadrant
-    const finalRotation = (minRotations * 360) + (targetQuadrant * degreesPerQuadrant) + 45; // +45 to center on quadrant
+    // Calculate target rotation to land on the selected segment
+    const finalRotation = (minRotations * 360) + (targetSegment * degreesPerSegment) + 22.5; // +22.5 to center on segment
     
     let startTime = Date.now();
     let currentRotation = 0;
@@ -194,69 +194,92 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
 
           {/* Spinning wheel */}
           <div className="relative flex items-center justify-center">
-            <div className="relative w-[600px] h-[600px] border-8 border-primary rounded-full bg-card/80 backdrop-blur-sm overflow-hidden shadow-2xl">
+            <div className="relative w-[500px] h-[500px] rounded-full bg-gradient-to-br from-card via-card/90 to-card/80 backdrop-blur-sm shadow-2xl border-4 border-primary/30 overflow-hidden">
               {/* Pointer/Indicator */}
-              <div className="absolute top-6 left-1/2 transform -translate-x-1/2 z-20">
-                <div className="w-0 h-0 border-l-8 border-r-8 border-b-16 border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-lg"></div>
+              <div className="absolute top-2 left-1/2 transform -translate-x-1/2 z-30">
+                <div className="w-0 h-0 border-l-[15px] border-r-[15px] border-b-[25px] border-l-transparent border-r-transparent border-b-yellow-400 drop-shadow-xl filter brightness-110"></div>
               </div>
               
-              {/* Wheel segments - 4 quadrants */}
+              {/* Wheel segments */}
               <div 
-                className="relative w-full h-full transition-transform duration-100 ease-out"
+                className="relative w-full h-full transition-transform duration-75 ease-out"
                 style={{
                   transform: `rotate(${-currentRotation}deg)`,
                   willChange: 'transform'
                 }}
               >
-                {/* Top-right quadrant (0-90 degrees) - Common (Green) */}
-                <div className="absolute top-0 right-0 w-1/2 h-1/2 bg-green-500/30 border-l-4 border-b-4 border-background/50 flex items-center justify-center"
-                     style={{ transformOrigin: 'bottom left', clipPath: 'polygon(0 0, 100% 0, 0 100%)' }}>
-                  <div className="absolute transform -translate-x-1/4 -translate-y-1/4 rotate-45">
-                    <div className="text-8xl drop-shadow-2xl">
-                      {rewards[0]?.emoji || '📚'}
+                {rewards.slice(0, 8).map((reward, index) => {
+                  const angle = (360 / 8) * index; // 8 segments for clean divisions
+                  const isSelected = Math.floor(((currentRotation + 22.5) % 360) / 45) === index;
+                  
+                  // Rarity-based colors
+                  const rarityColors = {
+                    common: 'from-green-500/40 to-green-600/60',
+                    uncommon: 'from-blue-500/40 to-blue-600/60', 
+                    rare: 'from-purple-500/40 to-purple-600/60',
+                    epic: 'from-orange-500/40 to-orange-600/60',
+                    legendary: 'from-yellow-400/40 to-yellow-500/60'
+                  };
+                  
+                  const segmentColor = rarityColors[reward.rarity as keyof typeof rarityColors] || rarityColors.common;
+                  
+                  return (
+                    <div
+                      key={`${reward.id}-${index}`}
+                      className={`absolute w-full h-full transition-all duration-200 ${
+                        isSelected ? 'scale-105 z-20' : 'z-10'
+                      }`}
+                      style={{
+                        transform: `rotate(${angle}deg)`,
+                        transformOrigin: 'center'
+                      }}
+                    >
+                      {/* Segment slice */}
+                      <div 
+                        className={`absolute top-0 left-1/2 w-1 h-1/2 origin-bottom transition-all duration-200 bg-gradient-to-t ${segmentColor} ${
+                          isSelected ? 'brightness-125 shadow-lg' : 'brightness-100'
+                        }`}
+                        style={{
+                          transform: 'translateX(-50%)',
+                          clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
+                          width: '90px',
+                          filter: isSelected ? 'drop-shadow(0 0 15px currentColor)' : 'none'
+                        }}
+                      />
+                      
+                      {/* Icon */}
+                      <div
+                        className="absolute flex items-center justify-center"
+                        style={{
+                          top: '25%',
+                          left: '50%',
+                          transform: `translateX(-50%) translateY(-50%) rotate(${-angle}deg)`,
+                        }}
+                      >
+                        <div className={`transition-all duration-200 ${
+                          isSelected ? 'text-6xl drop-shadow-2xl animate-pulse' : 'text-5xl drop-shadow-lg'
+                        }`}>
+                          {reward.emoji}
+                        </div>
+                      </div>
+                      
+                      {/* Segment border */}
+                      <div 
+                        className="absolute top-0 left-1/2 w-0.5 h-1/2 bg-background/30 origin-bottom"
+                        style={{ transform: 'translateX(-50%)' }}
+                      />
                     </div>
-                  </div>
-                </div>
-
-                {/* Bottom-right quadrant (90-180 degrees) - Rare (Blue) */}
-                <div className="absolute bottom-0 right-0 w-1/2 h-1/2 bg-blue-500/30 border-l-4 border-t-4 border-background/50 flex items-center justify-center"
-                     style={{ transformOrigin: 'top left', clipPath: 'polygon(0 0, 100% 100%, 0 100%)' }}>
-                  <div className="absolute transform -translate-x-1/4 translate-y-1/4 -rotate-45">
-                    <div className="text-8xl drop-shadow-2xl">
-                      {rewards[1]?.emoji || '⚡'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Bottom-left quadrant (180-270 degrees) - Epic (Purple) */}
-                <div className="absolute bottom-0 left-0 w-1/2 h-1/2 bg-purple-500/30 border-r-4 border-t-4 border-background/50 flex items-center justify-center"
-                     style={{ transformOrigin: 'top right', clipPath: 'polygon(100% 0, 100% 100%, 0 100%)' }}>
-                  <div className="absolute transform translate-x-1/4 translate-y-1/4 rotate-45">
-                    <div className="text-8xl drop-shadow-2xl">
-                      {rewards[2]?.emoji || '💎'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Top-left quadrant (270-360 degrees) - Legendary (Yellow) */}
-                <div className="absolute top-0 left-0 w-1/2 h-1/2 bg-yellow-500/30 border-r-4 border-b-4 border-background/50 flex items-center justify-center"
-                     style={{ transformOrigin: 'bottom right', clipPath: 'polygon(100% 0, 100% 100%, 0 0)' }}>
-                  <div className="absolute transform translate-x-1/4 -translate-y-1/4 -rotate-45">
-                    <div className="text-8xl drop-shadow-2xl">
-                      {rewards[3]?.emoji || '👑'}
-                    </div>
-                  </div>
-                </div>
-
-                {/* Quadrant dividers */}
-                <div className="absolute top-0 bottom-0 left-1/2 w-1 bg-background/70 transform -translate-x-1/2"></div>
-                <div className="absolute left-0 right-0 top-1/2 h-1 bg-background/70 transform -translate-y-1/2"></div>
+                  );
+                })}
               </div>
               
-              {/* Center decoration */}
-              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-20 h-20 bg-primary rounded-full border-6 border-background z-10 flex items-center justify-center shadow-xl">
-                <div className="text-3xl">{crate.emoji}</div>
+              {/* Center hub */}
+              <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-24 h-24 bg-gradient-to-br from-primary to-primary/80 rounded-full border-4 border-background z-30 flex items-center justify-center shadow-xl">
+                <div className="text-3xl drop-shadow-lg">{crate.emoji}</div>
               </div>
+              
+              {/* Outer ring decoration */}
+              <div className="absolute inset-2 rounded-full border-2 border-primary/20 pointer-events-none"></div>
             </div>
           </div>
         </div>
