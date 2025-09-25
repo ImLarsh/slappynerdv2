@@ -740,6 +740,9 @@ export const Game: React.FC = () => {
       const frameMultiplier = clampedDelta / FRAME_TIME;
       newState.lastFrameTime = currentTime;
 
+      // Clone nested objects we will mutate to preserve immutability
+      newState.bird = { ...newState.bird };
+
       // Clear expired temporary invincibility
       if (newState.temporaryInvincibility && currentTime >= newState.temporaryInvincibility) {
         newState.temporaryInvincibility = undefined;
@@ -828,97 +831,99 @@ export const Game: React.FC = () => {
           Math.abs(existingPipe.x - lockerX) < LOCKER_WIDTH + 50
         );
         
-        if (!wouldOverlap) {
-          // Use object pooling for iOS memory optimization
-          const topPipe = IOS_OPTIMIZATIONS.MEMORY_POOLING ? pipePoolRef.current.get() : {
-            x: lockerX,
-            y: 0,
-            width: LOCKER_WIDTH,
-            height: finalGapStart,
-            passed: false,
-            lockerType,
-          };
-          
-          const bottomPipe = IOS_OPTIMIZATIONS.MEMORY_POOLING ? pipePoolRef.current.get() : {
-            x: lockerX,
-            y: finalGapStart + finalGapSize,
-            width: LOCKER_WIDTH,
-            height: canvasSize.height - (finalGapStart + finalGapSize),
-            passed: false,
-            lockerType,
-          };
-          
-          // Set properties for pooled objects
-          if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
-            Object.assign(topPipe, {
-              x: lockerX, y: 0, width: LOCKER_WIDTH, height: finalGapStart, passed: false, lockerType
-            });
-            Object.assign(bottomPipe, {
-              x: lockerX, y: finalGapStart + finalGapSize, width: LOCKER_WIDTH, 
-              height: canvasSize.height - (finalGapStart + finalGapSize), passed: false, lockerType
-            });
-          }
-          
-          newState.pipes.push(topPipe, bottomPipe);
-          newState.lastPipeTime = currentTime;
-          
-          // 10% chance to spawn a book with the new pipe (reduced on iOS for performance)
-          const bookSpawnChance = isIOS() ? 0.08 : 0.1;
-          if (Math.random() < bookSpawnChance && !hasLockerSpam) {
-            const gapMiddle = finalGapStart + finalGapSize / 2;
-            const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6);
+          if (!wouldOverlap) {
+            // Ensure immutability before push
+            newState.pipes = [...newState.pipes];
             
-            // Use object pooling for books on iOS
-            const newBook = IOS_OPTIMIZATIONS.MEMORY_POOLING ? bookPoolRef.current.get() : {
-              id: `book_${nextBookIdRef.current++}`,
-              x: lockerX + LOCKER_WIDTH / 2,
-              y: Math.max(80, Math.min(safeY, canvasSize.height - 80)),
-              collected: false
+            // Use object pooling for iOS memory optimization
+            const topPipe = IOS_OPTIMIZATIONS.MEMORY_POOLING ? pipePoolRef.current.get() : {
+              x: lockerX,
+              y: 0,
+              width: LOCKER_WIDTH,
+              height: finalGapStart,
+              passed: false,
+              lockerType,
             };
             
+            const bottomPipe = IOS_OPTIMIZATIONS.MEMORY_POOLING ? pipePoolRef.current.get() : {
+              x: lockerX,
+              y: finalGapStart + finalGapSize,
+              width: LOCKER_WIDTH,
+              height: canvasSize.height - (finalGapStart + finalGapSize),
+              passed: false,
+              lockerType,
+            };
+            
+            // Set properties for pooled objects
             if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
-              Object.assign(newBook, {
+              Object.assign(topPipe, {
+                x: lockerX, y: 0, width: LOCKER_WIDTH, height: finalGapStart, passed: false, lockerType
+              });
+              Object.assign(bottomPipe, {
+                x: lockerX, y: finalGapStart + finalGapSize, width: LOCKER_WIDTH, 
+                height: canvasSize.height - (finalGapStart + finalGapSize), passed: false, lockerType
+              });
+            }
+            
+            newState.pipes.push(topPipe, bottomPipe);
+            newState.lastPipeTime = currentTime;
+            
+            // 10% chance to spawn a book with the new pipe (reduced on iOS for performance)
+            const bookSpawnChance = isIOS() ? 0.08 : 0.1;
+            if (Math.random() < bookSpawnChance && !hasLockerSpam) {
+              const gapMiddle = finalGapStart + finalGapSize / 2;
+              const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6);
+              
+              // Ensure immutability before push
+              newState.books = [...newState.books];
+              
+              // Use object pooling for books on iOS
+              const newBook = IOS_OPTIMIZATIONS.MEMORY_POOLING ? bookPoolRef.current.get() : {
                 id: `book_${nextBookIdRef.current++}`,
                 x: lockerX + LOCKER_WIDTH / 2,
                 y: Math.max(80, Math.min(safeY, canvasSize.height - 80)),
                 collected: false
-              });
+              };
+              
+              if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
+                Object.assign(newBook, {
+                  id: `book_${nextBookIdRef.current++}`,
+                  x: lockerX + LOCKER_WIDTH / 2,
+                  y: Math.max(80, Math.min(safeY, canvasSize.height - 80)),
+                  collected: false
+                });
+              }
+              
+              newState.books.push(newBook);
             }
-            
-            newState.books.push(newBook);
           }
-        }
       }
 
-      // Update books first (before collision check)
-      newState.books = newState.books.filter(book => {
-        if (!book.collected) {
-          if (book.beingPulled) {
-            // Calculate pull force toward character
-            const birdCenterX = newState.bird.x + newState.bird.width / 2;
-            const birdCenterY = newState.bird.y + newState.bird.height / 2;
-            
-            const dx = birdCenterX - book.x;
-            const dy = birdCenterY - book.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            
-            if (distance > 5) { // Only pull if not too close
-              // Normalize direction and apply pull speed (faster when farther)
-              const pullSpeed = Math.min(12, 6 + distance * 0.1) * frameMultiplier;
-              const normalizedDx = dx / distance;
-              const normalizedDy = dy / distance;
-              
-              book.x += normalizedDx * pullSpeed;
-              book.y += normalizedDy * pullSpeed;
-            }
-          } else {
-            // Normal book movement (scroll with world)
-            book.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
+      // Update books first (before collision check) with immutable updates
+      const movedBooks: Book[] = [];
+      for (let i = 0; i < newState.books.length; i++) {
+        const b = newState.books[i];
+        if (b.collected) continue;
+        let book = { ...b };
+        if (book.beingPulled) {
+          const birdCenterX = newState.bird.x + newState.bird.width / 2;
+          const birdCenterY = newState.bird.y + newState.bird.height / 2;
+          const dx = birdCenterX - book.x;
+          const dy = birdCenterY - book.y;
+          const distance = Math.sqrt(dx * dx + dy * dy);
+          if (distance > 5) {
+            const pullSpeed = Math.min(12, 6 + distance * 0.1) * frameMultiplier;
+            const normalizedDx = dx / distance;
+            const normalizedDy = dy / distance;
+            book.x += normalizedDx * pullSpeed;
+            book.y += normalizedDy * pullSpeed;
           }
+        } else {
+          book.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
         }
-        
-        return book.x > -50 && !book.collected;
-      });
+        if (book.x > -50 && !book.collected) movedBooks.push(book);
+      }
+      newState.books = movedBooks;
 
       // Check book collisions after position updates
       const bookCollisionResult = checkBookCollisions(newState.bird, newState.books);
@@ -939,36 +944,27 @@ export const Game: React.FC = () => {
         }, 0);
       }
 
-      // Update pipes with frame rate compensation and iOS memory optimization
-      newState.pipes = newState.pipes.filter(pipe => {
-        // Remove pipes marked for demolition by Ghost Mode
-        if ((pipe as any).shouldBeRemoved) {
-          // Return to object pool if using iOS optimizations
-          if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
-            pipePoolRef.current.release(pipe);
-          }
-          return false;
+      // Update pipes with frame rate compensation and iOS memory optimization (immutable)
+      const updatedPipes: Pipe[] = [];
+      for (let i = 0; i < newState.pipes.length; i++) {
+        const p = newState.pipes[i];
+        if ((p as any).shouldBeRemoved) {
+          if (IOS_OPTIMIZATIONS.MEMORY_POOLING) pipePoolRef.current.release(p);
+          continue;
         }
-        
-        pipe.x -= (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier;
-        
+        const movedPipe: Pipe = { ...p, x: p.x - (PIPE_SPEED * modifiers.speedMultiplier) * frameMultiplier };
+
         // Check scoring
-        if (!pipe.passed && pipe.x + pipe.width < newState.bird.x) {
-          pipe.passed = true;
-          if (pipe.y === 0) { // Only count top pipes
+        if (!movedPipe.passed && movedPipe.x + movedPipe.width < newState.bird.x) {
+          movedPipe.passed = true;
+          if (movedPipe.y === 0) {
             newState.score += 1;
-            
-            // Play pass locker sound effect
             if (isIOS()) {
               requestAnimationFrame(() => playSound('passLocker'));
             } else {
               playSound('passLocker');
             }
-            
-            // Check for power selection trigger
             checkPowerSelection(newState.score);
-            
-            // Check if we need to show crown (only when beating personal best)
             const currentBest = stats.best_score;
             if (newState.score > currentBest && !newState.crownCollected) {
               newState.crownCollected = true;
@@ -976,24 +972,19 @@ export const Game: React.FC = () => {
           }
         }
 
-        // Check collision (skip if invincible from powers or temporary invincibility)
+        // Collision
         const hasTemporaryInvincibility = newState.temporaryInvincibility && currentTime < newState.temporaryInvincibility;
-        if (!modifiers.isInvincible && !hasTemporaryInvincibility && checkCollision(newState.bird, pipe, newState)) {
+        if (!modifiers.isInvincible && !hasTemporaryInvincibility && checkCollision(newState.bird, movedPipe, newState)) {
           newState.gameOver = true;
           newState.gameEnded = true;
-          
-          // Play defeat sound
           if (isIOS()) {
             requestAnimationFrame(() => playSound('defeat'));
           } else {
             playSound('defeat');
           }
-          
-          // Update stats in database and get new totals
           if (user) {
             updateGameStats(newState.score).then((updatedStats) => {
               if (updatedStats) {
-                // Check achievements with updated stats
                 checkAchievements({
                   score: newState.score,
                   gamesPlayed: updatedStats.total_games,
@@ -1001,19 +992,19 @@ export const Game: React.FC = () => {
                 });
               }
             });
-
-            // Submit score to leaderboard
             submitScore(newState.score, selectedCharacter?.id);
           }
         }
 
-        // Remove pipes that should be demolished or have moved off screen
-        const shouldRemove = pipe.x <= -pipe.width || (pipe as any).shouldBeRemoved;
-        if (shouldRemove && IOS_OPTIMIZATIONS.MEMORY_POOLING) {
-          pipePoolRef.current.release(pipe);
+        const shouldRemove = movedPipe.x <= -movedPipe.width || (movedPipe as any).shouldBeRemoved;
+        if (!shouldRemove) {
+          updatedPipes.push(movedPipe);
+        } else if (IOS_OPTIMIZATIONS.MEMORY_POOLING) {
+          pipePoolRef.current.release(p);
         }
-        return !shouldRemove;
-      });
+      }
+      newState.pipes = updatedPipes;
+
       // iOS: draw and throttle UI updates instead of React re-render per frame
       if (isIOS()) {
         const ctxIos = ctxRef.current;
