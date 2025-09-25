@@ -17,7 +17,7 @@ const isiOS = /iPad|iPhone|iPod/.test(navigator.userAgent) ||
 const SOUND_SOURCES: Record<string, string> = {
   gameOver: '/audio/game-over-sound.mp3',
   passLocker: isiOS ? '/audio/passlocker.caf' : '/audio/passlocker.mp3',
-  collectBook: '/audio/collectbook.mp3',
+  collectBook: isiOS ? '/audio/collectbook-2.caf' : '/audio/collectbook.mp3',
   tapFlap: isiOS ? '/audio/tapflapsound-2.caf' : '/audio/tapflapsound.mp3',
   defeat: isiOS ? '/audio/defeatsound.caf' : '/audio/defeatsound.mp3',
   click: '/audio/clicksound.mp3',
