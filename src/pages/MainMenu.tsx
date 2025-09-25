@@ -52,7 +52,8 @@ const MainMenu: React.FC = () => {
     toggleMute,
     playBackgroundMusic,
     stopBackgroundMusic,
-    playSound
+    playSound,
+    startMusicOnInteraction
   } = useAudio();
   const {
     isInstallable,
@@ -91,6 +92,8 @@ const MainMenu: React.FC = () => {
     };
   }, []);
   const handleStartGame = () => {
+    // Start music on user interaction (mobile-friendly)
+    startMusicOnInteraction();
     // Play click sound for play button
     playSound('click');
     navigate('/game');

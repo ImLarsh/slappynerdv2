@@ -25,10 +25,14 @@ const SOUND_SOURCES: Record<string, string> = {
 };
 
 export const useAudio = () => {
-  const [audioState, setAudioState] = useState<AudioState>({
-    volume: 0.5,
-    isMuted: false,
-    isPlaying: true // Start with music playing by default
+  const [audioState, setAudioState] = useState<AudioState>(() => {
+    // Load mute state from localStorage
+    const savedMute = localStorage.getItem('audioMuted');
+    return {
+      volume: 0.5,
+      isMuted: savedMute === 'true',
+      isPlaying: false // Don't auto-play, wait for user interaction
+    };
   });
 
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
@@ -56,17 +60,7 @@ export const useAudio = () => {
         setAudioState(prev => ({ ...prev, isPlaying: false }));
       });
       
-      // Auto-start music when loaded
-      audio.addEventListener('canplaythrough', () => {
-        console.log('Background music loaded successfully');
-        // Start playing automatically on first load
-        audio.play().catch(error => {
-          if (error.name !== 'NotAllowedError') {
-            console.warn('Auto-play failed:', error);
-          }
-          setAudioState(prev => ({ ...prev, isPlaying: false }));
-        });
-      }, { once: true });
+      // Don't auto-start on mobile, wait for user interaction
     }
     // Point local ref to global instance
     backgroundMusicRef.current = globalBackgroundMusic;
@@ -153,7 +147,12 @@ export const useAudio = () => {
   }, []);
 
   const toggleMute = useCallback(() => {
-    setAudioState(prev => ({ ...prev, isMuted: !prev.isMuted }));
+    setAudioState(prev => {
+      const newMuted = !prev.isMuted;
+      // Save mute state to localStorage
+      localStorage.setItem('audioMuted', newMuted.toString());
+      return { ...prev, isMuted: newMuted };
+    });
   }, []);
 
   const playBackgroundMusic = useCallback(async () => {
@@ -201,9 +200,17 @@ export const useAudio = () => {
       // Reset to beginning for instant playback
       sound.currentTime = 0;
       sound.volume = audioState.volume;
+      sound.muted = audioState.isMuted;
       sound.play().catch(() => {});
     }
   }, [audioState.isMuted, audioState.volume]);
+
+  // Auto-start background music on first user interaction (mobile-friendly)
+  const startMusicOnInteraction = useCallback(() => {
+    if (!audioState.isPlaying && !audioState.isMuted) {
+      playBackgroundMusic();
+    }
+  }, [audioState.isPlaying, audioState.isMuted, playBackgroundMusic]);
 
   return {
     volume: audioState.volume,
@@ -213,6 +220,7 @@ export const useAudio = () => {
     toggleMute,
     playBackgroundMusic,
     stopBackgroundMusic,
-    playSound
+    playSound,
+    startMusicOnInteraction
   };
 };
