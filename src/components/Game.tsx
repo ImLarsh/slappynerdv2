@@ -56,14 +56,14 @@ const TARGET_FPS_MOBILE = 60;
 const TARGET_FPS_DESKTOP = 80;
 const getTargetFPS = () => window.innerWidth < 768 ? TARGET_FPS_MOBILE : TARGET_FPS_DESKTOP;
 const FRAME_TIME = () => 1000 / getTargetFPS();
-const GRAVITY = 0.6;
-const JUMP_FORCE = -9.4;
+const GRAVITY = 0.65; // Slightly increased from 0.6
+const JUMP_FORCE = -9.2; // Slightly reduced from -9.4
 const PIPE_WIDTH = 80;
-const BASE_PIPE_GAP = 280;
-const MIN_PIPE_GAP = 180; // Reduced from 200 to make it harder
+const BASE_PIPE_GAP = 270; // Slightly reduced from 280
+const MIN_PIPE_GAP = 170; // Slightly reduced from 180
 const LOCKER_WIDTH = 220;
-const PIPE_SPEED = 2.5;
-const PIPE_GAP = 220; // Reduced from 240 to make it harder
+const PIPE_SPEED = 2.7; // Slightly increased from 2.5
+const PIPE_GAP = 210; // Slightly reduced from 220
 const BIRD_SIZE = 50;
 export const Game: React.FC = () => {
   const navigate = useNavigate();
