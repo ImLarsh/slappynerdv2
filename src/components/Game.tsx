@@ -630,7 +630,10 @@ export const Game: React.FC = () => {
       // Generate pipes (adjust frequency for mobile performance and locker spam power)
       const basePipeFrequency = canvasSize.width < 500 ? 2200 : 1800; // Increased spawn rate further (reduced from 2500/2000)
       const hasLockerSpam = modifiers.activePowers.some(p => p.id === 'locker_spam');
-      const pipeFrequency = hasLockerSpam ? basePipeFrequency * 0.5 : basePipeFrequency; // Double spawn rate if locker spam is active
+      
+      // Adjust pipe frequency based on speed to maintain consistent locker density
+      const speedAdjustedFrequency = basePipeFrequency / modifiers.speedMultiplier; // Faster spawning when speed is higher
+      const pipeFrequency = hasLockerSpam ? speedAdjustedFrequency * 0.5 : speedAdjustedFrequency; // Double spawn rate if locker spam is active
 
       // Prevent pipe spawning during power selection or right after power activation to avoid stacking
       const timeSinceLastPipe = currentTime - newState.lastPipeTime;
