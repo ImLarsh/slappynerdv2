@@ -226,9 +226,9 @@ export const Game: React.FC = () => {
         width = Math.min(vw - 16, 500); // Account for padding
         height = Math.min(vh - 100, 820); // Account for UI elements
       } else {
-        // Desktop - reduced game canvas size
+        // Desktop - reduced game canvas size (height reduced more)
         width = 1200;
-        height = 700;
+        height = 650;
       }
 
       // Ensure minimum sizes for playability
@@ -357,9 +357,9 @@ export const Game: React.FC = () => {
     }
 
     // Normal collision detection - reduced hitboxes for more forgiving gameplay
-    const emojiMargin = BIRD_SIZE * 0.25; // Increased from 0.15 to 0.25
-    const lockerHorizontalMargin = Math.max(55, LOCKER_WIDTH * 0.38); // Slightly reduced for bigger hitboxes
-    const lockerVerticalMargin = 12; // Slightly reduced from 15 to 12
+    const emojiMargin = BIRD_SIZE * 0.3; // Increased margin for more forgiving collision
+    const lockerHorizontalMargin = Math.max(60, LOCKER_WIDTH * 0.4); // Increased margin for more forgiving collision
+    const lockerVerticalMargin = 15; // Increased margin for more forgiving collision
 
     const isColliding = bird.x + emojiMargin < pipe.x + pipe.width - lockerHorizontalMargin && bird.x + bird.width - emojiMargin > pipe.x + lockerHorizontalMargin && bird.y + emojiMargin < pipe.y + pipe.height - lockerVerticalMargin && bird.y + bird.height - emojiMargin > pipe.y + lockerVerticalMargin;
 
