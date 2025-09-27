@@ -675,8 +675,8 @@ export const Game: React.FC = () => {
           });
           newState.lastPipeTime = currentTime;
 
-          // 10% chance to spawn a book with the new pipe (not affected by locker spam)
-          if (Math.random() < 0.1 && !hasLockerSpam) {
+          // 15% chance to spawn a book with the new pipe (not affected by locker spam)
+          if (Math.random() < 0.15 && !hasLockerSpam) {
             // Use the existing gapStart calculation for safe spawn area
             const gapMiddle = finalGapStart + finalGapSize / 2;
             const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6); // Keep books in middle of gap
@@ -733,6 +733,9 @@ export const Game: React.FC = () => {
           const booksToAdd = hasDoublePoints() ? bookCollisionResult.booksCollected * 2 : bookCollisionResult.booksCollected;
           addBooks(booksToAdd);
           playSound('collectBook');
+          
+          // Trigger powerup selection when book is collected
+          setShowPowerSelection(true);
         }, 0);
       }
 
@@ -753,9 +756,6 @@ export const Game: React.FC = () => {
 
             // Play pass locker sound effect
             playSound('passLocker');
-
-            // Check for power selection trigger
-            checkPowerSelection(newState.score);
 
             // Check if we need to show crown (only when beating personal best)
             const currentBest = stats.best_score;
