@@ -165,9 +165,9 @@ const MainMenu: React.FC = () => {
       {/* Background overlay - no blur to avoid affecting emojis */}
       <div className="absolute inset-0 bg-background/60 z-1" />
       
-      {/* Title at absolute top */}
-      <div className="absolute top-0.5 sm:top-1 md:top-2 lg:top-6 left-0 right-0 z-10 animate-fade-in mx-[95px] py-0 px-0 my-[16px]">
-        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[140px] sm:max-w-[180px] md:max-w-[220px] lg:max-w-md xl:max-w-lg mx-auto hover-scale" />
+      {/* Title - Mobile responsive positioning */}
+      <div className="absolute top-2 sm:top-4 md:top-6 lg:top-6 left-0 right-0 z-10 animate-fade-in">
+        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px] lg:max-w-md xl:max-w-lg mx-auto hover-scale" />
       </div>
       
       {/* Pop Counter - Top Left */}
@@ -182,10 +182,10 @@ const MainMenu: React.FC = () => {
         </div>
       </div>
 
-      {/* User Info - Top Left (when signed in) - moved down */}
-      {user && <div className="absolute top-12 sm:top-16 md:top-20 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30 my-[32px] mx-[16px]">
-            <p className="text-xs sm:text-sm md:text-base text-center text-[#fc0101] font-extrabold lg:text-xl">
+      {/* User Info - Top, centered on mobile */}
+      {user && <div className="absolute top-16 sm:top-20 md:top-24 left-1/2 transform -translate-x-1/2 sm:left-2 md:left-4 sm:transform-none z-20 space-y-1 sm:space-y-2">
+          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-3 sm:px-2 md:px-3 py-2 sm:py-1.5 md:py-2 border border-primary/30">
+            <p className="text-sm sm:text-sm md:text-base text-center text-[#fc0101] font-extrabold lg:text-xl">
               {playerName || 'Player'}
             </p>
             {/* Currency Display */}
@@ -208,7 +208,7 @@ const MainMenu: React.FC = () => {
       
       
       {/* Centered Content */}
-      <div className="relative z-10 max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md w-full space-y-1.5 sm:space-y-2 md:space-y-3 lg:space-y-6 text-center mt-12 sm:mt-16 md:mt-20 lg:mt-16 px-1 sm:px-2">{/* Character and Description */}
+      <div className="relative z-10 max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md w-full space-y-1.5 sm:space-y-2 md:space-y-3 lg:space-y-6 text-center mt-20 sm:mt-24 md:mt-28 lg:mt-16 px-1 sm:px-2">{/* Character and Description */}
         {/* Character and Description */}
         <div className="space-y-2 md:space-y-4 animate-fade-in">
           
@@ -329,7 +329,7 @@ const MainMenu: React.FC = () => {
             
           </DialogHeader>
           <div className="overflow-y-auto max-h-[calc(85vh-80px)] md:max-h-[calc(80vh-80px)]">
-            <Shop />
+            <Shop onBack={() => setShopOpen(false)} />
           </div>
         </DialogContent>
       </Dialog>
@@ -339,7 +339,7 @@ const MainMenu: React.FC = () => {
           <DialogHeader>
             <DialogTitle>Achievements</DialogTitle>
           </DialogHeader>
-          <AchievementsTab />
+          <AchievementsTab onBack={() => setAchievementsOpen(false)} />
         </DialogContent>
       </Dialog>
 
@@ -348,14 +348,14 @@ const MainMenu: React.FC = () => {
           <DialogHeader>
             
           </DialogHeader>
-          <Leaderboards />
+          <Leaderboards onBack={() => setLeaderboardOpen(false)} />
         </DialogContent>
       </Dialog>
 
       {/* Crates Menu Dialog */}
       <Dialog open={cratesOpen} onOpenChange={setCratesOpen}>
         <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden animate-scale-in p-0">
-          <CratesMenu />
+          <CratesMenu onBack={() => setCratesOpen(false)} />
         </DialogContent>
       </Dialog>
 
