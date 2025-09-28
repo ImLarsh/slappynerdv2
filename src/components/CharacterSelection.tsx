@@ -50,7 +50,7 @@ const CharacterDisplay: React.FC<CharacterDisplayProps> = ({
       </div>;
   }
   if (imageUrl) {
-    return <div className={`${sizeClasses[size]} relative rounded-lg overflow-hidden ${isSelected && size === 'main' ? 'ring-4 ring-yellow-400' : ''}`}>
+    return <div className={`${sizeClasses[size]} relative rounded-lg overflow-hidden flex items-center justify-center ${isSelected && size === 'main' ? 'ring-4 ring-yellow-400' : ''}`}>
         <img src={imageUrl} alt={character.name} className="w-full h-full object-contain" style={{
         imageRendering: 'pixelated'
       }} />
