@@ -123,19 +123,6 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   const isCurrentUnlocked = currentCharacter ? isCharacterUnlocked(currentCharacter.id) : false;
   const isCurrentSelected = currentCharacter?.id === selectedCharacter?.id;
   return <div className="min-h-screen relative overflow-hidden bg-transparent">
-      {/* Back Button */}
-      <div className="fixed top-4 left-4 z-50">
-        <Button
-          onClick={onClose}
-          variant="outline"
-          size="lg"
-          className="bg-red-500/90 hover:bg-red-600/90 text-white border-red-400 backdrop-blur-sm shadow-lg"
-        >
-          <ArrowLeft className="w-6 h-6 mr-2" />
-          Back
-        </Button>
-      </div>
-
       {/* Main Character Display */}
       <div className="relative z-10 flex flex-col items-center space-y-8 px-4 my-[187px]">
         {/* Character Navigation */}
@@ -160,11 +147,22 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
                     {currentCharacter.name}
                   </h2>
                   
-                  {isCurrentUnlocked && <div className="flex justify-center">
-                      {isCurrentSelected ? <Badge variant="default" className="px-6 py-2 text-lg font-bold bg-green-500 hover:bg-green-600">
-                          <Check className="w-5 h-5 mr-2" />
-                          Selected
-                        </Badge> : <Button onClick={() => handleCharacterSelect(currentCharacter.id)} size="lg" className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-primary to-secondary hover:scale-105 transition-all duration-300">
+                  {isCurrentUnlocked && <div className="flex flex-col items-center justify-center gap-4">
+                      {isCurrentSelected ? <div className="flex flex-col items-center gap-4">
+                          <Badge variant="default" className="px-6 py-2 text-lg font-bold bg-green-500 hover:bg-green-600">
+                            <Check className="w-5 h-5 mr-2" />
+                            Selected
+                          </Badge>
+                          <Button
+                            onClick={onClose}
+                            variant="outline"
+                            size="lg"
+                            className="bg-red-500/90 hover:bg-red-600/90 text-white border-red-400 backdrop-blur-sm shadow-lg"
+                          >
+                            <ArrowLeft className="w-6 h-6 mr-2" />
+                            Back
+                          </Button>
+                        </div> : <Button onClick={() => handleCharacterSelect(currentCharacter.id)} size="lg" className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-primary to-secondary hover:scale-105 transition-all duration-300">
                           Select Character
                         </Button>}
                     </div>}
