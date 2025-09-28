@@ -1091,7 +1091,7 @@ export const Game: React.FC = () => {
       ctx.shadowOffsetY = 0;
       
       // Draw the character image - significantly increased size for better visibility
-      const imageSize = BIRD_SIZE * 1.8; // Increased from 1.6 to 1.8 for larger character
+      const imageSize = BIRD_SIZE * 2.0; // Increased from 1.8 to 2.0 for even larger character
       ctx.imageSmoothingEnabled = false; // Keep pixel art crisp
       ctx.drawImage(
         characterImg, 
@@ -1102,7 +1102,7 @@ export const Game: React.FC = () => {
       );
     } else {
       // Use emoji fallback - increased size for better visibility
-      ctx.font = `${BIRD_SIZE * 1.3}px Arial`; // Increased from 1.1 to 1.3 for larger emoji fallback
+      ctx.font = `${BIRD_SIZE * 1.5}px Arial`; // Increased from 1.3 to 1.5 for larger emoji fallback
       ctx.fillText(character, gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2);
     }
 
