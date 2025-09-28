@@ -27,11 +27,11 @@ const CharacterDisplay: React.FC<CharacterDisplayProps> = ({
   } = useCharacterImage(character.image_path);
   const sizeClasses = {
     preview: 'w-16 h-16 md:w-20 md:h-20',
-    main: 'w-48 h-48 md:w-64 md:h-64 lg:w-80 lg:h-80'
+    main: 'w-32 h-32 sm:w-40 sm:h-40 md:w-48 md:h-48 lg:w-64 lg:h-64'
   };
   const textSizeClasses = {
     preview: 'text-4xl md:text-5xl',
-    main: 'text-8xl md:text-9xl lg:text-[12rem]'
+    main: 'text-6xl sm:text-7xl md:text-8xl lg:text-9xl'
   };
   if (isLoading && size === 'main') {
     return <div className={`${sizeClasses[size]} animate-pulse bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg flex items-center justify-center border-2 border-primary/30`}>
@@ -121,13 +121,13 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
       <div className="relative z-10 flex flex-col items-center space-y-8 px-4 my-[187px]">
         {/* Character Navigation */}
         <div className="flex items-center justify-center space-x-8 md:space-x-12 my-[114px]">
-          <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 hover:border-yellow-500 transition-all duration-300">
-            <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 text-black" />
+          <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 hover:border-yellow-500 transition-all duration-300">
+            <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-black" />
           </Button>
 
           {/* Main Character */}
           <div className={`transition-all duration-300 ${isAnimating ? 'scale-95 opacity-70' : 'scale-100 opacity-100'}`}>
-            {currentCharacter && <div className="text-center space-y-6">
+            {currentCharacter && <div className="text-center space-y-3 sm:space-y-4 md:space-y-6">
                 <div className="relative">
                   <CharacterDisplay character={currentCharacter} isSelected={isCurrentSelected} isUnlocked={isCurrentUnlocked} size="main" />
                   
@@ -137,26 +137,26 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
 
                 {/* Character Info */}
                 <div className="space-y-4">
-                  <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-500">
+                  <h2 className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-500">
                     {currentCharacter.name}
                   </h2>
                   
-                  {isCurrentUnlocked && <div className="flex flex-col items-center justify-center gap-4">
-                      {isCurrentSelected ? <div className="flex flex-col items-center gap-4">
-                          <Badge variant="default" className="px-6 py-2 text-lg font-bold bg-green-500 hover:bg-green-600">
-                            <Check className="w-5 h-5 mr-2" />
+                  {isCurrentUnlocked && <div className="flex flex-col items-center justify-center gap-3 sm:gap-4">
+                      {isCurrentSelected ? <div className="flex flex-col items-center gap-3 sm:gap-4">
+                          <Badge variant="default" className="px-4 py-2 sm:px-6 sm:py-2 text-base sm:text-lg font-bold bg-green-500 hover:bg-green-600">
+                            <Check className="w-4 h-4 sm:w-5 sm:h-5 mr-2" />
                             Selected
                           </Badge>
                           <Button
                             onClick={onClose}
                             variant="outline"
                             size="lg"
-                            className="bg-red-500/90 hover:bg-red-600/90 text-white border-red-400 backdrop-blur-sm shadow-lg"
+                            className="bg-red-500/90 hover:bg-red-600/90 text-white border-red-400 backdrop-blur-sm shadow-lg px-4 py-2 sm:px-6 sm:py-2 text-sm sm:text-base"
                           >
-                            <ArrowLeft className="w-6 h-6 mr-2" />
+                            <ArrowLeft className="w-4 h-4 sm:w-6 sm:h-6 mr-2" />
                             Back
                           </Button>
-                        </div> : <Button onClick={() => handleCharacterSelect(currentCharacter.id)} size="lg" className="px-8 py-3 text-lg font-bold bg-gradient-to-r from-primary to-secondary hover:scale-105 transition-all duration-300">
+                        </div> : <Button onClick={() => handleCharacterSelect(currentCharacter.id)} size="lg" className="px-6 py-3 sm:px-8 sm:py-3 text-base sm:text-lg font-bold bg-gradient-to-r from-primary to-secondary hover:scale-105 transition-all duration-300">
                           Select Character
                         </Button>}
                     </div>}
@@ -164,8 +164,8 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
               </div>}
           </div>
 
-          <Button variant="outline" size="lg" onClick={() => navigateCharacter('next')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 hover:border-yellow-500 transition-all duration-300">
-            <ChevronRight className="w-8 h-8 md:w-10 md:h-10 text-black" />
+          <Button variant="outline" size="lg" onClick={() => navigateCharacter('next')} disabled={isAnimating} className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 hover:border-yellow-500 transition-all duration-300">
+            <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-black" />
           </Button>
         </div>
 
