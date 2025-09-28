@@ -326,7 +326,7 @@ const MainMenu: React.FC = () => {
       <Dialog open={shopOpen} onOpenChange={setShopOpen}>
         <DialogContent className="max-w-4xl max-h-[85vh] md:max-h-[80vh] overflow-hidden animate-scale-in">
           <DialogHeader>
-            <DialogTitle>Shop</DialogTitle>
+            
           </DialogHeader>
           <div className="overflow-y-auto max-h-[calc(85vh-80px)] md:max-h-[calc(80vh-80px)]">
             <Shop />
