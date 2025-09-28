@@ -17,6 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 import bgImage from '@/assets/school-hallway-bg.webp';
 import lockerYellow from '@/assets/locker-yellow.webp';
 import nerdDefault from '@/assets/characters/nerd-default.png';
+import coolNerd from '@/assets/characters/cool-nerd.png';
 interface GameObject {
   x: number;
   y: number;
@@ -1022,10 +1023,21 @@ export const Game: React.FC = () => {
     const characterImagePath = selectedCharacter?.image_path;
     
     // Use character image if available, otherwise use emoji
-    if (characterImagePath === 'src/assets/characters/nerd-default.png') {
+    const getCharacterImage = () => {
+      if (characterImagePath === 'src/assets/characters/nerd-default.png') {
+        return nerdDefault;
+      } else if (characterImagePath === 'src/assets/characters/cool-nerd.png') {
+        return coolNerd;
+      }
+      return null;
+    };
+    
+    const characterImageSrc = getCharacterImage();
+    
+    if (characterImageSrc) {
       // Load and draw the character image
       const img = new Image();
-      img.src = nerdDefault;
+      img.src = characterImageSrc;
       
       if (img.complete) {
         // Clear previous shadow for image
@@ -1034,8 +1046,9 @@ export const Game: React.FC = () => {
         ctx.shadowOffsetX = 0;
         ctx.shadowOffsetY = 0;
         
-        // Draw the character image
-        const imageSize = BIRD_SIZE * 0.8;
+        // Draw the character image - increased size for better visibility
+        const imageSize = BIRD_SIZE * 1.2;
+        ctx.imageSmoothingEnabled = false; // Keep pixel art crisp
         ctx.drawImage(
           img, 
           gameState.bird.x + (gameState.bird.width - imageSize) / 2, 
