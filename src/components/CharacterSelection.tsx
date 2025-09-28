@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
-import { Lock, Check, ChevronLeft, ChevronRight, X } from 'lucide-react';
+import { Lock, Check, ChevronLeft, ChevronRight, X, ArrowLeft } from 'lucide-react';
 import { useCharactersContext } from '@/context/CharactersContext';
 import { useCharacterImage } from '@/hooks/useCharacterImage';
 import { useAudio } from '@/hooks/useAudio';
@@ -122,12 +122,19 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   const currentCharacter = characters[currentIndex];
   const isCurrentUnlocked = currentCharacter ? isCharacterUnlocked(currentCharacter.id) : false;
   const isCurrentSelected = currentCharacter?.id === selectedCharacter?.id;
-  return <div className="min-h-screen relative overflow-hidden" style={{
-    backgroundColor: 'transparent'
-  }}>
-
-      {/* Header */}
-      
+  return <div className="min-h-screen relative overflow-hidden bg-transparent">
+      {/* Back Button */}
+      <div className="fixed top-4 left-4 z-50">
+        <Button
+          onClick={onClose}
+          variant="outline"
+          size="lg"
+          className="bg-red-500/90 hover:bg-red-600/90 text-white border-red-400 backdrop-blur-sm shadow-lg"
+        >
+          <ArrowLeft className="w-6 h-6 mr-2" />
+          Back
+        </Button>
+      </div>
 
       {/* Main Character Display */}
       <div className="relative z-10 flex flex-col items-center space-y-8 px-4 my-[187px]">
