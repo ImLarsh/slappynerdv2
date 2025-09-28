@@ -272,16 +272,16 @@ export const Game: React.FC = () => {
       const isTinyMobile = vw < 400;
       let width: number, height: number;
       if (isTinyMobile) {
-        width = Math.min(vw - 16, 420); // Account for padding
-        height = Math.min(vh - 100, 720); // Account for UI elements
+        width = Math.min(vw - 16, 450); // Increased width from 420 to 450
+        height = Math.min(vh - 100, 680); // Reduced height from 720 to 680
       } else if (isMobile) {
         // Fill more of the screen on mobile
-        width = Math.min(vw - 16, 500); // Account for padding
-        height = Math.min(vh - 100, 820); // Account for UI elements
+        width = Math.min(vw - 16, 530); // Increased width from 500 to 530
+        height = Math.min(vh - 100, 780); // Reduced height from 820 to 780
       } else {
         // Desktop - reduced game canvas size (height reduced more)
-        width = 1200;
-        height = 650;
+        width = 1300; // Increased width from 1200 to 1300
+        height = 600; // Reduced height from 650 to 600
       }
 
       // Ensure minimum sizes for playability
