@@ -3,7 +3,7 @@ import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { Lock } from 'lucide-react';
+import { Lock, ArrowLeft } from 'lucide-react';
 import { useCharactersContext } from '@/context/CharactersContext';
 import { useCharacterImage } from '@/hooks/useCharacterImage';
 
@@ -28,7 +28,12 @@ const CharacterImageDisplay: React.FC<{ character: any; size?: 'small' | 'large'
   
   return <span className={size === 'large' ? 'text-5xl' : 'text-4xl'}>{character.emoji}</span>;
 };
-export const CharactersTab: React.FC = () => {
+
+interface CharactersTabProps {
+  onBack?: () => void;
+}
+
+export const CharactersTab: React.FC<CharactersTabProps> = ({ onBack }) => {
   const {
     characters,
     selectedCharacter,
@@ -42,8 +47,21 @@ export const CharactersTab: React.FC = () => {
         <p className="text-muted-foreground mt-2">Loading characters...</p>
       </div>;
   }
-  return <div className="space-y-4 h-full flex flex-col">
+   return <div className="space-y-4 h-full flex flex-col">
       <div className="text-center mb-6">
+        {onBack && (
+          <div className="flex items-center mb-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onBack}
+              className="text-xs md:text-sm"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+          </div>
+        )}
         <h3 className="text-xl font-bold text-primary mb-2">Choose Your Character</h3>
         
       </div>

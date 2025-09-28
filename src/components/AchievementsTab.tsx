@@ -2,11 +2,16 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Lock } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Trophy, Lock, ArrowLeft } from 'lucide-react';
 import { useCharacters, Achievement } from '@/hooks/useCharacters';
 import { useUserStats } from '@/hooks/useUserStats';
 
-export const AchievementsTab: React.FC = () => {
+interface AchievementsTabProps {
+  onBack?: () => void;
+}
+
+export const AchievementsTab: React.FC<AchievementsTabProps> = ({ onBack }) => {
   const {
     achievements,
     isAchievementUnlocked,
@@ -78,6 +83,19 @@ export const AchievementsTab: React.FC = () => {
     <div className="space-y-2 md:space-y-4 h-full flex flex-col">
       {/* Header - Compact */}
       <div className="text-center space-y-1">
+        {onBack && (
+          <div className="flex items-center mb-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onBack}
+              className="text-xs md:text-sm"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+          </div>
+        )}
         <h3 className="text-lg md:text-xl font-bold text-primary">Achievements</h3>
         <div className="text-xs md:text-sm text-muted-foreground">
           {unlockedCount} of {achievements.length} unlocked

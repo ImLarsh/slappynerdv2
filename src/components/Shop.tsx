@@ -23,9 +23,26 @@ interface ShopItem {
 }
 
 const ShopItemDisplay: React.FC<{ item: ShopItem }> = ({ item }) => {
-  const { imageUrl, isLoading } = useCharacterImage(item.item_data?.image_path);
+  const [characterImagePath, setCharacterImagePath] = useState<string | null>(null);
+  const { imageUrl, isLoading } = useCharacterImage(characterImagePath);
   
-  if (item.item_type === 'character' && item.item_data?.image_path) {
+  useEffect(() => {
+    if (item.item_type === 'character' && item.item_data?.character_id) {
+      // Fetch character image path from characters table
+      supabase
+        .from('characters')
+        .select('image_path')
+        .eq('id', item.item_data.character_id)
+        .single()
+        .then(({ data }) => {
+          if (data?.image_path) {
+            setCharacterImagePath(data.image_path);
+          }
+        });
+    }
+  }, [item]);
+  
+  if (item.item_type === 'character' && characterImagePath) {
     if (isLoading) {
       return <div className="w-8 h-8 md:w-12 md:h-12 bg-muted rounded animate-pulse"></div>;
     }

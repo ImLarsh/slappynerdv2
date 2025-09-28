@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import { useCurrency } from '@/hooks/useCurrency';
 import { CrateOpening } from './CrateOpening';
 import { useToast } from '@/hooks/use-toast';
@@ -15,7 +16,11 @@ interface Crate {
   is_available: boolean;
 }
 
-export const CratesMenu = () => {
+interface CratesMenuProps {
+  onBack?: () => void;
+}
+
+export const CratesMenu = ({ onBack }: CratesMenuProps) => {
   const [crates, setCrates] = useState<Crate[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCrate, setSelectedCrate] = useState<Crate | null>(null);
@@ -96,6 +101,19 @@ export const CratesMenu = () => {
     <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/10 p-4">
       <div className="max-w-6xl mx-auto">
         <div className="text-center mb-8">
+          {onBack && (
+            <div className="flex items-center mb-4">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onBack}
+                className="text-xs md:text-sm"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                Back
+              </Button>
+            </div>
+          )}
           <h1 className="text-4xl font-bold mb-2 text-foreground">
             📦 Crates Menu
           </h1>
