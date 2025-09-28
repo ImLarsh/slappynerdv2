@@ -172,7 +172,7 @@ const MainMenu: React.FC = () => {
       
       {/* Pop Counter - Top Left */}
       <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20 my-[112px] py-0 px-[111px]">
-        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl py-px my-[44px] mx-[18px]">
+        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg sm:px-3 md:px-4 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl py-0 px-[10px] mx-[37px] my-[18px]">
           <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
             <span className="text-xs sm:text-sm md:text-lg">💥</span>
             <span className="font-bold text-[10px] sm:text-xs md:text-sm lg:text-base">
