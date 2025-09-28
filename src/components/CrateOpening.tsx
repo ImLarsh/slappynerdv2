@@ -218,17 +218,6 @@ export const CrateOpening = ({ crate, onComplete }: CrateOpeningProps) => {
                         transformOrigin: 'center'
                       }}
                     >
-                      {/* Segment slice */}
-                      <div 
-                        className="absolute top-0 left-1/2 w-1 h-1/2 origin-bottom transition-all duration-200"
-                        style={{
-                          transform: 'translateX(-50%)',
-                          clipPath: 'polygon(0% 100%, 50% 0%, 100% 100%)',
-                          width: `${Math.max(60, 360/segmentCount)}px`,
-                          background: getRarityGradient(reward.rarity),
-                          filter: isSelected ? 'drop-shadow(0 0 18px hsl(var(--primary-glow) / 0.6))' : 'none',
-                        }}
-                      />
                       
                       {/* Icon positioned at outer edge */}
                       <div
