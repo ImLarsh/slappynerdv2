@@ -276,12 +276,12 @@ export const Game: React.FC = () => {
         height = Math.min(vh - 100, 680); // Reduced height from 720 to 680
       } else if (isMobile) {
         // Fill more of the screen on mobile
-        width = Math.min(vw - 16, 530); // Increased width from 500 to 530
-        height = Math.min(vh - 100, 780); // Reduced height from 820 to 780
+        width = Math.min(vw - 16, 560); // Increased width from 530 to 560
+        height = Math.min(vh - 100, 780); // Keep same height
       } else {
-        // Desktop - reduced game canvas size (height reduced more)
-        width = 1300; // Increased width from 1200 to 1300
-        height = 600; // Reduced height from 650 to 600
+        // Desktop - increased width for wider game
+        width = 1400; // Increased width from 1300 to 1400
+        height = 600; // Keep same height
       }
 
       // Ensure minimum sizes for playability
@@ -411,8 +411,8 @@ export const Game: React.FC = () => {
 
     // Normal collision detection - reduced hitboxes for more forgiving gameplay
     const emojiMargin = BIRD_SIZE * 0.3; // Increased margin for more forgiving collision
-    const lockerHorizontalMargin = Math.max(50, LOCKER_WIDTH * 0.35); // Reduced margin to increase hitbox (from 60 and 0.4)
-    const lockerVerticalMargin = 12; // Reduced margin to increase hitbox (from 15)
+    const lockerHorizontalMargin = Math.max(40, LOCKER_WIDTH * 0.3); // Reduced margin to make less forgiving (from 50 and 0.35)
+    const lockerVerticalMargin = 8; // Reduced margin to make less forgiving (from 12)
 
     const isColliding = bird.x + emojiMargin < pipe.x + pipe.width - lockerHorizontalMargin && bird.x + bird.width - emojiMargin > pipe.x + lockerHorizontalMargin && bird.y + emojiMargin < pipe.y + pipe.height - lockerVerticalMargin && bird.y + bird.height - emojiMargin > pipe.y + lockerVerticalMargin;
 

@@ -29,7 +29,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '⚡',
     type: 'speed',
     beneficial: false,
-    weight: 15,
+    weight: 18, // Increased from 15 to 18
     effect: { speedMultiplier: 1.5 }
   },
   {
@@ -39,7 +39,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🔒',
     type: 'gap',
     beneficial: false,
-    weight: 15,
+    weight: 18, // Increased from 15 to 18
     effect: { gapMultiplier: 0.75 }
   },
   {
@@ -49,7 +49,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🌪️',
     type: 'temporary',
     beneficial: false,
-    weight: 13,
+    weight: 16, // Increased from 13 to 16
     effect: { speedMultiplier: 1.8, duration: 6000 }
   },
   {
@@ -111,7 +111,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🐌',
     type: 'speed',
     beneficial: true,
-    weight: 2.5, // 5% chance (increased from 1)
+    weight: 1.5, // Decreased from 2.5 to 1.5
     effect: { speedMultiplier: 0.7 }
   },
   {
@@ -121,7 +121,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '📏',
     type: 'temporary',
     beneficial: true,
-    weight: 2.5, // 5% chance (increased from 1)
+    weight: 1.5, // Decreased from 2.5 to 1.5
     effect: { gapMultiplier: 1.4, duration: 8000 }
   },
   {
@@ -137,12 +137,12 @@ export const AVAILABLE_POWERS: Power[] = [
   {
     id: 'slow_motion',
     name: 'Matrix Mode',
-    description: 'Slow motion for 8 seconds',
+    description: 'Slow motion for 10 seconds',
     emoji: '⏰',
     type: 'temporary',
     beneficial: true,
-    weight: 2.5, // 5% chance (increased from 1)
-    effect: { speedMultiplier: 0.4, duration: 8000 }
+    weight: 1.5, // Decreased from 2.5 to 1.5
+    effect: { speedMultiplier: 0.4, duration: 10000 } // Changed from 8000 to 10000 (10 seconds)
   },
   {
     id: 'mega_gaps',
@@ -151,7 +151,7 @@ export const AVAILABLE_POWERS: Power[] = [
     emoji: '🚪',
     type: 'temporary',
     beneficial: true,
-    weight: 2.5, // 5% chance (increased from 1)
+    weight: 1.5, // Decreased from 2.5 to 1.5
     effect: { gapMultiplier: 2.0, duration: 10000 }
   },
   {
