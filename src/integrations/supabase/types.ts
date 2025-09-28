@@ -63,6 +63,7 @@ export type Database = {
           created_at: string
           emoji: string
           id: string
+          image_path: string | null
           is_default: boolean
           name: string
           sort_order: number
@@ -74,6 +75,7 @@ export type Database = {
           created_at?: string
           emoji: string
           id?: string
+          image_path?: string | null
           is_default?: boolean
           name: string
           sort_order?: number
@@ -85,6 +87,7 @@ export type Database = {
           created_at?: string
           emoji?: string
           id?: string
+          image_path?: string | null
           is_default?: boolean
           name?: string
           sort_order?: number
