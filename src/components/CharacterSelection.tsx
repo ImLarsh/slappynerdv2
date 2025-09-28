@@ -121,8 +121,8 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
       <div className="relative z-10 flex flex-col items-center space-y-8 px-4 my-[187px]">
         {/* Character Navigation */}
         <div className="flex items-center justify-center space-x-8 md:space-x-12 my-[114px]">
-          <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 transition-all duration-300">
-            <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 text-yellow-400" />
+          <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 hover:border-yellow-500 transition-all duration-300">
+            <ChevronLeft className="w-8 h-8 md:w-10 md:h-10 text-black" />
           </Button>
 
           {/* Main Character */}
@@ -164,8 +164,8 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
               </div>}
           </div>
 
-          <Button variant="outline" size="lg" onClick={() => navigateCharacter('next')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 transition-all duration-300">
-            <ChevronRight className="w-8 h-8 md:w-10 md:h-10 text-yellow-400" />
+          <Button variant="outline" size="lg" onClick={() => navigateCharacter('next')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 hover:border-yellow-500 transition-all duration-300">
+            <ChevronRight className="w-8 h-8 md:w-10 md:h-10 text-black" />
           </Button>
         </div>
 
