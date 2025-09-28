@@ -122,7 +122,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   const currentCharacter = characters[currentIndex];
   const isCurrentUnlocked = currentCharacter ? isCharacterUnlocked(currentCharacter.id) : false;
   const isCurrentSelected = currentCharacter?.id === selectedCharacter?.id;
-  return <div className="min-h-screen relative overflow-hidden">
+  return <div className="min-h-screen relative overflow-hidden bg-transparent">
 
       {/* Header */}
       <div className="relative z-10 pt-8 pb-6">
