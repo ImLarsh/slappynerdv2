@@ -16,11 +16,25 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import bgImage from '@/assets/school-hallway-bg.webp';
 import lockerYellow from '@/assets/locker-yellow.webp';
+// Import all character images for the game
 import nerdDefault from '@/assets/characters/nerd-default.png';
 import coolNerd from '@/assets/characters/cool-nerd.png';
 import coolNerd2 from '@/assets/characters/cool-nerd-2.png';
 import alienNerd from '@/assets/characters/alien-nerd.png';
 import robotNerd from '@/assets/characters/robot-nerd.png';
+import pheonixNerd from '@/assets/characters/pheonixnerd.png';
+import demonNerd from '@/assets/characters/demonnerd.png';
+import demonNerd2 from '@/assets/characters/demonnerd-2.png';
+import wizardNerd from '@/assets/characters/wizardnerd.png';
+import defaultNerd from '@/assets/characters/defaultnerd.png';
+import eagleNerd from '@/assets/characters/eaglenerd.png';
+import owlNerd from '@/assets/characters/owlnerd.png';
+import parrotNerd from '@/assets/characters/parrotnerd.png';
+import flamingoNerd from '@/assets/characters/flamingonerd.png';
+import peacockNerd from '@/assets/characters/peacocknerd.png';
+import dragonNerd from '@/assets/characters/dragonnerd.png';
+import unicornNerd from '@/assets/characters/unicornnerd.png';
+import snailNerd from '@/assets/characters/snailnerd.png';
 interface GameObject {
   x: number;
   y: number;
@@ -1027,18 +1041,31 @@ export const Game: React.FC = () => {
     
     // Use character image if available, otherwise use emoji
     const getCharacterImage = () => {
-      if (characterImagePath === 'src/assets/characters/nerd-default.png') {
-        return nerdDefault;
-      } else if (characterImagePath === 'src/assets/characters/cool-nerd.png') {
-        return coolNerd;
-      } else if (characterImagePath === 'src/assets/characters/cool-nerd-2.png') {
-        return coolNerd2;
-      } else if (characterImagePath === 'src/assets/characters/alien-nerd.png') {
-        return alienNerd;
-      } else if (characterImagePath === 'src/assets/characters/robot-nerd.png') {
-        return robotNerd;
-      }
-      return null;
+      if (!characterImagePath) return null;
+      
+      // Complete mapping for all character images
+      const imageMap: Record<string, any> = {
+        'src/assets/characters/nerd-default.png': nerdDefault,
+        'src/assets/characters/cool-nerd.png': coolNerd,
+        'src/assets/characters/cool-nerd-2.png': coolNerd2,
+        'src/assets/characters/alien-nerd.png': alienNerd,
+        'src/assets/characters/robot-nerd.png': robotNerd,
+        'src/assets/characters/pheonixnerd.png': pheonixNerd,
+        'src/assets/characters/demonnerd.png': demonNerd,
+        'src/assets/characters/demonnerd-2.png': demonNerd2,
+        'src/assets/characters/wizardnerd.png': wizardNerd,
+        'src/assets/characters/defaultnerd.png': defaultNerd,
+        'src/assets/characters/eaglenerd.png': eagleNerd,
+        'src/assets/characters/owlnerd.png': owlNerd,
+        'src/assets/characters/parrotnerd.png': parrotNerd,
+        'src/assets/characters/flamingonerd.png': flamingoNerd,
+        'src/assets/characters/peacocknerd.png': peacockNerd,
+        'src/assets/characters/dragonnerd.png': dragonNerd,
+        'src/assets/characters/unicornnerd.png': unicornNerd,
+        'src/assets/characters/snailnerd.png': snailNerd,
+      };
+      
+      return imageMap[characterImagePath] || null;
     };
     
     const characterImageSrc = getCharacterImage();
