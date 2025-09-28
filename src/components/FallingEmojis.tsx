@@ -5,6 +5,7 @@ import { useAudio } from '@/hooks/useAudio';
 interface FallingEmoji {
   id: number;
   emoji: string;
+  image_path?: string;
   x: number;
   duration: number;
   delay: number;
@@ -24,12 +25,12 @@ export const FallingEmojis: React.FC<FallingEmojisProps> = ({ onEmojiPop }) => {
   const createEmoji = () => {
     if (characters.length === 0) return null;
     
-    const characterEmojis = characters.map(char => char.emoji);
-    const randomEmoji = characterEmojis[Math.floor(Math.random() * characterEmojis.length)];
+    const randomCharacter = characters[Math.floor(Math.random() * characters.length)];
     
     return {
       id: Math.random(),
-      emoji: randomEmoji,
+      emoji: randomCharacter.emoji,
+      image_path: randomCharacter.image_path,
       x: Math.random() * 80 + 10, // Random x position (10-90% to avoid edges)
       duration: Math.random() * 8 + 12, // Random duration between 12-20 seconds
       delay: 0,
@@ -130,7 +131,15 @@ export const FallingEmojis: React.FC<FallingEmojisProps> = ({ onEmojiPop }) => {
           onClick={(e) => handleEmojiClick(emoji.id, e)}
           onTouchStart={(e) => handleEmojiClick(emoji.id, e)}
         >
-          {emoji.emoji}
+          {emoji.image_path ? (
+            <img 
+              src={emoji.image_path} 
+              alt="Character"
+              className="w-8 h-8 object-contain"
+            />
+          ) : (
+            emoji.emoji
+          )}
         </div>
       ))}
     </div>

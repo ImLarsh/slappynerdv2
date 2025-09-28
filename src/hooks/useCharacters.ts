@@ -6,7 +6,8 @@ import { useToast } from './use-toast';
 export interface Character {
   id: string;
   name: string;
-  emoji: string;
+  emoji: string; // Keep for backward compatibility, will be deprecated
+  image_path?: string; // New field for character images
   unlock_condition: string;
   unlock_description: string;
   is_default: boolean;

@@ -35,8 +35,18 @@ export const CharactersTab: React.FC = () => {
                     
                   </div>}
                 
-                <div className="text-4xl mb-2 animate-pulse">
-                  {unlocked ? character.emoji : '🔒'}
+                <div className="text-4xl mb-2 animate-pulse flex justify-center items-center h-16">
+                  {unlocked ? (
+                    character.image_path ? (
+                      <img 
+                        src={character.image_path} 
+                        alt={character.name}
+                        className="w-12 h-12 object-contain"
+                      />
+                    ) : (
+                      character.emoji
+                    )
+                  ) : '🔒'}
                 </div>
                 
                 <h4 className="font-semibold text-sm mb-1">{character.name}</h4>
@@ -55,8 +65,16 @@ export const CharactersTab: React.FC = () => {
 
       {selectedCharacter && <Card className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 mt-4">
           <div className="text-center">
-            <div className="text-5xl mb-2 animate-bounce">
-              {selectedCharacter.emoji}
+            <div className="text-5xl mb-2 animate-bounce flex justify-center items-center h-20">
+              {selectedCharacter.image_path ? (
+                <img 
+                  src={selectedCharacter.image_path} 
+                  alt={selectedCharacter.name}
+                  className="w-16 h-16 object-contain"
+                />
+              ) : (
+                selectedCharacter.emoji
+              )}
             </div>
             <h3 className="font-bold text-lg text-primary">
               {selectedCharacter.name}
