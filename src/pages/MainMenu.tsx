@@ -318,7 +318,7 @@ const MainMenu: React.FC = () => {
 
       {/* Character Selection Full Screen */}
       <Dialog open={charactersOpen} onOpenChange={setCharactersOpen}>
-        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 animate-scale-in">
+        <DialogContent overlayClassName="bg-transparent" className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 animate-scale-in bg-transparent border-none shadow-none sm:rounded-none">
           <CharacterSelection onClose={() => setCharactersOpen(false)} />
         </DialogContent>
       </Dialog>
