@@ -50,20 +50,14 @@ const CharacterDisplay: React.FC<CharacterDisplayProps> = ({
       </div>;
   }
   if (imageUrl) {
-    return <div className={`${sizeClasses[size]} relative rounded-lg overflow-hidden ${isSelected && size === 'main' ? 'ring-4 ring-primary animate-pulse' : ''}`}>
+    return <div className={`${sizeClasses[size]} relative rounded-lg overflow-hidden ${isSelected && size === 'main' ? 'ring-4 ring-yellow-400' : ''}`}>
         <img src={imageUrl} alt={character.name} className="w-full h-full object-contain" style={{
         imageRendering: 'pixelated'
       }} />
-        {isSelected && size === 'main' && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">
-            <Check className="w-6 h-6" />
-          </div>}
       </div>;
   }
-  return <div className={`${sizeClasses[size]} flex items-center justify-center rounded-lg ${isSelected && size === 'main' ? 'ring-4 ring-primary' : ''}`}>
+  return <div className={`${sizeClasses[size]} flex items-center justify-center rounded-lg ${isSelected && size === 'main' ? 'ring-4 ring-yellow-400' : ''}`}>
       <span className={textSizeClasses[size]}>{character.emoji}</span>
-      {isSelected && size === 'main' && <div className="absolute top-2 right-2 bg-primary text-primary-foreground rounded-full p-2">
-          <Check className="w-6 h-6" />
-        </div>}
     </div>;
 };
 export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
@@ -127,7 +121,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
       <div className="relative z-10 flex flex-col items-center space-y-8 px-4 my-[187px]">
         {/* Character Navigation */}
         <div className="flex items-center justify-center space-x-8 md:space-x-12 my-[114px]">
-          <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-primary/30 hover:scale-110 transition-all duration-300">
+          <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-yellow-400 hover:scale-110 transition-all duration-300">
             <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
           </Button>
 
@@ -138,7 +132,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
                   <CharacterDisplay character={currentCharacter} isSelected={isCurrentSelected} isUnlocked={isCurrentUnlocked} size="main" />
                   
                   {/* Character glow effect */}
-                  {isCurrentUnlocked && <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg -z-10 blur-xl animate-pulse"></div>}
+                  {isCurrentUnlocked && <div className="absolute inset-0 bg-gradient-to-br from-primary/20 to-secondary/20 rounded-lg -z-10 blur-xl"></div>}
                 </div>
 
                 {/* Character Info */}
@@ -170,7 +164,7 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
               </div>}
           </div>
 
-          <Button variant="outline" size="lg" onClick={() => navigateCharacter('next')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-primary/30 hover:scale-110 transition-all duration-300">
+          <Button variant="outline" size="lg" onClick={() => navigateCharacter('next')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-yellow-400 hover:scale-110 transition-all duration-300">
             <ChevronRight className="w-8 h-8 md:w-10 md:h-10" />
           </Button>
         </div>
