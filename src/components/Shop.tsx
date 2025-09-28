@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
@@ -55,7 +56,11 @@ const ShopItemDisplay: React.FC<{
   // Fallback to emoji for powerups or if image fails to load
   return <span className="text-2xl md:text-3xl">{item.emoji}</span>;
 };
-export const Shop: React.FC = () => {
+interface ShopProps {
+  onBack?: () => void;
+}
+
+export const Shop: React.FC<ShopProps> = ({ onBack }) => {
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [userPurchases, setUserPurchases] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -224,6 +229,19 @@ export const Shop: React.FC = () => {
   if (!selectedCategory) {
     return <div className="p-4 h-full flex flex-col">
         <div className="text-center mb-6">
+          {onBack && (
+            <div className="flex items-center mb-3">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={onBack}
+                className="text-xs md:text-sm"
+              >
+                <ArrowLeft className="w-4 h-4 mr-1" />
+                Back
+              </Button>
+            </div>
+          )}
           <h2 className="text-xl md:text-2xl font-bold text-primary mb-2">Nerd Shop 🛍️</h2>
           <div className="flex items-center justify-center gap-2 mb-4">
             <span className="text-xl md:text-2xl">📚</span>

@@ -3,6 +3,8 @@ import { Badge } from '@/components/ui/badge';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useCharacterImage } from '@/hooks/useCharacterImage';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const LeaderboardCharacterDisplay: React.FC<{ character: any }> = ({ character }) => {
   const { imageUrl, isLoading } = useCharacterImage(character?.image_path);
@@ -24,7 +26,11 @@ const LeaderboardCharacterDisplay: React.FC<{ character: any }> = ({ character }
   
   return character?.emoji ? <span className="text-lg">{character.emoji}</span> : null;
 };
-export const Leaderboards = () => {
+interface LeaderboardsProps {
+  onBack?: () => void;
+}
+
+export const Leaderboards: React.FC<LeaderboardsProps> = ({ onBack }) => {
   const {
     leaderboard,
     isLoading,
@@ -33,6 +39,19 @@ export const Leaderboards = () => {
   const playerBestScore = getPlayerBestScore();
   return <div className="space-y-4">
       <div className="text-center">
+        {onBack && (
+          <div className="flex items-center mb-3">
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onBack}
+              className="text-xs md:text-sm"
+            >
+              <ArrowLeft className="w-4 h-4 mr-1" />
+              Back
+            </Button>
+          </div>
+        )}
         <h2 className="text-2xl font-bold text-primary mb-2">Top Nerds</h2>
         <p className="text-sm text-muted-foreground">
           Live scores from players worldwide
