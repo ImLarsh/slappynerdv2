@@ -2,6 +2,28 @@ import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useLeaderboard } from '@/hooks/useLeaderboard';
 import { Skeleton } from '@/components/ui/skeleton';
+import { useCharacterImage } from '@/hooks/useCharacterImage';
+
+const LeaderboardCharacterDisplay: React.FC<{ character: any }> = ({ character }) => {
+  const { imageUrl, isLoading } = useCharacterImage(character?.image_path);
+  
+  if (isLoading) {
+    return <div className="w-6 h-6 animate-pulse bg-gray-200 rounded"></div>;
+  }
+  
+  if (imageUrl) {
+    return (
+      <img 
+        src={imageUrl} 
+        alt={character?.name || "Character"}
+        className="w-6 h-6 object-contain"
+        style={{ imageRendering: 'pixelated' }}
+      />
+    );
+  }
+  
+  return character?.emoji ? <span className="text-lg">{character.emoji}</span> : null;
+};
 export const Leaderboards = () => {
   const {
     leaderboard,
@@ -35,7 +57,7 @@ export const Leaderboards = () => {
                 </div>
                 <div>
                   <div className="font-medium flex items-center space-x-2">
-                    {entry.characters?.emoji && <span className="text-lg">{entry.characters.emoji}</span>}
+                    <LeaderboardCharacterDisplay character={entry.characters} />
                     <span>{entry.player_name}</span>
                     {entry.isCurrentPlayer && <Badge variant="secondary">You</Badge>}
                     {index + 1 <= 3 && <span className="text-lg">
