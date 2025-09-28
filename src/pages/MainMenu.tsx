@@ -166,12 +166,12 @@ const MainMenu: React.FC = () => {
       <div className="absolute inset-0 bg-background/60 z-1" />
       
       {/* Title - Mobile responsive positioning */}
-      <div className="absolute top-2 sm:top-4 md:top-6 lg:top-6 left-0 right-0 z-10 animate-fade-in">
+      <div className="absolute top-2 sm:top-4 md:top-6 lg:top-6 left-0 right-0 z-10 animate-fade-in my-[240px] mx-0 px-[30px] py-[90px]">
         <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px] lg:max-w-md xl:max-w-lg mx-auto hover-scale" />
       </div>
       
       {/* Pop Counter - Top Left */}
-      <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20">
+      <div className="absolute top-1 sm:top-2 md:top-4 left-1 sm:left-2 md:left-4 z-20 my-[112px] py-0 px-[111px]">
         <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl py-px my-[44px] mx-[18px]">
           <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
             <span className="text-xs sm:text-sm md:text-lg">💥</span>
