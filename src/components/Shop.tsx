@@ -7,6 +7,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { useCharactersContext } from '@/context/CharactersContext';
+import { useCharacterImage } from '@/hooks/useCharacterImage';
 interface ShopItem {
   id: string;
   name: string;
@@ -20,6 +21,29 @@ interface ShopItem {
   created_at: string;
   updated_at: string;
 }
+
+const ShopItemDisplay: React.FC<{ item: ShopItem }> = ({ item }) => {
+  const { imageUrl, isLoading } = useCharacterImage(item.item_data?.image_path);
+  
+  if (item.item_type === 'character' && item.item_data?.image_path) {
+    if (isLoading) {
+      return <div className="w-8 h-8 md:w-12 md:h-12 bg-muted rounded animate-pulse"></div>;
+    }
+    
+    if (imageUrl) {
+      return (
+        <img 
+          src={imageUrl} 
+          alt={item.name}
+          className="w-8 h-8 md:w-12 md:h-12 object-contain"
+        />
+      );
+    }
+  }
+  
+  // Fallback to emoji for powerups or if image fails to load
+  return <span className="text-2xl md:text-3xl">{item.emoji}</span>;
+};
 export const Shop: React.FC = () => {
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [userPurchases, setUserPurchases] = useState<string[]>([]);
@@ -259,8 +283,8 @@ export const Shop: React.FC = () => {
           return (
             <Card key={item.id} className="p-2 md:p-3 flex flex-col h-full">
               <div className="flex flex-col gap-2 flex-1">
-                <div className="text-center">
-                  <span className="text-2xl md:text-3xl">{item.emoji}</span>
+                <div className="text-center flex justify-center">
+                  <ShopItemDisplay item={item} />
                 </div>
                 <div className="flex-1 text-center">
                   <h3 className="font-semibold text-xs md:text-sm mb-1">{item.name}</h3>
