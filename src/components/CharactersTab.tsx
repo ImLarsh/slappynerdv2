@@ -5,6 +5,24 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Lock } from 'lucide-react';
 import { useCharactersContext } from '@/context/CharactersContext';
+import { useCharacterImage } from '@/hooks/useCharacterImage';
+
+const CharacterImageDisplay: React.FC<{ character: any; size?: 'small' | 'large' }> = ({ character, size = 'small' }) => {
+  const { imageUrl } = useCharacterImage(character.image_path);
+  const sizeClass = size === 'large' ? 'w-16 h-16' : 'w-12 h-12';
+  
+  if (imageUrl) {
+    return (
+      <img 
+        src={imageUrl} 
+        alt={character.name}
+        className={`${sizeClass} object-contain`}
+      />
+    );
+  }
+  
+  return <span className={size === 'large' ? 'text-5xl' : 'text-4xl'}>{character.emoji}</span>;
+};
 export const CharactersTab: React.FC = () => {
   const {
     characters,
@@ -37,15 +55,7 @@ export const CharactersTab: React.FC = () => {
                 
                 <div className="text-4xl mb-2 animate-pulse flex justify-center items-center h-16">
                   {unlocked ? (
-                    character.image_path ? (
-                      <img 
-                        src={character.image_path} 
-                        alt={character.name}
-                        className="w-12 h-12 object-contain"
-                      />
-                    ) : (
-                      character.emoji
-                    )
+                    <CharacterImageDisplay character={character} />
                   ) : '🔒'}
                 </div>
                 
@@ -66,15 +76,7 @@ export const CharactersTab: React.FC = () => {
       {selectedCharacter && <Card className="p-4 bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/20 mt-4">
           <div className="text-center">
             <div className="text-5xl mb-2 animate-bounce flex justify-center items-center h-20">
-              {selectedCharacter.image_path ? (
-                <img 
-                  src={selectedCharacter.image_path} 
-                  alt={selectedCharacter.name}
-                  className="w-16 h-16 object-contain"
-                />
-              ) : (
-                selectedCharacter.emoji
-              )}
+              <CharacterImageDisplay character={selectedCharacter} size="large" />
             </div>
             <h3 className="font-bold text-lg text-primary">
               {selectedCharacter.name}

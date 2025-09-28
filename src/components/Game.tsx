@@ -16,6 +16,7 @@ import { useAuth } from '@/hooks/useAuth';
 import { useToast } from '@/hooks/use-toast';
 import bgImage from '@/assets/school-hallway-bg.webp';
 import lockerYellow from '@/assets/locker-yellow.webp';
+import nerdDefault from '@/assets/characters/nerd-default.png';
 interface GameObject {
   x: number;
   y: number;
@@ -1018,7 +1019,38 @@ export const Game: React.FC = () => {
     ctx.shadowOffsetX = 2;
     ctx.shadowOffsetY = 2;
     const character = selectedCharacter ? selectedCharacter.emoji : '🤓';
-    ctx.fillText(character, gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2);
+    const characterImagePath = selectedCharacter?.image_path;
+    
+    // Use character image if available, otherwise use emoji
+    if (characterImagePath === 'src/assets/characters/nerd-default.png') {
+      // Load and draw the character image
+      const img = new Image();
+      img.src = nerdDefault;
+      
+      if (img.complete) {
+        // Clear previous shadow for image
+        ctx.shadowColor = 'transparent';
+        ctx.shadowBlur = 0;
+        ctx.shadowOffsetX = 0;
+        ctx.shadowOffsetY = 0;
+        
+        // Draw the character image
+        const imageSize = BIRD_SIZE * 0.8;
+        ctx.drawImage(
+          img, 
+          gameState.bird.x + (gameState.bird.width - imageSize) / 2, 
+          gameState.bird.y + (gameState.bird.height - imageSize) / 2, 
+          imageSize, 
+          imageSize
+        );
+      } else {
+        // Fallback to emoji while image loads
+        ctx.fillText(character, gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2);
+      }
+    } else {
+      // Use emoji
+      ctx.fillText(character, gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2);
+    }
 
     // Draw crown if beating personal best
     if (gameState.crownCollected) {

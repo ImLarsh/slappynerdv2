@@ -1,6 +1,23 @@
 import React, { useEffect, useState } from 'react';
 import { useCharactersContext } from '@/context/CharactersContext';
 import { useAudio } from '@/hooks/useAudio';
+import { useCharacterImage } from '@/hooks/useCharacterImage';
+
+const FallingCharacterDisplay: React.FC<{ emoji: string; imagePath?: string }> = ({ emoji, imagePath }) => {
+  const { imageUrl } = useCharacterImage(imagePath);
+  
+  if (imageUrl) {
+    return (
+      <img 
+        src={imageUrl} 
+        alt="Character"
+        className="w-8 h-8 object-contain"
+      />
+    );
+  }
+  
+  return <span>{emoji}</span>;
+};
 
 interface FallingEmoji {
   id: number;
@@ -131,15 +148,7 @@ export const FallingEmojis: React.FC<FallingEmojisProps> = ({ onEmojiPop }) => {
           onClick={(e) => handleEmojiClick(emoji.id, e)}
           onTouchStart={(e) => handleEmojiClick(emoji.id, e)}
         >
-          {emoji.image_path ? (
-            <img 
-              src={emoji.image_path} 
-              alt="Character"
-              className="w-8 h-8 object-contain"
-            />
-          ) : (
-            emoji.emoji
-          )}
+          <FallingCharacterDisplay emoji={emoji.emoji} imagePath={emoji.image_path} />
         </div>
       ))}
     </div>
