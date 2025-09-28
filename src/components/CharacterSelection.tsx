@@ -122,13 +122,13 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   const currentCharacter = characters[currentIndex];
   const isCurrentUnlocked = currentCharacter ? isCharacterUnlocked(currentCharacter.id) : false;
   const isCurrentSelected = currentCharacter?.id === selectedCharacter?.id;
-  return <div className="min-h-screen relative overflow-hidden bg-transparent">
+  return <div className="min-h-screen relative overflow-hidden" style={{backgroundColor: 'transparent'}}>
 
       {/* Header */}
       <div className="relative z-10 pt-8 pb-6">
         {/* Close Button */}
-        {onClose && <Button variant="outline" size="icon" onClick={onClose} className="absolute top-4 right-4 w-14 h-14 rounded-full bg-red-500 hover:bg-red-600 border-2 border-red-600 shadow-lg z-50">
-            <X className="w-8 h-8 text-white" />
+        {onClose && <Button variant="outline" size="icon" onClick={onClose} className="fixed top-6 left-6 w-16 h-16 rounded-full bg-red-500 hover:bg-red-600 border-4 border-white shadow-2xl z-[999] backdrop-blur-sm">
+            <X className="w-10 h-10 text-white font-bold" />
           </Button>}
         
         <div className="text-center space-y-2">
