@@ -122,23 +122,13 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
   const currentCharacter = characters[currentIndex];
   const isCurrentUnlocked = currentCharacter ? isCharacterUnlocked(currentCharacter.id) : false;
   const isCurrentSelected = currentCharacter?.id === selectedCharacter?.id;
-  return <div className="min-h-screen bg-gradient-to-br from-background via-primary/5 to-secondary/10 relative overflow-hidden">
-      {/* Animated background elements */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute top-20 left-10 w-32 h-32 bg-primary/10 rounded-full animate-float"></div>
-        <div className="absolute bottom-20 right-10 w-24 h-24 bg-secondary/10 rounded-full animate-float" style={{
-        animationDelay: '2s'
-      }}></div>
-        <div className="absolute top-1/2 left-20 w-16 h-16 bg-accent/10 rounded-full animate-float" style={{
-        animationDelay: '4s'
-      }}></div>
-      </div>
+  return <div className="min-h-screen relative overflow-hidden">
 
       {/* Header */}
       <div className="relative z-10 pt-8 pb-6">
         {/* Close Button */}
-        {onClose && <Button variant="outline" size="icon" onClick={onClose} className="absolute top-4 right-4 w-12 h-12 rounded-full bg-background/80 backdrop-blur-sm hover:bg-background">
-            <X className="w-6 h-6" />
+        {onClose && <Button variant="outline" size="icon" onClick={onClose} className="absolute top-4 right-4 w-14 h-14 rounded-full bg-red-500 hover:bg-red-600 border-2 border-red-600 shadow-lg z-50">
+            <X className="w-8 h-8 text-white" />
           </Button>}
         
         <div className="text-center space-y-2">
