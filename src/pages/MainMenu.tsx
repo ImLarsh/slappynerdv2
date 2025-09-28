@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Slider } from '@/components/ui/slider';
-import { CharactersTab } from '@/components/CharactersTab';
+import { CharacterSelection } from '@/components/CharacterSelection';
 import { AchievementsTab } from '@/components/AchievementsTab';
 import { FallingEmojis } from '@/components/FallingEmojis';
 import { Leaderboards } from '@/components/Leaderboards';
@@ -316,13 +316,10 @@ const MainMenu: React.FC = () => {
         </div>
       </div>
 
-      {/* Dialogs for each feature */}
+      {/* Character Selection Full Screen */}
       <Dialog open={charactersOpen} onOpenChange={setCharactersOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden animate-scale-in">
-          <DialogHeader>
-            
-          </DialogHeader>
-          <CharactersTab />
+        <DialogContent className="max-w-[95vw] max-h-[95vh] w-full h-full p-0 animate-scale-in">
+          <CharacterSelection onClose={() => setCharactersOpen(false)} />
         </DialogContent>
       </Dialog>
 
