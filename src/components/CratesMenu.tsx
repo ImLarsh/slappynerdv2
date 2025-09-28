@@ -1,7 +1,9 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { useCurrency } from '@/hooks/useCurrency';
 import { CrateOpening } from './CrateOpening';
 import { useToast } from '@/hooks/use-toast';
@@ -83,67 +85,79 @@ export const CratesMenu = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/10 flex items-center justify-center">
-        <div className="text-center">
-          <div className="text-6xl mb-4">📦</div>
-          <p className="text-muted-foreground">Loading crates...</p>
-        </div>
+      <div className="text-center py-8">
+        <div className="text-4xl animate-pulse">📦</div>
+        <p className="text-muted-foreground mt-2">Loading crates...</p>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-background via-background/95 to-primary/10 p-4">
-      <div className="max-w-6xl mx-auto">
-        <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold mb-2 text-foreground">
-            📦 Crates Menu
-          </h1>
-          <p className="text-muted-foreground mb-4">
-            Open mystery crates to get exclusive rewards!
-          </p>
-          <div className="text-lg font-semibold">
-            📚 Books: <span className="text-primary">{books}</span>
-          </div>
+    <div className="space-y-4 h-full flex flex-col">
+      <div className="text-center mb-6">
+        <h3 className="text-xl font-bold text-yellow-500 mb-2">Mystery Crates</h3>
+        <div className="flex items-center justify-center gap-2 mb-4">
+          <span className="text-xl">📚</span>
+          <span className="text-lg font-semibold text-yellow-500">{books} Books</span>
         </div>
+      </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {crates.map((crate) => (
-            <Card key={crate.id} className="bg-card/80 backdrop-blur-sm border-border hover:shadow-lg transition-all duration-300">
-              <CardHeader className="text-center">
-                <div className="text-6xl mb-2">{crate.emoji}</div>
-                <CardTitle className="text-xl">{crate.name}</CardTitle>
-                <CardDescription>{crate.description}</CardDescription>
-              </CardHeader>
-              <CardContent className="text-center">
-                <div className="mb-4">
-                  <div className="text-2xl font-bold text-primary">
-                    📚 {crate.price} Books
+      <ScrollArea className="flex-1 max-h-[50vh] sm:max-h-[60vh]">
+        <div className="grid grid-cols-2 gap-3 p-1">
+          {crates.map(crate => {
+            const canAfford = books >= crate.price;
+            return (
+              <Card 
+                key={crate.id} 
+                className={`relative p-4 text-center transition-all duration-300 cursor-pointer ${
+                  canAfford 
+                    ? 'hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/50 border-yellow-400/30' 
+                    : 'opacity-60 cursor-not-allowed border-muted/30'
+                }`} 
+                onClick={() => canAfford && handleOpenCrate(crate)}
+              >
+                {!canAfford && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
+                    <span className="text-xs text-muted-foreground font-medium">Not enough books</span>
                   </div>
+                )}
+                
+                <div className="text-4xl mb-2 animate-pulse flex justify-center items-center h-16">
+                  {crate.emoji}
                 </div>
-                <Button 
-                  onClick={() => handleOpenCrate(crate)}
-                  disabled={books < crate.price}
-                  className="w-full"
-                  variant={books >= crate.price ? "default" : "outline"}
-                >
-                  {books >= crate.price ? "Open Crate" : "Not Enough Books"}
-                </Button>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+                
+                <h4 className="font-semibold text-sm mb-1 text-yellow-500">{crate.name}</h4>
+                
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                  {crate.description}
+                </p>
 
-        {crates.length === 0 && (
-          <div className="text-center py-12">
-            <div className="text-6xl mb-4">📦</div>
-            <h3 className="text-xl font-semibold mb-2">No Crates Available</h3>
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  <span className="text-xs font-medium">📚 {crate.price}</span>
+                </div>
+                
+                {canAfford && (
+                  <Badge variant="default" className="text-xs bg-green-500 hover:bg-green-600">
+                    Open Crate
+                  </Badge>
+                )}
+              </Card>
+            );
+          })}
+        </div>
+      </ScrollArea>
+
+      {crates.length === 0 && (
+        <div className="flex-1 flex items-center justify-center text-center">
+          <div className="space-y-2">
+            <div className="text-6xl">📦</div>
+            <h3 className="text-xl font-semibold text-yellow-500">No Crates Available</h3>
             <p className="text-muted-foreground">
               Check back later for new crates to open!
             </p>
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   );
 };

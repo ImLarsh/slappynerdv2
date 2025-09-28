@@ -2,11 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useToast } from '@/hooks/use-toast';
 import { useCharactersContext } from '@/context/CharactersContext';
+
 interface ShopItem {
   id: string;
   name: string;
@@ -20,6 +22,7 @@ interface ShopItem {
   created_at: string;
   updated_at: string;
 }
+
 export const Shop: React.FC = () => {
   const [shopItems, setShopItems] = useState<ShopItem[]>([]);
   const [userPurchases, setUserPurchases] = useState<string[]>([]);
@@ -30,25 +33,20 @@ export const Shop: React.FC = () => {
     spendBooks,
     loading: booksLoading
   } = useCurrency();
-  const {
-    toast
-  } = useToast();
-  const {
-    fetchUserData
-  } = useCharactersContext();
+  const { toast } = useToast();
+  const { fetchUserData } = useCharactersContext();
+
   const fetchShopData = async () => {
     try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
 
       // Fetch shop items
-      const {
-        data: items,
-        error: itemsError
-      } = await supabase.from('shop_items').select('*').eq('is_available', true).order('sort_order');
+      const { data: items, error: itemsError } = await supabase
+        .from('shop_items')
+        .select('*')
+        .eq('is_available', true)
+        .order('sort_order');
+
       if (itemsError) {
         console.error('Error fetching shop items:', itemsError);
         return;
@@ -57,10 +55,11 @@ export const Shop: React.FC = () => {
 
       // Fetch user purchases if logged in
       if (user) {
-        const {
-          data: purchases,
-          error: purchasesError
-        } = await supabase.from('user_purchases').select('shop_item_id').eq('user_id', user.id);
+        const { data: purchases, error: purchasesError } = await supabase
+          .from('user_purchases')
+          .select('shop_item_id')
+          .eq('user_id', user.id);
+
         if (purchasesError) {
           console.error('Error fetching purchases:', purchasesError);
         } else {
@@ -73,13 +72,10 @@ export const Shop: React.FC = () => {
       setLoading(false);
     }
   };
+
   const handlePurchase = async (item: ShopItem) => {
     try {
-      const {
-        data: {
-          user
-        }
-      } = await supabase.auth.getUser();
+      const { data: { user } } = await supabase.auth.getUser();
       if (!user) {
         toast({
           title: "Please log in",
@@ -88,6 +84,7 @@ export const Shop: React.FC = () => {
         });
         return;
       }
+
       if (books < item.price) {
         toast({
           title: "Not enough books!",
@@ -96,6 +93,7 @@ export const Shop: React.FC = () => {
         });
         return;
       }
+
       if (userPurchases.includes(item.id)) {
         toast({
           title: "Already owned",
@@ -117,36 +115,31 @@ export const Shop: React.FC = () => {
       }
 
       // Record the purchase
-      const {
-        error
-      } = await supabase.from('user_purchases').insert({
+      const { error } = await supabase.from('user_purchases').insert({
         user_id: user.id,
         shop_item_id: item.id
       });
+
       if (error) {
         console.error('Error recording purchase:', error);
-        // Refund books since recording failed
-        // Note: This is a simple approach, in production you'd want more robust error handling
         return;
       }
 
       // If it's a character item, also unlock it in user_characters
       if (item.item_type === 'character' && item.item_data?.character_id) {
-        const {
-          data: {
-            user: currentUser
-          }
-        } = await supabase.auth.getUser();
-        const {
-          data: profile
-        } = await supabase.from('profiles').select('player_name').eq('id', currentUser?.id).single();
-        const {
-          error: characterError
-        } = await supabase.from('user_characters').insert({
+        const { data: { user: currentUser } } = await supabase.auth.getUser();
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('player_name')
+          .eq('id', currentUser?.id)
+          .single();
+
+        const { error: characterError } = await supabase.from('user_characters').insert({
           user_id: user.id,
           character_id: item.item_data.character_id,
           player_name: profile?.player_name || 'Player'
         });
+
         if (characterError) {
           console.error('Error unlocking character:', characterError);
         } else {
@@ -154,6 +147,7 @@ export const Shop: React.FC = () => {
           await fetchUserData();
         }
       }
+
       setUserPurchases(prev => [...prev, item.id]);
       toast({
         title: "Purchase successful! 🎉",
@@ -168,15 +162,20 @@ export const Shop: React.FC = () => {
       });
     }
   };
+
   useEffect(() => {
     fetchShopData();
   }, []);
+
   if (loading || booksLoading) {
-    return <div className="p-6 text-center">
-        <div className="text-2xl">📚</div>
-        <p>Loading shop...</p>
-      </div>;
+    return (
+      <div className="text-center py-8">
+        <div className="text-4xl animate-pulse">🛍️</div>
+        <p className="text-muted-foreground mt-2">Loading shop...</p>
+      </div>
+    );
   }
+
   // Filter items based on selected category and sort by price (least to most expensive)
   const filteredItems = selectedCategory 
     ? shopItems
@@ -191,36 +190,42 @@ export const Shop: React.FC = () => {
   // Category selection view
   if (!selectedCategory) {
     return (
-      <div className="p-4 h-full flex flex-col">
+      <div className="space-y-4 h-full flex flex-col">
         <div className="text-center mb-6">
-          <h2 className="text-xl md:text-2xl font-bold text-primary mb-2">Nerd Shop 🛍️</h2>
+          <h3 className="text-xl font-bold text-yellow-500 mb-2">Nerd Shop 🛍️</h3>
           <div className="flex items-center justify-center gap-2 mb-4">
-            <span className="text-xl md:text-2xl">📚</span>
-            <span className="text-lg md:text-xl font-semibold">{books} Books</span>
+            <span className="text-xl">📚</span>
+            <span className="text-lg font-semibold text-yellow-500">{books} Books</span>
           </div>
           <p className="text-muted-foreground">Choose a category to browse:</p>
         </div>
 
         <div className="flex-1 flex flex-col gap-4 max-w-md mx-auto w-full">
-          <Card className="p-6 hover:bg-accent transition-colors cursor-pointer" onClick={() => setSelectedCategory('characters')}>
+          <Card 
+            className="p-6 hover:bg-accent transition-colors cursor-pointer hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/50 border-yellow-400/30" 
+            onClick={() => setSelectedCategory('characters')}
+          >
             <div className="text-center space-y-3">
               <div className="text-4xl">🎭</div>
-              <h3 className="text-xl font-bold">Characters</h3>
+              <h3 className="text-xl font-bold text-yellow-500">Characters</h3>
               <p className="text-muted-foreground">Unlock new characters to play as</p>
-              <div className="text-sm text-primary font-semibold">
-                {shopItems.filter(item => item.item_type === 'character').length} characters available
-              </div>
+              <Badge variant="outline" className="text-yellow-500 border-yellow-400">
+                {shopItems.filter(item => item.item_type === 'character').length} available
+              </Badge>
             </div>
           </Card>
 
-          <Card className="p-6 hover:bg-accent transition-colors cursor-pointer" onClick={() => setSelectedCategory('powerups')}>
+          <Card 
+            className="p-6 hover:bg-accent transition-colors cursor-pointer hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/50 border-yellow-400/30" 
+            onClick={() => setSelectedCategory('powerups')}
+          >
             <div className="text-center space-y-3">
               <div className="text-4xl">⚡</div>
-              <h3 className="text-xl font-bold">Powerups</h3>
+              <h3 className="text-xl font-bold text-yellow-500">Powerups</h3>
               <p className="text-muted-foreground">Get permanent game advantages</p>
-              <div className="text-sm text-primary font-semibold">
-                {shopItems.filter(item => item.item_type === 'power').length} powerups available
-              </div>
+              <Badge variant="outline" className="text-yellow-500 border-yellow-400">
+                {shopItems.filter(item => item.item_type === 'power').length} available
+              </Badge>
             </div>
           </Card>
         </div>
@@ -230,64 +235,93 @@ export const Shop: React.FC = () => {
 
   // Category items view
   return (
-    <div className="p-2 md:p-4 h-full flex flex-col">
-      <div className="text-center mb-3 md:mb-4">
+    <div className="space-y-4 h-full flex flex-col">
+      <div className="text-center mb-6">
         <div className="flex items-center justify-between mb-2">
           <Button 
             variant="outline" 
             size="sm" 
             onClick={() => setSelectedCategory(null)}
-            className="text-xs md:text-sm"
+            className="bg-red-500/90 hover:bg-red-600/90 text-white border-red-400"
           >
-            ← Back
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
           </Button>
-          <h2 className="text-lg md:text-xl font-bold text-primary">
+          <h3 className="text-xl font-bold text-yellow-500">
             {selectedCategory === 'characters' ? '🎭 Characters' : '⚡ Powerups'}
-          </h2>
+          </h3>
           <div className="w-16"></div> {/* Spacer for centering */}
         </div>
         <div className="flex items-center justify-center gap-2">
-          <span className="text-xl md:text-2xl">📚</span>
-          <span className="text-lg md:text-xl font-semibold">{books} Books</span>
+          <span className="text-xl">📚</span>
+          <span className="text-lg font-semibold text-yellow-500">{books} Books</span>
         </div>
       </div>
 
-      <div className="flex-1 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4 auto-rows-max">
-        {filteredItems.map(item => {
-          const isPurchased = userPurchases.includes(item.id);
-          const canAfford = books >= item.price;
-          return (
-            <Card key={item.id} className="p-2 md:p-3 flex flex-col h-full">
-              <div className="flex flex-col gap-2 flex-1">
-                <div className="text-center">
-                  <span className="text-2xl md:text-3xl">{item.emoji}</span>
-                </div>
-                <div className="flex-1 text-center">
-                  <h3 className="font-semibold text-xs md:text-sm mb-1">{item.name}</h3>
-                  <p className="text-xs text-muted-foreground line-clamp-2 mb-2">{item.description}</p>
-                  <div className="flex items-center justify-center gap-1 mb-2">
-                    <span className="text-xs font-medium">📚 {item.price}</span>
-                  </div>
-                </div>
-              </div>
-              
-              <Button 
-                onClick={() => handlePurchase(item)} 
-                disabled={isPurchased || !canAfford} 
-                variant={isPurchased ? "outline" : canAfford ? "default" : "destructive"} 
-                size="sm" 
-                className="w-full text-xs md:text-sm"
+      <ScrollArea className="flex-1 max-h-[50vh] sm:max-h-[60vh]">
+        <div className="grid grid-cols-2 gap-3 p-1">
+          {filteredItems.map(item => {
+            const isPurchased = userPurchases.includes(item.id);
+            const canAfford = books >= item.price;
+            
+            return (
+              <Card 
+                key={item.id} 
+                className={`relative p-4 text-center transition-all duration-300 cursor-pointer ${
+                  isPurchased 
+                    ? 'ring-2 ring-green-500 bg-green-500/10 scale-105 border-green-400/30' 
+                    : canAfford 
+                      ? 'hover:scale-105 hover:shadow-lg hover:shadow-yellow-400/50 border-yellow-400/30' 
+                      : 'opacity-60 cursor-not-allowed border-muted/30'
+                }`} 
+                onClick={() => !isPurchased && canAfford && handlePurchase(item)}
               >
-                {isPurchased ? "Owned ✓" : canAfford ? "Buy" : "Can't Afford"}
-              </Button>
-            </Card>
-          );
-        })}
-      </div>
+                {!canAfford && !isPurchased && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-background/80 rounded-lg">
+                    <span className="text-xs text-muted-foreground font-medium">Can't afford</span>
+                  </div>
+                )}
+                
+                <div className="text-4xl mb-2 animate-pulse flex justify-center items-center h-16">
+                  {item.emoji}
+                </div>
+                
+                <h4 className="font-semibold text-sm mb-1 text-yellow-500">{item.name}</h4>
+                
+                <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
+                  {item.description}
+                </p>
+
+                <div className="flex items-center justify-center gap-1 mb-2">
+                  <span className="text-xs font-medium">📚 {item.price}</span>
+                </div>
+                
+                {isPurchased ? (
+                  <Badge variant="default" className="text-xs bg-green-500 hover:bg-green-600">
+                    Owned ✓
+                  </Badge>
+                ) : canAfford ? (
+                  <Badge variant="default" className="text-xs bg-blue-500 hover:bg-blue-600">
+                    Buy Now
+                  </Badge>
+                ) : null}
+              </Card>
+            );
+          })}
+        </div>
+      </ScrollArea>
 
       {filteredItems.length === 0 && (
-        <div className="flex-1 flex items-center justify-center text-center text-muted-foreground">
-          <p>No {selectedCategory} available in the shop right now.</p>
+        <div className="flex-1 flex items-center justify-center text-center">
+          <div className="space-y-2">
+            <div className="text-6xl">
+              {selectedCategory === 'characters' ? '🎭' : '⚡'}
+            </div>
+            <h3 className="text-xl font-semibold text-yellow-500">No Items Available</h3>
+            <p className="text-muted-foreground">
+              No {selectedCategory} available in the shop right now.
+            </p>
+          </div>
         </div>
       )}
     </div>

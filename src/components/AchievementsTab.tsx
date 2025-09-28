@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
-import { Trophy, Lock } from 'lucide-react';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Trophy, Lock, Star, Award, Target, Zap } from 'lucide-react';
 import { useCharacters, Achievement } from '@/hooks/useCharacters';
 import { useUserStats } from '@/hooks/useUserStats';
 
@@ -59,58 +60,98 @@ export const AchievementsTab: React.FC = () => {
 
     switch (achievement.condition_type) {
       case 'single_game_score':
-        return `Best: ${gameStats.personalBest}/${achievement.condition_value}`;
+        return `${gameStats.personalBest}/${achievement.condition_value}`;
       
       case 'games_played':
-        return `${gameStats.gamesPlayed}/${achievement.condition_value} games`;
+        return `${gameStats.gamesPlayed}/${achievement.condition_value}`;
       
       case 'high_score':
-        return `Best: ${gameStats.personalBest}/${achievement.condition_value}`;
+        return `${gameStats.personalBest}/${achievement.condition_value}`;
       
       default:
-        return '0%';
+        return '0/100';
     }
   };
 
+  const getRarityColor = (achievement: Achievement): string => {
+    const progress = getProgress(achievement);
+    if (isAchievementUnlocked(achievement.id)) {
+      if (achievement.condition_value >= 100) return 'from-yellow-400/20 to-orange-500/20 border-yellow-400/30'; // Legendary
+      if (achievement.condition_value >= 50) return 'from-purple-400/20 to-blue-500/20 border-purple-400/30'; // Epic
+      if (achievement.condition_value >= 20) return 'from-blue-400/20 to-green-500/20 border-blue-400/30'; // Rare
+      return 'from-green-400/20 to-primary/20 border-green-400/30'; // Common
+    }
+    return 'from-muted/10 to-muted/5 border-muted/20';
+  };
+
+  const getDifficultyIcon = (achievement: Achievement) => {
+    if (achievement.condition_value >= 100) return <Star className="w-3 h-3 text-yellow-500" />;
+    if (achievement.condition_value >= 50) return <Award className="w-3 h-3 text-purple-500" />;
+    if (achievement.condition_value >= 20) return <Target className="w-3 h-3 text-blue-500" />;
+    return <Zap className="w-3 h-3 text-green-500" />;
+  };
+
   const unlockedCount = achievements.filter(a => isAchievementUnlocked(a.id)).length;
+  const totalProgress = (unlockedCount / achievements.length) * 100;
+
+  // Sort achievements: unlocked first, then by difficulty/rarity
+  const sortedAchievements = [...achievements].sort((a, b) => {
+    const aUnlocked = isAchievementUnlocked(a.id);
+    const bUnlocked = isAchievementUnlocked(b.id);
+    
+    if (aUnlocked && !bUnlocked) return -1;
+    if (!aUnlocked && bUnlocked) return 1;
+    
+    // If both same unlock status, sort by difficulty
+    return a.condition_value - b.condition_value;
+  });
 
   return (
-    <div className="space-y-2 md:space-y-4 h-full flex flex-col">
-      {/* Header - Compact */}
-      <div className="text-center space-y-1">
-        <h3 className="text-lg md:text-xl font-bold text-primary">Achievements</h3>
-        <div className="text-xs md:text-sm text-muted-foreground">
-          {unlockedCount} of {achievements.length} unlocked
-        </div>
-        <Progress 
-          value={(unlockedCount / achievements.length) * 100} 
-          className="w-full max-w-xs mx-auto h-1.5"
-        />
+    <div className="space-y-4 h-full flex flex-col">
+      {/* Header with progress overview */}
+      <div className="text-center space-y-3">
+        <h3 className="text-xl font-bold text-yellow-500 flex items-center justify-center gap-2">
+          <Trophy className="w-6 h-6" />
+          Achievements
+        </h3>
+        
+        {/* Overall progress card */}
+        <Card className="p-4 bg-gradient-to-r from-yellow-400/10 to-orange-500/10 border-yellow-400/30">
+          <div className="grid grid-cols-3 gap-4 text-center mb-3">
+            <div>
+              <div className="text-2xl font-bold text-yellow-500">{unlockedCount}</div>
+              <div className="text-xs text-muted-foreground">Unlocked</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-500">{gameStats.personalBest}</div>
+              <div className="text-xs text-muted-foreground">Best Score</div>
+            </div>
+            <div>
+              <div className="text-2xl font-bold text-yellow-500">{gameStats.gamesPlayed}</div>
+              <div className="text-xs text-muted-foreground">Games Played</div>
+            </div>
+          </div>
+          
+          <div className="space-y-2">
+            <div className="flex justify-between items-center">
+              <span className="text-sm font-medium text-yellow-500">Overall Progress</span>
+              <span className="text-sm text-muted-foreground">{unlockedCount}/{achievements.length}</span>
+            </div>
+            <Progress 
+              value={totalProgress} 
+              className="h-2 bg-muted/30"
+            />
+            <div className="text-center text-xs text-muted-foreground">
+              {Math.round(totalProgress)}% Complete
+            </div>
+          </div>
+        </Card>
       </div>
 
-      {/* Game Statistics - Compact */}
-      <Card className="p-2 md:p-3 bg-card/50 backdrop-blur border-primary/20">
-        <h4 className="font-semibold mb-2 text-center text-sm">Your Progress</h4>
-        <div className="grid grid-cols-3 gap-2 text-center">
-          <div>
-            <div className="text-lg md:text-xl font-bold text-primary">{gameStats.gamesPlayed}</div>
-            <div className="text-xs text-muted-foreground">Games</div>
-          </div>
-          <div>
-            <div className="text-lg md:text-xl font-bold text-primary">{gameStats.personalBest}</div>
-            <div className="text-xs text-muted-foreground">Best</div>
-          </div>
-          <div>
-            <div className="text-lg md:text-xl font-bold text-primary">{unlockedCount}</div>
-            <div className="text-xs text-muted-foreground">Unlocked</div>
-          </div>
-        </div>
-      </Card>
-
-      {/* Achievements List - Optimized for mobile */}
-      <div className="flex-1 overflow-hidden">
-        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 md:gap-3 h-full">
-          {achievements.map((achievement) => {
+      {/* Achievements list */}
+      <ScrollArea className="flex-1 max-h-[45vh] sm:max-h-[55vh]">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 p-1">
+          {sortedAchievements.map((achievement) => {
             const unlocked = isAchievementUnlocked(achievement.id);
             const progress = getProgress(achievement);
             const progressText = getProgressText(achievement);
@@ -118,41 +159,65 @@ export const AchievementsTab: React.FC = () => {
             return (
               <Card 
                 key={achievement.id}
-                className={`p-2 md:p-3 transition-all duration-300 ${
-                  unlocked 
-                    ? 'bg-gradient-to-r from-primary/10 to-secondary/10 border-primary/30 shadow-glow' 
-                    : 'bg-card/50 backdrop-blur border-muted/30'
+                className={`p-3 transition-all duration-300 bg-gradient-to-r ${getRarityColor(achievement)} ${
+                  unlocked ? 'shadow-lg hover:scale-105' : 'hover:bg-muted/5'
                 }`}
               >
-                <div className="flex items-center gap-2">
-                  <div className={`text-lg md:text-xl transition-all duration-300 ${unlocked ? 'scale-110' : ''}`}>
-                    {unlocked ? achievement.icon : <Lock className="w-4 h-4 md:w-5 md:h-5 text-muted-foreground" />}
+                <div className="flex items-start gap-3">
+                  {/* Achievement icon/status */}
+                  <div className={`text-xl transition-all duration-300 ${unlocked ? 'animate-pulse' : ''}`}>
+                    {unlocked ? (
+                      <div className="relative">
+                        {achievement.icon}
+                        <div className="absolute -top-1 -right-1">
+                          <Trophy className="w-3 h-3 text-yellow-500" />
+                        </div>
+                      </div>
+                    ) : (
+                      <Lock className="w-5 h-5 text-muted-foreground" />
+                    )}
                   </div>
                   
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-1 mb-0.5">
-                      <h4 className="font-semibold text-xs md:text-sm truncate">{achievement.name}</h4>
+                    {/* Achievement header */}
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-semibold text-sm text-yellow-500 truncate">
+                        {achievement.name}
+                      </h4>
+                      {getDifficultyIcon(achievement)}
                       {unlocked && (
-                        <Badge variant="secondary" className="text-xs px-1 py-0 hidden sm:flex">
-                          <Trophy className="w-2 h-2 mr-0.5" />
+                        <Badge variant="secondary" className="text-xs px-1 py-0 bg-green-500/20 text-green-400 border-green-400/30">
                           ✓
                         </Badge>
                       )}
                     </div>
                     
-                    <p className="text-xs text-muted-foreground mb-1 line-clamp-1">
+                    {/* Achievement description */}
+                    <p className="text-xs text-muted-foreground mb-2 line-clamp-2">
                       {achievement.description}
                     </p>
                     
-                    <div className="space-y-0.5">
+                    {/* Progress section */}
+                    <div className="space-y-1">
                       <div className="flex justify-between items-center">
-                        <span className="text-xs font-medium">Progress</span>
+                        <span className="text-xs font-medium text-yellow-500">
+                          {unlocked ? 'Completed!' : 'Progress'}
+                        </span>
                         <span className="text-xs text-muted-foreground">{progressText}</span>
                       </div>
+                      
                       <Progress 
                         value={progress} 
-                        className="h-1.5"
+                        className={`h-1.5 ${unlocked ? 'bg-green-500/20' : 'bg-muted/30'}`}
                       />
+                      
+                      {unlocked && (
+                        <div className="text-center">
+                          <Badge variant="outline" className="text-xs bg-green-500/10 text-green-400 border-green-400/30">
+                            🎉 Achievement Unlocked!
+                          </Badge>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -160,7 +225,20 @@ export const AchievementsTab: React.FC = () => {
             );
           })}
         </div>
-      </div>
+      </ScrollArea>
+
+      {/* Empty state */}
+      {achievements.length === 0 && (
+        <div className="flex-1 flex items-center justify-center text-center">
+          <div className="space-y-2">
+            <Trophy className="w-16 h-16 text-muted-foreground mx-auto" />
+            <h3 className="text-xl font-semibold text-yellow-500">No Achievements Yet</h3>
+            <p className="text-muted-foreground">
+              Start playing to unlock achievements!
+            </p>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
