@@ -141,6 +141,10 @@ export const Game: React.FC = () => {
   const backgroundImageRef = useRef<HTMLImageElement | null>(null);
   const lockerImagesRef = useRef<HTMLImageElement[]>([]);
   const nextBookIdRef = useRef(0);
+  
+  // Preload all character images to prevent flickering
+  const characterImagesRef = useRef<Map<string, HTMLImageElement>>(new Map());
+  
   // Queue jumps to process inside rAF to avoid per-tap React state updates on iOS
   const pendingJumpsRef = useRef(0);
   // Pre-scaled background tile canvas to avoid per-frame scaling cost (iOS jank)
@@ -202,6 +206,36 @@ export const Game: React.FC = () => {
     lockerImg.onerror = e => console.error('Yellow locker failed to load:', e);
     lockerImg.src = lockerYellow;
     lockerImagesRef.current[0] = lockerImg;
+
+    // Preload all character images to prevent flickering
+    const imageMap: Record<string, any> = {
+      'src/assets/characters/nerd-default.png': nerdDefault,
+      'src/assets/characters/cool-nerd.png': coolNerd,
+      'src/assets/characters/cool-nerd-2.png': coolNerd2,
+      'src/assets/characters/alien-nerd.png': alienNerd,
+      'src/assets/characters/robot-nerd.png': robotNerd,
+      'src/assets/characters/pheonixnerd.png': pheonixNerd,
+      'src/assets/characters/demonnerd.png': demonNerd,
+      'src/assets/characters/demonnerd-2.png': demonNerd2,
+      'src/assets/characters/wizardnerd.png': wizardNerd,
+      'src/assets/characters/defaultnerd.png': defaultNerd,
+      'src/assets/characters/eaglenerd.png': eagleNerd,
+      'src/assets/characters/owlnerd.png': owlNerd,
+      'src/assets/characters/parrotnerd.png': parrotNerd,
+      'src/assets/characters/flamingonerd.png': flamingoNerd,
+      'src/assets/characters/peacocknerd.png': peacockNerd,
+      'src/assets/characters/dragonnerd.png': dragonNerd,
+      'src/assets/characters/unicornnerd.png': unicornNerd,
+      'src/assets/characters/snailnerd.png': snailNerd,
+    };
+
+    // Preload all character images
+    Object.entries(imageMap).forEach(([path, src]) => {
+      const img = new Image();
+      img.decoding = 'sync';
+      img.src = src;
+      characterImagesRef.current.set(path, img);
+    });
 
     // Cleanup function
     return () => {
@@ -1043,61 +1077,32 @@ export const Game: React.FC = () => {
     const getCharacterImage = () => {
       if (!characterImagePath) return null;
       
-      // Complete mapping for all character images
-      const imageMap: Record<string, any> = {
-        'src/assets/characters/nerd-default.png': nerdDefault,
-        'src/assets/characters/cool-nerd.png': coolNerd,
-        'src/assets/characters/cool-nerd-2.png': coolNerd2,
-        'src/assets/characters/alien-nerd.png': alienNerd,
-        'src/assets/characters/robot-nerd.png': robotNerd,
-        'src/assets/characters/pheonixnerd.png': pheonixNerd,
-        'src/assets/characters/demonnerd.png': demonNerd,
-        'src/assets/characters/demonnerd-2.png': demonNerd2,
-        'src/assets/characters/wizardnerd.png': wizardNerd,
-        'src/assets/characters/defaultnerd.png': defaultNerd,
-        'src/assets/characters/eaglenerd.png': eagleNerd,
-        'src/assets/characters/owlnerd.png': owlNerd,
-        'src/assets/characters/parrotnerd.png': parrotNerd,
-        'src/assets/characters/flamingonerd.png': flamingoNerd,
-        'src/assets/characters/peacocknerd.png': peacockNerd,
-        'src/assets/characters/dragonnerd.png': dragonNerd,
-        'src/assets/characters/unicornnerd.png': unicornNerd,
-        'src/assets/characters/snailnerd.png': snailNerd,
-      };
-      
-      return imageMap[characterImagePath] || null;
+      // Get preloaded image from cache
+      return characterImagesRef.current.get(characterImagePath) || null;
     };
     
-    const characterImageSrc = getCharacterImage();
+    const characterImg = getCharacterImage();
     
-    if (characterImageSrc) {
-      // Load and draw the character image
-      const img = new Image();
-      img.src = characterImageSrc;
+    if (characterImg && (characterImg.complete || characterImg.naturalWidth > 0)) {
+      // Clear previous shadow for image
+      ctx.shadowColor = 'transparent';
+      ctx.shadowBlur = 0;
+      ctx.shadowOffsetX = 0;
+      ctx.shadowOffsetY = 0;
       
-      if (img.complete) {
-        // Clear previous shadow for image
-        ctx.shadowColor = 'transparent';
-        ctx.shadowBlur = 0;
-        ctx.shadowOffsetX = 0;
-        ctx.shadowOffsetY = 0;
-        
-        // Draw the character image - increased size for better visibility
-        const imageSize = BIRD_SIZE * 1.2;
-        ctx.imageSmoothingEnabled = false; // Keep pixel art crisp
-        ctx.drawImage(
-          img, 
-          gameState.bird.x + (gameState.bird.width - imageSize) / 2, 
-          gameState.bird.y + (gameState.bird.height - imageSize) / 2, 
-          imageSize, 
-          imageSize
-        );
-      } else {
-        // Fallback to emoji while image loads
-        ctx.fillText(character, gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2);
-      }
+      // Draw the character image - significantly increased size for better visibility
+      const imageSize = BIRD_SIZE * 1.6; // Increased from 1.2 to 1.6
+      ctx.imageSmoothingEnabled = false; // Keep pixel art crisp
+      ctx.drawImage(
+        characterImg, 
+        gameState.bird.x + (gameState.bird.width - imageSize) / 2, 
+        gameState.bird.y + (gameState.bird.height - imageSize) / 2, 
+        imageSize, 
+        imageSize
+      );
     } else {
-      // Use emoji
+      // Use emoji fallback - increased size for better visibility
+      ctx.font = `${BIRD_SIZE * 1.1}px Arial`; // Increased from default
       ctx.fillText(character, gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2);
     }
 
