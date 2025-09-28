@@ -6,6 +6,9 @@ import alienNerd from '@/assets/characters/alien-nerd.png';
 import robotNerd from '@/assets/characters/robot-nerd.png';
 import pheonixNerd from '@/assets/characters/pheonixnerd.png';
 import demonNerd from '@/assets/characters/demonnerd.png';
+import demonNerd2 from '@/assets/characters/demonnerd-2.png';
+import wizardNerd from '@/assets/characters/wizardnerd.png';
+import defaultNerd from '@/assets/characters/defaultnerd.png';
 import eagleNerd from '@/assets/characters/eaglenerd.png';
 import owlNerd from '@/assets/characters/owlnerd.png';
 import parrotNerd from '@/assets/characters/parrotnerd.png';
@@ -23,6 +26,9 @@ const imageMap: Record<string, string> = {
   'src/assets/characters/robot-nerd.png': robotNerd,
   'src/assets/characters/pheonixnerd.png': pheonixNerd,
   'src/assets/characters/demonnerd.png': demonNerd,
+  'src/assets/characters/demonnerd-2.png': demonNerd2,
+  'src/assets/characters/wizardnerd.png': wizardNerd,
+  'src/assets/characters/defaultnerd.png': defaultNerd,
   'src/assets/characters/eaglenerd.png': eagleNerd,
   'src/assets/characters/owlnerd.png': owlNerd,
   'src/assets/characters/parrotnerd.png': parrotNerd,
