@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import nerdDefault from '@/assets/characters/nerd-default.png';
+import coolNerd from '@/assets/characters/cool-nerd.png';
 
 const imageMap: Record<string, string> = {
   'src/assets/characters/nerd-default.png': nerdDefault,
+  'src/assets/characters/cool-nerd.png': coolNerd,
 };
 
 export const useCharacterImage = (imagePath?: string) => {
@@ -15,10 +17,13 @@ export const useCharacterImage = (imagePath?: string) => {
       return;
     }
 
+    setIsLoading(true);
     if (imageMap[imagePath]) {
       setImageUrl(imageMap[imagePath]);
+      setIsLoading(false);
     } else {
       setImageUrl(null);
+      setIsLoading(false);
     }
   }, [imagePath]);
 

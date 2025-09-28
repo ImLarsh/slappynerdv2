@@ -4,19 +4,24 @@ import { useAudio } from '@/hooks/useAudio';
 import { useCharacterImage } from '@/hooks/useCharacterImage';
 
 const FallingCharacterDisplay: React.FC<{ emoji: string; imagePath?: string }> = ({ emoji, imagePath }) => {
-  const { imageUrl } = useCharacterImage(imagePath);
+  const { imageUrl, isLoading } = useCharacterImage(imagePath);
+  
+  if (isLoading) {
+    return <div className="w-12 h-12 animate-pulse bg-gray-200 rounded"></div>;
+  }
   
   if (imageUrl) {
     return (
       <img 
         src={imageUrl} 
         alt="Character"
-        className="w-8 h-8 object-contain"
+        className="w-12 h-12 object-contain"
+        style={{ imageRendering: 'pixelated' }}
       />
     );
   }
   
-  return <span>{emoji}</span>;
+  return <span className="text-4xl">{emoji}</span>;
 };
 
 interface FallingEmoji {

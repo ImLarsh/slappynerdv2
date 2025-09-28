@@ -8,8 +8,12 @@ import { useCharactersContext } from '@/context/CharactersContext';
 import { useCharacterImage } from '@/hooks/useCharacterImage';
 
 const CharacterImageDisplay: React.FC<{ character: any; size?: 'small' | 'large' }> = ({ character, size = 'small' }) => {
-  const { imageUrl } = useCharacterImage(character.image_path);
-  const sizeClass = size === 'large' ? 'w-16 h-16' : 'w-12 h-12';
+  const { imageUrl, isLoading } = useCharacterImage(character.image_path);
+  const sizeClass = size === 'large' ? 'w-20 h-20' : 'w-16 h-16';
+  
+  if (isLoading) {
+    return <div className={`${sizeClass} animate-pulse bg-gray-200 rounded`}></div>;
+  }
   
   if (imageUrl) {
     return (
@@ -17,6 +21,7 @@ const CharacterImageDisplay: React.FC<{ character: any; size?: 'small' | 'large'
         src={imageUrl} 
         alt={character.name}
         className={`${sizeClass} object-contain`}
+        style={{ imageRendering: 'pixelated' }}
       />
     );
   }
