@@ -11,6 +11,7 @@ import { Shop } from '@/components/Shop';
 import { useCurrency } from '@/hooks/useCurrency';
 import { useAuth } from '@/hooks/useAuth';
 import { useCharactersContext } from '@/context/CharactersContext';
+import { useCharacterImage } from '@/hooks/useCharacterImage';
 import { useAudio } from '@/hooks/useAudio';
 import { useAdmin } from '@/hooks/useAdmin';
 import { AdminPanel } from '@/components/AdminPanel';
@@ -21,6 +22,37 @@ import slappyNerdsTitle from '@/assets/slappy-nerds-title-new.png';
 import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen, Package, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePWA } from '@/hooks/usePWA';
+
+const MainMenuCharacterDisplay: React.FC<{ character: any }> = ({ character }) => {
+  const { imageUrl, isLoading } = useCharacterImage(character?.image_path);
+  
+  if (isLoading) {
+    return (
+      <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px] flex items-center justify-center">
+        <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 animate-pulse bg-gray-200 rounded"></div>
+      </div>
+    );
+  }
+  
+  if (imageUrl) {
+    return (
+      <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px] flex items-center justify-center">
+        <img 
+          src={imageUrl} 
+          alt={character?.name || "Character"}
+          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain"
+          style={{ imageRendering: 'pixelated' }}
+        />
+      </div>
+    );
+  }
+  
+  return (
+    <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px]">
+      {character?.emoji || '🤓'}
+    </div>
+  );
+};
 const MainMenu: React.FC = () => {
   const [charactersOpen, setCharactersOpen] = useState(false);
   const [shopOpen, setShopOpen] = useState(false);
@@ -199,9 +231,7 @@ const MainMenu: React.FC = () => {
             animationDelay: '0.6s'
           }}>
             <div className="relative">
-              <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px]">
-                {selectedCharacter ? selectedCharacter.emoji : '🤓'}
-              </div>
+              <MainMenuCharacterDisplay character={selectedCharacter} />
               {/* Yellow rotating arrow indicator */}
               
             </div>
