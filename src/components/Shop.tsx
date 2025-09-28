@@ -21,43 +21,37 @@ interface ShopItem {
   created_at: string;
   updated_at: string;
 }
-
-const ShopItemDisplay: React.FC<{ item: ShopItem }> = ({ item }) => {
+const ShopItemDisplay: React.FC<{
+  item: ShopItem;
+}> = ({
+  item
+}) => {
   const [characterImagePath, setCharacterImagePath] = useState<string | null>(null);
-  const { imageUrl, isLoading } = useCharacterImage(characterImagePath);
-  
+  const {
+    imageUrl,
+    isLoading
+  } = useCharacterImage(characterImagePath);
   useEffect(() => {
     if (item.item_type === 'character' && item.item_data?.character_id) {
       // Fetch character image path from characters table
-      supabase
-        .from('characters')
-        .select('image_path')
-        .eq('id', item.item_data.character_id)
-        .single()
-        .then(({ data }) => {
-          if (data?.image_path) {
-            setCharacterImagePath(data.image_path);
-          }
-        });
+      supabase.from('characters').select('image_path').eq('id', item.item_data.character_id).single().then(({
+        data
+      }) => {
+        if (data?.image_path) {
+          setCharacterImagePath(data.image_path);
+        }
+      });
     }
   }, [item]);
-  
   if (item.item_type === 'character' && characterImagePath) {
     if (isLoading) {
       return <div className="w-8 h-8 md:w-12 md:h-12 bg-muted rounded animate-pulse"></div>;
     }
-    
     if (imageUrl) {
-      return (
-        <img 
-          src={imageUrl} 
-          alt={item.name}
-          className="w-8 h-8 md:w-12 md:h-12 object-contain"
-        />
-      );
+      return <img src={imageUrl} alt={item.name} className="w-8 h-8 md:w-12 md:h-12 object-contain" />;
     }
   }
-  
+
   // Fallback to emoji for powerups or if image fails to load
   return <span className="text-2xl md:text-3xl">{item.emoji}</span>;
 };
@@ -219,20 +213,16 @@ export const Shop: React.FC = () => {
       </div>;
   }
   // Filter items based on selected category and sort by price (least to most expensive)
-  const filteredItems = selectedCategory 
-    ? shopItems
-        .filter(item => {
-          // Map category names to database item_type values
-          const itemType = selectedCategory === 'characters' ? 'character' : 'power';
-          return item.item_type === itemType;
-        })
-        .sort((a, b) => a.price - b.price) // Sort by price ascending
-    : [];
+  const filteredItems = selectedCategory ? shopItems.filter(item => {
+    // Map category names to database item_type values
+    const itemType = selectedCategory === 'characters' ? 'character' : 'power';
+    return item.item_type === itemType;
+  }).sort((a, b) => a.price - b.price) // Sort by price ascending
+  : [];
 
   // Category selection view
   if (!selectedCategory) {
-    return (
-      <div className="p-4 h-full flex flex-col">
+    return <div className="p-4 h-full flex flex-col">
         <div className="text-center mb-6">
           <h2 className="text-xl md:text-2xl font-bold text-primary mb-2">Nerd Shop 🛍️</h2>
           <div className="flex items-center justify-center gap-2 mb-4">
@@ -265,26 +255,17 @@ export const Shop: React.FC = () => {
             </div>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Category items view
-  return (
-    <div className="p-2 md:p-4 h-full flex flex-col">
+  return <div className="p-2 md:p-4 h-full flex flex-col">
       <div className="text-center mb-3 md:mb-4">
         <div className="flex items-center justify-between mb-2">
-          <Button 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setSelectedCategory(null)}
-            className="text-xs md:text-sm"
-          >
+          <Button variant="outline" size="sm" onClick={() => setSelectedCategory(null)} className="text-xs md:text-sm">
             ← Back
           </Button>
-          <h2 className="text-lg md:text-xl font-bold text-primary">
-            {selectedCategory === 'characters' ? '🎭 Characters' : '⚡ Powerups'}
-          </h2>
+          
           <div className="w-16"></div> {/* Spacer for centering */}
         </div>
         <div className="flex items-center justify-center gap-2">
@@ -295,10 +276,9 @@ export const Shop: React.FC = () => {
 
       <div className="flex-1 grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2 md:gap-4 auto-rows-max">
         {filteredItems.map(item => {
-          const isPurchased = userPurchases.includes(item.id);
-          const canAfford = books >= item.price;
-          return (
-            <Card key={item.id} className="p-2 md:p-3 flex flex-col h-full">
+        const isPurchased = userPurchases.includes(item.id);
+        const canAfford = books >= item.price;
+        return <Card key={item.id} className="p-2 md:p-3 flex flex-col h-full">
               <div className="flex flex-col gap-2 flex-1">
                 <div className="text-center flex justify-center">
                   <ShopItemDisplay item={item} />
@@ -312,25 +292,15 @@ export const Shop: React.FC = () => {
                 </div>
               </div>
               
-              <Button 
-                onClick={() => handlePurchase(item)} 
-                disabled={isPurchased || !canAfford} 
-                variant={isPurchased ? "outline" : canAfford ? "default" : "destructive"} 
-                size="sm" 
-                className="w-full text-xs md:text-sm"
-              >
+              <Button onClick={() => handlePurchase(item)} disabled={isPurchased || !canAfford} variant={isPurchased ? "outline" : canAfford ? "default" : "destructive"} size="sm" className="w-full text-xs md:text-sm">
                 {isPurchased ? "Owned ✓" : canAfford ? "Buy" : "Can't Afford"}
               </Button>
-            </Card>
-          );
-        })}
+            </Card>;
+      })}
       </div>
 
-      {filteredItems.length === 0 && (
-        <div className="flex-1 flex items-center justify-center text-center text-muted-foreground">
+      {filteredItems.length === 0 && <div className="flex-1 flex items-center justify-center text-center text-muted-foreground">
           <p>No {selectedCategory} available in the shop right now.</p>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
