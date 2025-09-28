@@ -7,7 +7,7 @@ const FallingCharacterDisplay: React.FC<{ emoji: string; imagePath?: string }> =
   const { imageUrl, isLoading } = useCharacterImage(imagePath);
   
   if (isLoading) {
-    return <div className="w-12 h-12 animate-pulse bg-gray-200 rounded"></div>;
+    return <div className="w-16 h-16 animate-pulse bg-gray-200 rounded"></div>;
   }
   
   if (imageUrl) {
@@ -15,13 +15,13 @@ const FallingCharacterDisplay: React.FC<{ emoji: string; imagePath?: string }> =
       <img 
         src={imageUrl} 
         alt="Character"
-        className="w-12 h-12 object-contain"
+        className="w-16 h-16 object-contain"
         style={{ imageRendering: 'pixelated' }}
       />
     );
   }
   
-  return <span className="text-4xl">{emoji}</span>;
+  return <span className="text-5xl">{emoji}</span>;
 };
 
 interface FallingEmoji {

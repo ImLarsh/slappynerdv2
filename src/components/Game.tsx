@@ -18,6 +18,9 @@ import bgImage from '@/assets/school-hallway-bg.webp';
 import lockerYellow from '@/assets/locker-yellow.webp';
 import nerdDefault from '@/assets/characters/nerd-default.png';
 import coolNerd from '@/assets/characters/cool-nerd.png';
+import coolNerd2 from '@/assets/characters/cool-nerd-2.png';
+import alienNerd from '@/assets/characters/alien-nerd.png';
+import robotNerd from '@/assets/characters/robot-nerd.png';
 interface GameObject {
   x: number;
   y: number;
@@ -1028,6 +1031,12 @@ export const Game: React.FC = () => {
         return nerdDefault;
       } else if (characterImagePath === 'src/assets/characters/cool-nerd.png') {
         return coolNerd;
+      } else if (characterImagePath === 'src/assets/characters/cool-nerd-2.png') {
+        return coolNerd2;
+      } else if (characterImagePath === 'src/assets/characters/alien-nerd.png') {
+        return alienNerd;
+      } else if (characterImagePath === 'src/assets/characters/robot-nerd.png') {
+        return robotNerd;
       }
       return null;
     };
