@@ -142,19 +142,15 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
           </Button>}
         
         <div className="text-center space-y-2">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-black text-primary bg-gradient-to-r from-primary to-secondary bg-clip-text text-transparent my-0">
-            SELECT CHARACTER
-          </h1>
-          <p className="text-lg md:text-xl text-muted-foreground font-medium">
-            Choose your champion for battle
-          </p>
+          
+          
         </div>
       </div>
 
       {/* Main Character Display */}
       <div className="relative z-10 flex flex-col items-center space-y-8 px-4 my-[187px]">
         {/* Character Navigation */}
-        <div className="flex items-center justify-center space-x-8 md:space-x-12">
+        <div className="flex items-center justify-center space-x-8 md:space-x-12 my-[114px]">
           <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-16 h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-primary/20 to-secondary/20 border-2 border-primary/30 hover:scale-110 transition-all duration-300">
             <ChevronLeft className="w-8 h-8 md:w-10 md:h-10" />
           </Button>
