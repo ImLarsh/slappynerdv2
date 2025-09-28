@@ -22,36 +22,30 @@ import slappyNerdsTitle from '@/assets/slappy-nerds-title-new.png';
 import { Gamepad2, Trophy, Users, Play, ShoppingCart, Volume2, VolumeX, DoorOpen, Package, Plus } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { usePWA } from '@/hooks/usePWA';
-
-const MainMenuCharacterDisplay: React.FC<{ character: any }> = ({ character }) => {
-  const { imageUrl, isLoading } = useCharacterImage(character?.image_path);
-  
+const MainMenuCharacterDisplay: React.FC<{
+  character: any;
+}> = ({
+  character
+}) => {
+  const {
+    imageUrl,
+    isLoading
+  } = useCharacterImage(character?.image_path);
   if (isLoading) {
-    return (
-      <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px] flex items-center justify-center">
+    return <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px] flex items-center justify-center">
         <div className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 animate-pulse bg-gray-200 rounded"></div>
-      </div>
-    );
+      </div>;
   }
-  
   if (imageUrl) {
-    return (
-      <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px] flex items-center justify-center">
-        <img 
-          src={imageUrl} 
-          alt={character?.name || "Character"}
-          className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain"
-          style={{ imageRendering: 'pixelated' }}
-        />
-      </div>
-    );
+    return <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px] flex items-center justify-center">
+        <img src={imageUrl} alt={character?.name || "Character"} className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain" style={{
+        imageRendering: 'pixelated'
+      }} />
+      </div>;
   }
-  
-  return (
-    <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px]">
+  return <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px]">
       {character?.emoji || '🤓'}
-    </div>
-  );
+    </div>;
 };
 const MainMenu: React.FC = () => {
   const [charactersOpen, setCharactersOpen] = useState(false);
@@ -191,7 +185,7 @@ const MainMenu: React.FC = () => {
       {/* User Info - Top Left (when signed in) - moved down */}
       {user && <div className="absolute top-12 sm:top-16 md:top-20 left-1 sm:left-2 md:left-4 z-20 space-y-1 sm:space-y-2">
           <div className="bg-background/90 backdrop-blur-sm rounded-lg px-1.5 sm:px-2 md:px-3 py-1 sm:py-1.5 md:py-2 border border-primary/30 my-[32px] mx-[16px]">
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-black font-bold">
+            <p className="text-xs sm:text-sm md:text-base text-center text-[#fc0101] font-extrabold lg:text-xl">
               {playerName || 'Player'}
             </p>
             {/* Currency Display */}
