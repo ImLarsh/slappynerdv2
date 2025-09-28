@@ -411,8 +411,8 @@ export const Game: React.FC = () => {
 
     // Normal collision detection - reduced hitboxes for more forgiving gameplay
     const emojiMargin = BIRD_SIZE * 0.3; // Increased margin for more forgiving collision
-    const lockerHorizontalMargin = Math.max(60, LOCKER_WIDTH * 0.4); // Increased margin for more forgiving collision
-    const lockerVerticalMargin = 15; // Increased margin for more forgiving collision
+    const lockerHorizontalMargin = Math.max(50, LOCKER_WIDTH * 0.35); // Reduced margin to increase hitbox (from 60 and 0.4)
+    const lockerVerticalMargin = 12; // Reduced margin to increase hitbox (from 15)
 
     const isColliding = bird.x + emojiMargin < pipe.x + pipe.width - lockerHorizontalMargin && bird.x + bird.width - emojiMargin > pipe.x + lockerHorizontalMargin && bird.y + emojiMargin < pipe.y + pipe.height - lockerVerticalMargin && bird.y + bird.height - emojiMargin > pipe.y + lockerVerticalMargin;
 
@@ -1091,7 +1091,7 @@ export const Game: React.FC = () => {
       ctx.shadowOffsetY = 0;
       
       // Draw the character image - significantly increased size for better visibility
-      const imageSize = BIRD_SIZE * 2.0; // Increased from 1.8 to 2.0 for even larger character
+      const imageSize = BIRD_SIZE * 2.2; // Increased from 2.0 to 2.2 for even larger character
       ctx.imageSmoothingEnabled = false; // Keep pixel art crisp
       ctx.drawImage(
         characterImg, 
@@ -1102,7 +1102,7 @@ export const Game: React.FC = () => {
       );
     } else {
       // Use emoji fallback - increased size for better visibility
-      ctx.font = `${BIRD_SIZE * 1.5}px Arial`; // Increased from 1.3 to 1.5 for larger emoji fallback
+      ctx.font = `${BIRD_SIZE * 1.7}px Arial`; // Increased from 1.5 to 1.7 for larger emoji fallback
       ctx.fillText(character, gameState.bird.x + gameState.bird.width / 2, gameState.bird.y + gameState.bird.height / 2);
     }
 
