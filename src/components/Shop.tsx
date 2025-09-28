@@ -238,9 +238,7 @@ export const Shop: React.FC = () => {
               <div className="text-4xl">🎭</div>
               <h3 className="text-xl font-bold">Characters</h3>
               <p className="text-muted-foreground">Unlock new characters to play as</p>
-              <div className="text-sm text-primary font-semibold">
-                {shopItems.filter(item => item.item_type === 'character').length} characters available
-              </div>
+              
             </div>
           </Card>
 
@@ -249,9 +247,7 @@ export const Shop: React.FC = () => {
               <div className="text-4xl">⚡</div>
               <h3 className="text-xl font-bold">Powerups</h3>
               <p className="text-muted-foreground">Get permanent game advantages</p>
-              <div className="text-sm text-primary font-semibold">
-                {shopItems.filter(item => item.item_type === 'power').length} powerups available
-              </div>
+              
             </div>
           </Card>
         </div>
