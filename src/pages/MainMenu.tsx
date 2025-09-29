@@ -166,7 +166,7 @@ const MainMenu: React.FC = () => {
       <div className="absolute inset-0 bg-background/60 z-1" />
       
       {/* Pop Counter - Centered on all devices */}
-      <div className="absolute top-1 sm:top-2 md:top-4 left-1/2 transform -translate-x-1/2 z-20">
+      <div className="absolute top-32 sm:top-2 md:top-4 left-1/2 transform -translate-x-1/2 z-20">
         <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-2 sm:px-3 md:px-4 py-1 sm:py-1.5 md:py-2 border border-purple-300 shadow-xl">
           <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2">
             <span className="text-xs sm:text-sm md:text-lg">💥</span>
@@ -178,7 +178,7 @@ const MainMenu: React.FC = () => {
       </div>
 
       {/* User Info - Centered on all devices */}
-      {user && <div className="absolute top-16 sm:top-20 md:top-24 left-1/2 transform -translate-x-1/2 z-20 space-y-1 sm:space-y-2">
+      {user && <div className="absolute top-48 sm:top-20 md:top-24 left-1/2 transform -translate-x-1/2 z-20 space-y-1 sm:space-y-2">
           <div className="bg-background/90 backdrop-blur-sm rounded-lg px-3 py-2 border border-primary/30">
             <p className="text-sm md:text-base text-center text-[#fc0101] font-extrabold lg:text-xl">
               {playerName || 'Player'}
@@ -194,7 +194,7 @@ const MainMenu: React.FC = () => {
         </div>}
 
       {/* Title - Just above character on all devices */}
-      <div className="absolute top-56 sm:top-64 md:top-72 lg:top-10 left-0 right-0 z-10 animate-fade-in">
+      <div className="absolute top-72 sm:top-64 md:top-72 lg:top-10 left-0 right-0 z-10 animate-fade-in">
         <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px] lg:max-w-md xl:max-w-lg mx-auto hover-scale" />
       </div>
 
