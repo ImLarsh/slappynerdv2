@@ -290,7 +290,7 @@ const MainMenu: React.FC = () => {
             }}>
               {/* Crown icon */}
               <div className="text-lg sm:text-xl md:text-3xl lg:text-4xl font-black">👑</div>
-              <span className="font-black text-xs sm:text-sm md:text-base lg:text-lg">Leaderboard</span>
+              
               {/* Extended bottom decoration */}
               <div className="absolute bottom-0 left-0 right-0 h-0.5 sm:h-1 md:h-2 bg-gradient-to-r from-yellow-600 to-yellow-700"></div>
             </Button>
