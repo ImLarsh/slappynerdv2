@@ -193,8 +193,8 @@ const MainMenu: React.FC = () => {
           </div>
         </div>}
 
-      {/* Title - Just slightly above character on all devices */}
-      <div className="absolute top-32 sm:top-36 md:top-40 lg:top-44 left-0 right-0 z-10 animate-fade-in">
+      {/* Title - Just above character on all devices */}
+      <div className="absolute top-52 sm:top-60 md:top-64 lg:top-72 left-0 right-0 z-10 animate-fade-in">
         <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[200px] sm:max-w-[240px] md:max-w-[280px] lg:max-w-md xl:max-w-lg mx-auto hover-scale" />
       </div>
 
