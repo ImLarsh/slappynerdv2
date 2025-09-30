@@ -194,7 +194,7 @@ const MainMenu: React.FC = () => {
         </div>}
 
       {/* Title - Responsive positioning and sizing */}
-      <div className="absolute top-40 sm:top-48 md:top-56 lg:top-24 xl:top-28 left-0 right-0 z-10 animate-fade-in px-4">
+      <div className="absolute top-40 sm:top-48 md:top-56 lg:top-20 xl:top-24 left-0 right-0 z-10 animate-fade-in px-4">
         <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[360px] xl:max-w-[400px] 2xl:max-w-[500px] mx-auto hover-scale object-contain" />
       </div>
 
