@@ -1,5 +1,6 @@
-// Enhanced service worker for image caching (iOS-friendly)
-const STATIC_CACHE = 'slappy-nerds-static-v2';
+// Enhanced service worker - always serve latest version
+const CACHE_VERSION = 'v' + Date.now(); // Force cache invalidation on each deploy
+const STATIC_CACHE = 'slappy-nerds-static-' + CACHE_VERSION;
 const IMAGE_CACHE = 'slappy-nerds-images-v1';
 const STATIC_ASSETS = [
   '/',
@@ -50,7 +51,30 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Default cache-first for other GET requests
+  // Network-first for app resources to ensure latest version
+  const isAppResource = url.pathname.endsWith('.js') || 
+                       url.pathname.endsWith('.css') || 
+                       url.pathname.endsWith('.html') || 
+                       url.pathname === '/';
+
+  if (isAppResource) {
+    event.respondWith(
+      fetch(req, { cache: 'no-cache' })
+        .then((response) => {
+          if (response && response.ok) {
+            const responseClone = response.clone();
+            caches.open(STATIC_CACHE).then((cache) => {
+              cache.put(req, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
+
+  // Cache-first for other resources
   event.respondWith(
     caches.match(req).then((cached) => cached || fetch(req))
   );
