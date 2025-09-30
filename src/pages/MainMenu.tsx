@@ -240,7 +240,7 @@ const MainMenu: React.FC = () => {
             </Button>
             
             {/* Volume Control Button - Top Right of Play Button */}
-            <Button variant="outline" size="icon" onClick={() => handleButtonClick(() => setVolumeOpen(true))} className="absolute -top-12 sm:-top-14 md:-top-16 lg:-top-18 -right-1 sm:-right-2 md:-right-3 lg:-right-4 z-30 hover-scale w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-primary text-primary-foreground border-2 border-primary-foreground shadow-xl">
+            <Button variant="outline" size="icon" onClick={() => handleButtonClick(() => setVolumeOpen(true))} className="absolute -top-12 sm:-top-14 md:-top-16 lg:-top-18 -right-1 sm:-right-2 md:-right-3 lg:-right-4 z-30 hover-scale w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-16 lg:h-16 bg-primary text-primary-foreground border-2 border-primary-foreground shadow-xl my-0">
               {isMuted ? <VolumeX className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8" /> : <Volume2 className="h-5 w-5 sm:h-6 sm:w-6 md:h-7 md:w-7 lg:h-8 lg:w-8" />}
             </Button>
           </div>
