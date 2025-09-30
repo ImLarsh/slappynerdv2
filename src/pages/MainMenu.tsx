@@ -38,7 +38,7 @@ const MainMenuCharacterDisplay: React.FC<{
   }
   if (imageUrl) {
     return <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px] flex items-center justify-center">
-        <img src={imageUrl} alt={character?.name || "Character"} className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-36 xl:h-36 object-contain" style={{
+        <img src={imageUrl} alt={character?.name || "Character"} className="w-40 h-40 sm:w-48 sm:h-48 md:w-56 md:h-56 lg:w-64 lg:h-64 xl:w-72 xl:h-72 object-contain" style={{
         imageRendering: 'pixelated'
       }} />
       </div>;
