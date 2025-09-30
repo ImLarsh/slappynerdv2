@@ -167,7 +167,7 @@ const MainMenu: React.FC = () => {
       
       {/* Pop Counter - Responsive positioning */}
       <div className="absolute top-4 sm:top-6 md:top-8 lg:top-4 xl:top-6 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md px-4">
-        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 md:py-3 border border-purple-300 shadow-xl w-fit mx-auto">
+        <div className="bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 text-white rounded-lg px-3 sm:px-4 md:px-5 py-1.5 sm:py-2 border border-purple-300 shadow-xl w-fit mx-auto md:py-[9px] my-[38px]">
           <div className="flex items-center gap-1.5 sm:gap-2 md:gap-3">
             <span className="text-sm sm:text-base md:text-lg lg:text-xl">💥</span>
             <span className="font-bold text-xs sm:text-sm md:text-base lg:text-lg whitespace-nowrap">
@@ -195,11 +195,7 @@ const MainMenu: React.FC = () => {
 
       {/* Title - Responsive positioning and sizing */}
       <div className="absolute top-32 sm:top-40 md:top-48 lg:top-36 xl:top-44 left-0 right-0 z-10 animate-fade-in px-4">
-        <img 
-          src={slappyNerdsTitle} 
-          alt="Slappy Nerds" 
-          className="w-full max-w-[240px] sm:max-w-[280px] md:max-w-[320px] lg:max-w-[360px] xl:max-w-[400px] 2xl:max-w-[500px] mx-auto hover-scale object-contain" 
-        />
+        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[240px] sm:max-w-[280px] md:max-w-[320px] lg:max-w-[360px] xl:max-w-[400px] 2xl:max-w-[500px] mx-auto hover-scale object-contain" />
       </div>
 
 
