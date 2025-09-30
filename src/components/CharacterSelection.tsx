@@ -50,8 +50,8 @@ const CharacterDisplay: React.FC<CharacterDisplayProps> = ({
       </div>;
   }
   if (imageUrl) {
-    return <div className={`${sizeClasses[size]} relative rounded-lg overflow-hidden flex items-center justify-center ${isSelected && size === 'main' ? 'ring-4 ring-yellow-400' : ''}`}>
-        <img src={imageUrl} alt={character.name} className="w-full h-full object-contain" style={{
+    return <div className={`${sizeClasses[size]} relative rounded-lg overflow-hidden flex items-center justify-center mx-auto ${isSelected && size === 'main' ? 'ring-4 ring-yellow-400' : ''}`}>
+        <img src={imageUrl} alt={character.name} className="w-full h-full object-contain mx-auto" style={{
         imageRendering: 'pixelated'
       }} />
       </div>;
@@ -120,15 +120,15 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
       {/* Main Character Display */}
       <div className="relative z-10 flex flex-col items-center space-y-8 px-4 my-[187px]">
         {/* Character Navigation */}
-        <div className="flex items-center justify-center space-x-8 md:space-x-12 my-[114px]">
-          <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 hover:border-yellow-500 transition-all duration-300">
-            <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-black" />
+        <div className="flex items-center justify-center space-x-4 sm:space-x-8 md:space-x-12 my-8 sm:my-16 md:my-[114px] px-4">
+          <Button variant="outline" size="lg" onClick={() => navigateCharacter('prev')} disabled={isAnimating} className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/40 to-yellow-500/40 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/60 hover:to-yellow-500/60 hover:border-yellow-500 transition-all duration-300 backdrop-blur-sm">
+            <ChevronLeft className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-yellow-900 font-bold" />
           </Button>
 
           {/* Main Character */}
-          <div className={`transition-all duration-300 ${isAnimating ? 'scale-95 opacity-70' : 'scale-100 opacity-100'}`}>
-            {currentCharacter && <div className="text-center space-y-3 sm:space-y-4 md:space-y-6">
-                <div className="relative">
+          <div className={`transition-all duration-300 flex justify-center ${isAnimating ? 'scale-95 opacity-70' : 'scale-100 opacity-100'}`}>
+            {currentCharacter && <div className="text-center space-y-3 sm:space-y-4 md:space-y-6 flex flex-col items-center">
+                <div className="relative flex justify-center">
                   <CharacterDisplay character={currentCharacter} isSelected={isCurrentSelected} isUnlocked={isCurrentUnlocked} size="main" />
                   
                   {/* Character glow effect */}
@@ -164,8 +164,8 @@ export const CharacterSelection: React.FC<CharacterSelectionProps> = ({
               </div>}
           </div>
 
-          <Button variant="outline" size="lg" onClick={() => navigateCharacter('next')} disabled={isAnimating} className="w-12 h-12 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/20 to-yellow-500/20 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/30 hover:to-yellow-500/30 hover:border-yellow-500 transition-all duration-300">
-            <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-black" />
+          <Button variant="outline" size="lg" onClick={() => navigateCharacter('next')} disabled={isAnimating} className="w-14 h-14 sm:w-16 sm:h-16 md:w-20 md:h-20 rounded-full bg-gradient-to-r from-yellow-400/40 to-yellow-500/40 border-2 border-yellow-400 hover:scale-110 hover:shadow-lg hover:shadow-yellow-400/50 hover:bg-gradient-to-r hover:from-yellow-400/60 hover:to-yellow-500/60 hover:border-yellow-500 transition-all duration-300 backdrop-blur-sm">
+            <ChevronRight className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 text-yellow-900 font-bold" />
           </Button>
         </div>
 
