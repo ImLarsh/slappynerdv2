@@ -179,7 +179,7 @@ const MainMenu: React.FC = () => {
 
       {/* User Info - Responsive positioning */}
       {user && <div className="absolute top-16 sm:top-20 md:top-24 lg:top-16 xl:top-20 left-1/2 transform -translate-x-1/2 z-20 w-full max-w-[280px] sm:max-w-xs md:max-w-sm lg:max-w-md px-4">
-          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-3 sm:px-4 md:px-5 py-2 sm:py-3 md:py-4 border border-primary/30 w-fit mx-auto">
+          <div className="bg-background/90 backdrop-blur-sm rounded-lg px-3 sm:px-4 md:px-5 py-2 sm:py-3 md:py-4 border border-primary/30 w-fit mx-auto my-[46px]">
             <p className="text-sm sm:text-base md:text-lg lg:text-xl text-center text-[#fc0101] font-extrabold whitespace-nowrap">
               {playerName || 'Player'}
             </p>
