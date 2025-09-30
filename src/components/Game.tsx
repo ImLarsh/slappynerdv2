@@ -728,8 +728,8 @@ export const Game: React.FC = () => {
           });
           newState.lastPipeTime = currentTime;
 
-          // 5% chance to spawn a book with the new pipe
-          if (Math.random() < 0.05) {
+          // 15% chance to spawn a book with the new pipe
+          if (Math.random() < 0.15) {
             // Use the existing gapStart calculation for safe spawn area
             const gapMiddle = finalGapStart + finalGapSize / 2;
             const safeY = gapMiddle + (Math.random() - 0.5) * (finalGapSize * 0.6); // Keep books in middle of gap
