@@ -38,7 +38,7 @@ const MainMenuCharacterDisplay: React.FC<{
   }
   if (imageUrl) {
     return <div className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl hover-scale sm:py-3 md:py-4 lg:py-[21px] my-[8px] mx-0 px-0 py-[16px] flex items-center justify-center">
-        <img src={imageUrl} alt={character?.name || "Character"} className="w-16 h-16 sm:w-20 sm:h-20 md:w-24 md:h-24 lg:w-28 lg:h-28 object-contain" style={{
+        <img src={imageUrl} alt={character?.name || "Character"} className="w-20 h-20 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-36 xl:h-36 object-contain" style={{
         imageRendering: 'pixelated'
       }} />
       </div>;
@@ -194,8 +194,8 @@ const MainMenu: React.FC = () => {
         </div>}
 
       {/* Title - Responsive positioning and sizing */}
-      <div className="absolute top-32 sm:top-40 md:top-48 lg:top-28 xl:top-32 left-0 right-0 z-10 animate-fade-in px-4">
-        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[240px] sm:max-w-[280px] md:max-w-[320px] lg:max-w-[360px] xl:max-w-[400px] 2xl:max-w-[500px] mx-auto hover-scale object-contain" />
+      <div className="absolute top-40 sm:top-48 md:top-56 lg:top-28 xl:top-32 left-0 right-0 z-10 animate-fade-in px-4">
+        <img src={slappyNerdsTitle} alt="Slappy Nerds" className="w-full max-w-[280px] sm:max-w-[320px] md:max-w-[360px] lg:max-w-[360px] xl:max-w-[400px] 2xl:max-w-[500px] mx-auto hover-scale object-contain" />
       </div>
 
 
